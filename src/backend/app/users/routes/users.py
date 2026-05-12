@@ -1,5 +1,5 @@
-# from backend.app.services.mail_service import send_email
-from  app.core.mail_service import send_email
+
+# from  app.core.mail_service import send_email
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status, Body
 from sqlalchemy.orm import Session
 
@@ -200,8 +200,9 @@ def update_user_status(
             f"Razón: {reason if reason else 'Incumplimiento de las normas de la comunidad.'}\n\n"
             "Si crees que esto es un error, por favor contacta al soporte técnico."
         )
-    
-        background_tasks.add_task(send_email, db_user.email, subject, body)
+
+        # TODO: Enviar email de suspensión (requiere configurar SMTP y MAIL_SUPPRESS=false)
+        # background_tasks.add_task(send_email, db_user.email, subject, body)
     
     else:
         raise HTTPException(status_code=400, detail="Acción no válida (usar 'block' o 'suspend')")
