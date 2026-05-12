@@ -1,5 +1,5 @@
 # from backend.app.services.mail_service import send_email
-from app.services.mail_service import send_email
+from  app.core.mail_service import send_email
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status, Body
 from sqlalchemy.orm import Session
 
