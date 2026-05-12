@@ -1,4 +1,4 @@
-# CI: valida el backend (FastAPI + Postgres) en main.
+# CI: valida el backend (FastAPI + Postgres), pytest (incl. tests/user) y smoke de import.
 name: CI
 
 on:

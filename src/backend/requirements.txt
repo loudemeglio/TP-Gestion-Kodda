@@ -6,4 +6,6 @@ pydantic[email]
 python-dotenv
 bcrypt
 python-multipart
+python-jose[cryptography]
 pytest
+httpx

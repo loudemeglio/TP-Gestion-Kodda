@@ -3,7 +3,7 @@
 import pytest
 from pydantic import ValidationError
 
-from app.schemas import UserCreateDTO, UserUpdateDTO
+from app.users.schemas import UserCreateDTO, UserUpdateDTO
 
 
 def test_user_create_dto_minimal_valid():
