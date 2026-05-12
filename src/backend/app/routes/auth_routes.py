@@ -32,6 +32,13 @@ def login(
     db: Session = Depends(get_db),
 ):
     user = AuthService.authenticate(db, form_data.username, form_data.password)
+    
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=user.status_message or "Tu cuenta se encuentra desactivada."
+        )
+        
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

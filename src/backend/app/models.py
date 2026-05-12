@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, Enum, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, DateTime, Enum, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database import Base
@@ -34,6 +34,9 @@ class User(Base):
         onupdate=func.now(),
     )
     email_verified_at = Column(DateTime(timezone=True), nullable=True)
+    
+    is_active = Column(Boolean, default=True, nullable=False)
+    status_message = Column(String, nullable=True)
 
     refresh_tokens = relationship("RefreshToken", back_populates="user", cascade="all, delete-orphan")
     email_verification_tokens = relationship(

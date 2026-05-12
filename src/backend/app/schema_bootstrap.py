@@ -13,3 +13,6 @@ def apply_schema_patches(engine: Engine) -> None:
                 "email_verified_at TIMESTAMP WITH TIME ZONE"
             )
         )
+        
+        conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE"))
+        conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS status_message TEXT"))

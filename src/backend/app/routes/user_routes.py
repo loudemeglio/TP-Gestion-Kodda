@@ -1,4 +1,4 @@
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status, Body
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
@@ -169,3 +169,32 @@ def delete_user(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error al eliminar el usuario",
         )
+        
+@router.patch("/{user_id}/status", response_model=UserDTO)
+def update_user_status(
+    user_id: int,
+    action: str = Body(..., embed=True), # "block" o "suspend"
+    reason: str = Body(None, embed=True),
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin), # Solo admins
+):
+    db_user = UserRepository.get_by_id(db, user_id)
+    if not db_user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    if action == "block":
+        db_user.is_active = False
+        db_user.status_message = reason or "Cuenta bloqueada por seguridad."
+        
+    elif action == "suspend":
+        db_user.is_active = False
+        db_user.status_message = "Tu cuenta ha sido suspendida temporalmente."
+        # TODO: Aquí puedes llamar a una función de envío de email
+        # EmailService.send_suspension_notice(db_user.email)
+    
+    else:
+        raise HTTPException(status_code=400, detail="Acción no válida (usar 'block' o 'suspend')")
+
+    db.commit()
+    db.refresh(db_user)
+    return db_user
