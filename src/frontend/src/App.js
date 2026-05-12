@@ -5,6 +5,7 @@ import ForgotPassword from './components/ForgotPassword';
 import Home from './components/Home';
 import Login from './components/Login';
 import ResetPassword from './components/ResetPassword';
+import UserList from './components/UserList';
 import VerifyEmail from './components/VerifyEmail';
 
 function PrivateRoute({ children }) {
@@ -32,6 +33,14 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <Home />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/users"
+        element={
+          <PrivateRoute>
+            <UserList />
           </PrivateRoute>
         }
       />

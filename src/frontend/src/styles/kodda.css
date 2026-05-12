@@ -586,3 +586,80 @@ body {
   font-family: var(--kd-font);
   color: var(--kd-mist);
 }
+
+/* ----- User list table ----- */
+.kodda-table-wrap {
+  overflow-x: auto;
+  border-radius: var(--kd-radius);
+  border: 1px solid var(--kd-line);
+  box-shadow: var(--kd-shadow-sm);
+  background: var(--kd-card);
+}
+
+.kodda-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.kodda-table thead {
+  background: var(--kd-paper-deep);
+}
+
+.kodda-table th {
+  padding: 0.85rem 1rem;
+  text-align: left;
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--kd-mist);
+  border-bottom: 1px solid var(--kd-line);
+}
+
+.kodda-table td {
+  padding: 0.75rem 1rem;
+  color: var(--kd-ink);
+  border-bottom: 1px solid var(--kd-line);
+}
+
+.kodda-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.kodda-table tbody tr {
+  transition: background 0.12s;
+}
+
+.kodda-table tbody tr:hover {
+  background: rgba(15, 118, 110, 0.04);
+}
+
+.kodda-role-badge {
+  display: inline-block;
+  padding: 0.22rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.kodda-role-badge--admin {
+  background: linear-gradient(135deg, rgba(15, 118, 110, 0.12), rgba(20, 184, 166, 0.15));
+  color: var(--kd-accent);
+  border: 1px solid rgba(15, 118, 110, 0.2);
+}
+
+.kodda-role-badge--user {
+  background: rgba(15, 20, 18, 0.05);
+  color: var(--kd-mist);
+  border: 1px solid var(--kd-line);
+}
+
+.kodda-userlist-status {
+  padding: 3rem 1rem;
+  text-align: center;
+  color: var(--kd-mist);
+  font-size: 1rem;
+}
