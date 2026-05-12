@@ -14,8 +14,14 @@ apply_schema_patches(engine)
 settings = get_settings()
 
 app = FastAPI(
-    title="User Management API",
-    description="API para gestionar usuarios",
+    title="Kodda API",
+    description=(
+        "Backend de usuarios y autenticación. **Probar registro:** abrí `/docs`, "
+        "**POST /api/users/** (cuerpo JSON: username, email, password) con "
+        "`ALLOW_PUBLIC_SIGNUP=true` en `.env`. Para exigir correo verificado antes del login: "
+        "`REQUIRE_EMAIL_VERIFICATION_FOR_LOGIN=true`. Con `MAIL_SUPPRESS=true` el enlace de "
+        "verificación solo se imprime en la consola del servidor, no llega a la bandeja."
+    ),
     version="1.0.0",
 )
 
@@ -37,6 +43,7 @@ def home():
         "mensaje": "Bienvenido a User Management API",
         "version": "1.0.0",
         "endpoints": {
+            "register": "POST /api/users/ (con ALLOW_PUBLIC_SIGNUP=true)",
             "login": "POST /api/auth/login",
             "refresh": "POST /api/auth/refresh",
             "logout": "POST /api/auth/logout",

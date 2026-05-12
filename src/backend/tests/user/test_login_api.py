@@ -73,3 +73,26 @@ def test_login_blocked_until_email_verified_when_config_enabled(
     finally:
         monkeypatch.delenv("REQUIRE_EMAIL_VERIFICATION_FOR_LOGIN", raising=False)
         get_settings.cache_clear()
+
+
+@pytest.mark.postgres
+def test_refresh_blocked_when_verification_required_after_login_without_verify(
+    api_client, register_payload, monkeypatch
+):
+    """Si después se exige email verificado, el refresh no debe renovar sesión sin verificar."""
+    from app.core.config import get_settings
+
+    assert api_client.post("/api/users/", json=register_payload).status_code == 201
+    lr = post_login(api_client, register_payload["username"], register_payload["password"])
+    assert lr.status_code == 200
+    refresh = lr.json()["refresh_token"]
+
+    monkeypatch.setenv("REQUIRE_EMAIL_VERIFICATION_FOR_LOGIN", "true")
+    get_settings.cache_clear()
+    try:
+        rr = api_client.post("/api/auth/refresh", json={"refresh_token": refresh})
+        assert rr.status_code == 403
+        assert "verificar" in rr.json()["detail"].lower()
+    finally:
+        monkeypatch.delenv("REQUIRE_EMAIL_VERIFICATION_FOR_LOGIN", raising=False)
+        get_settings.cache_clear()

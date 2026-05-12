@@ -8,10 +8,17 @@ logger = logging.getLogger(__name__)
 
 
 def send_email(to: str, subject: str, body: str) -> None:
-    """Envía un correo por SMTP. Si MAIL_SUPPRESS=true, solo registra en log (útil en desarrollo)."""
+    """Envía un correo por SMTP. Si MAIL_SUPPRESS=true, no usa SMTP y escribe el cuerpo en log (desarrollo)."""
     settings = get_settings()
     if settings.mail_suppress:
-        logger.info("[MAIL_SUPPRESS] to=%s subject=%s\n%s", to, subject, body)
+        # WARNING para que aparezca con el nivel por defecto de uvicorn (INFO deja ocultos muchos loggers de app).
+        logger.warning(
+            "[MAIL_SUPPRESS=true] No se envió correo real. Copiá el enlace del cuerpo o configurá SMTP y MAIL_SUPPRESS=false.\n"
+            "  Para: %s\n  Asunto: %s\n  Cuerpo:\n%s",
+            to,
+            subject,
+            body,
+        )
         return
 
     if not settings.smtp_host or not settings.smtp_from:

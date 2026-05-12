@@ -50,6 +50,8 @@ class AuthService:
             user = UserRepository.get_by_id(db, active.user_id)
             if not user:
                 raise ValueError("Usuario no encontrado")
+            if settings.require_email_verification_for_login and user.email_verified_at is None:
+                raise ValueError("Debés verificar tu correo antes de renovar la sesión.")
             access = create_access_token(str(user.id), user.role.value)
             new_plain = secrets.token_urlsafe(32)
             new_hash = hash_refresh_token(new_plain)

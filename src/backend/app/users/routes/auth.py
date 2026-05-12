@@ -53,7 +53,10 @@ def refresh_tokens(body: RefreshTokenRequest, db: Session = Depends(get_db)):
     try:
         access_token, refresh_token = AuthService.rotate_refresh(db, body.refresh_token)
         return TokenPairResponse(access_token=access_token, refresh_token=refresh_token)
-    except ValueError:
+    except ValueError as e:
+        detail = str(e)
+        if "verificar" in detail.lower():
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=detail)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Refresh token inválido o expirado",
