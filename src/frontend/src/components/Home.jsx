@@ -1,4 +1,5 @@
 import { useAuth } from '../context/AuthContext';
+import { Link } from 'react-router-dom';
 import { KoddaLogo } from './KoddaLogo';
 
 const PLACEHOLDER_FEED = [
@@ -90,6 +91,11 @@ export default function Home() {
               <strong style={{ color: 'var(--kd-ink-soft)' }}>Rol:</strong> {user?.role}
             </li>
           </ul>
+          {user?.role === 'admin' && (
+            <Link to="/users" className="kodda-btn-accent-outline" style={{ marginTop: '1rem', display: 'inline-block' }}>
+              Ver usuarios
+            </Link>
+          )}
         </section>
       </main>
 
