@@ -33,18 +33,19 @@ def login(
 ):
     user = AuthService.authenticate(db, form_data.username, form_data.password)
     
-    if not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=user.status_message or "Tu cuenta se encuentra desactivada."
-        )
-        
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Credenciales incorrectas",
             headers={"WWW-Authenticate": "Bearer"},
         )
+        
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=user.status_message or "Tu cuenta se encuentra desactivada."
+        )
+        
     settings = get_settings()
     if settings.require_email_verification_for_login and user.email_verified_at is None:
         raise HTTPException(
