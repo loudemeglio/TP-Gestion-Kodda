@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from sqlalchemy.orm import Session
 from app.models import User, UserRole
 from app.schemas import UserCreateDTO, UserUpdateDTO
@@ -18,6 +20,26 @@ class UserRepository:
             address=user_data.address,
         )
         db.add(db_user)
+        db.commit()
+        db.refresh(db_user)
+        return db_user
+
+    @staticmethod
+    def mark_email_verified(db: Session, user_id: int) -> bool:
+        db_user = UserRepository.get_by_id(db, user_id)
+        if not db_user:
+            return False
+        db_user.email_verified_at = datetime.now(timezone.utc)
+        db.commit()
+        db.refresh(db_user)
+        return True
+
+    @staticmethod
+    def set_hashed_password(db: Session, user_id: int, hashed_password: str) -> User | None:
+        db_user = UserRepository.get_by_id(db, user_id)
+        if not db_user:
+            return None
+        db_user.hashed_password = hashed_password
         db.commit()
         db.refresh(db_user)
         return db_user

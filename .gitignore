@@ -1,0 +1,18 @@
+# Entorno y dependencias
+src/backend/.venv/
+node_modules/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Variables de entorno locales; los .env.example siguen versionados
+.env
+!.env.example
+
+# Cursor / depuración local
+.cursor/
+
+# Frontend: salida de producción (regenerar con npm run build)
+src/frontend/build/

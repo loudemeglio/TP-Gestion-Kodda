@@ -1,26 +1,66 @@
-.App {
+.loading,
+.auth-page,
+.dashboard {
+  max-width: 480px;
+  margin: 2rem auto;
+  padding: 0 1rem;
   text-align: center;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.auth-form {
   display: flex;
   flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.auth-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  text-align: left;
+  font-size: 0.95rem;
+}
+
+.auth-form input {
+  padding: 0.5rem 0.65rem;
+  font-size: 1rem;
+}
+
+.auth-form button {
+  padding: 0.6rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.auth-error {
+  color: #b00020;
+  margin: 0;
+}
+
+.auth-success {
+  color: #0d6d1d;
+  margin: 0;
+}
+
+.auth-hint {
+  font-size: 0.9rem;
+  opacity: 0.85;
+}
+
+.auth-links {
+  margin-top: 1rem;
+}
+
+.dashboard-header {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
-.App-header h1 {
-  margin: 0;
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-}
-
-.App-header p {
-  margin: 0;
-  font-size: 1.2rem;
-  opacity: 0.8;
+.user-summary {
+  text-align: left;
+  line-height: 1.8;
 }

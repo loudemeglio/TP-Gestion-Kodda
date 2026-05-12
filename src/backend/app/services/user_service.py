@@ -142,4 +142,3 @@ class UserService:
         """Obtener todos los usuarios con un rol específico"""
         users = UserRepository.get_by_role(db, UserRoleModel[role.value.upper()], skip, limit)
         return [UserDTO.from_orm(user) for user in users]
-        return True

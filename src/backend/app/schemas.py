@@ -30,6 +30,37 @@ class UserUpdateDTO(BaseModel):
     address: Optional[str] = Field(None, max_length=200)
 
 
+class TokenPairResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
+
+
+class LogoutRequest(BaseModel):
+    refresh_token: str | None = None
+
+
+class VerifyEmailRequest(BaseModel):
+    token: str = Field(..., min_length=10)
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str = Field(..., min_length=10)
+    new_password: str = Field(..., min_length=6)
+
+
+class MessageResponse(BaseModel):
+    message: str
+
+
 class UserDTO(BaseModel):
     """DTO para respuestas con datos del usuario"""
     id: int
@@ -40,7 +71,8 @@ class UserDTO(BaseModel):
     height: Optional[float]
     address: Optional[str]
     created_at: datetime
-    updated_at: datetime
+    updated_at: Optional[datetime] = None
+    email_verified_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
