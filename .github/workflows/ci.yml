@@ -1,4 +1,4 @@
-# CI: backend con PostgreSQL — dependencias, pytest (incl. tests/user) y smoke de import.
+# CI: valida el backend (FastAPI + Postgres), pytest (incl. tests/user) y smoke de import.
 name: CI
 
 on:
@@ -48,7 +48,7 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run tests
+      - name: Run tests (pytest)
         run: pytest -v
 
       - name: Verify application imports and DB schema
