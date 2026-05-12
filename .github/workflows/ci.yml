@@ -49,4 +49,5 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Verify application imports and DB schema
-        run: python -c "import main; print('OK: FastAPI app and DB init')"
+        run: |
+          python -c "import main; print('OK: FastAPI app and DB init')"
