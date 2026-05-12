@@ -1,18 +1,22 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, Enum, ForeignKey
+import enum
+
+from sqlalchemy import Column, DateTime, Enum, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from app.database import Base
-import enum
+
+from app.core.database import Base
 
 
 class UserRole(str, enum.Enum):
     """Roles de usuario disponibles"""
+
     ADMIN = "admin"
     USER = "user"
 
 
 class User(Base):
     """Modelo de Usuario en la base de datos"""
+
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -20,13 +24,11 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     role = Column(Enum(UserRole), default=UserRole.USER, nullable=False)
-    
-    # Campos opcionales
-    weight = Column(Float, nullable=True)  # En kg
-    height = Column(Float, nullable=True)  # En cm
+
+    weight = Column(Float, nullable=True)
+    height = Column(Float, nullable=True)
     address = Column(String, nullable=True)
-    
-    # Campos de auditoría
+
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(
         DateTime(timezone=True),

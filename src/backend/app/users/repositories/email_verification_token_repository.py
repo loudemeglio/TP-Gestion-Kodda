@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
 
-from app.models import EmailVerificationToken
+from app.users.models import EmailVerificationToken
 
 
 class EmailVerificationTokenRepository:

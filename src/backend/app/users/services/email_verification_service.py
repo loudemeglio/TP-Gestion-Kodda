@@ -5,11 +5,11 @@ from datetime import datetime, timedelta, timezone
 from fastapi import BackgroundTasks
 from sqlalchemy.orm import Session
 
-from app.config import get_settings
-from app.models import User
-from app.repositories.email_verification_token_repository import EmailVerificationTokenRepository
-from app.repositories.user_repository import UserRepository
-from app.services.mail_service import send_email
+from app.core.config import get_settings
+from app.core.mail_service import send_email
+from app.users.models import User
+from app.users.repositories.email_verification_token_repository import EmailVerificationTokenRepository
+from app.users.repositories.user_repository import UserRepository
 
 
 def _opaque_token_hash(plain: str) -> str:

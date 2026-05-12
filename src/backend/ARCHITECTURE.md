@@ -1,38 +1,45 @@
-# Arquitectura User Management API
+# Arquitectura del backend
 
-## Capas de la Aplicación
+## Organización por dominio
 
-```
-ROUTES (user_routes.py) → SERVICES (user_service.py) → REPOSITORIES (user_repository.py) → DATABASE
-```
-
-## Estructura de Archivos
+El código se agrupa para que nuevos módulos (p. ej. catálogo de productos) no mezclen responsabilidades con usuarios.
 
 ```
 app/
-├── __init__.py
-├── models.py              # Modelos SQLAlchemy (User)
-├── schemas.py             # DTOs Pydantic (UserCreateDTO, UserUpdateDTO, UserDTO)
-├── database.py            # Configuración SQLAlchemy
-├── repositories/
-│   ├── __init__.py
-│   └── user_repository.py # Acceso a datos
-├── services/
-│   ├── __init__.py
-│   └── user_service.py    # Lógica de negocio
-└── routes/
-    ├── __init__.py
-    └── user_routes.py     # Endpoints
+├── core/                    # Infraestructura compartida (no es dominio de negocio)
+│   ├── config.py            # Variables de entorno / settings
+│   ├── database.py          # Engine, Session, Base, get_db
+│   ├── schema_bootstrap.py  # Parches DDL al arranque (PostgreSQL)
+│   ├── tokens.py            # JWT acceso
+│   └── mail_service.py      # Envío SMTP (suprimible en dev)
+│
+└── users/                   # Dominio: cuentas, auth, verificación y reset de email
+    ├── models.py            # User, tokens ORM
+    ├── schemas.py           # DTOs Pydantic (usuario + auth)
+    ├── permissions.py       # Helpers de rol (decoradores / Depends)
+    ├── deps/
+    │   └── auth.py          # JWT → usuario actual
+    ├── repositories/
+    ├── services/
+    └── routes/
+        ├── auth.py          # /api/auth/*
+        └── users.py         # /api/users/*
 
-main.py                   # Punto de entrada FastAPI
-requirements.txt          # Dependencias
+main.py                      # FastAPI, CORS, include_router, create_all
 ```
 
-## Capas
+## Flujo de capas (dentro de `users`)
 
-- **Routes**: Endpoints de la API, manejo de requests/responses
-- **Services**: Lógica de negocio, validaciones, encriptación
-- **Repositories**: Acceso a datos, operaciones CRUD
-- **Models**: Entidades SQLAlchemy
-- **Schemas**: DTOs y validaciones Pydantic
-- **Database**: Configuración de conexión y sesiones
+```
+routes → services → repositories → models (SQLAlchemy) + core.database
+```
+
+- **Routes**: HTTP, validación de entrada con schemas, códigos de error.
+- **Services**: reglas de negocio, hashing, orquestación.
+- **Repositories**: consultas y commits sobre la sesión.
+- **Models**: tablas y relaciones.
+- **Schemas**: contratos de API (request/response).
+
+## Próximos dominios
+
+Para productos u órdenes, añadir paquetes paralelos (`app/catalog/`, …) con la misma idea: `models`, `schemas`, `repositories`, `services`, `routes`, e importar routers desde `main.py`.

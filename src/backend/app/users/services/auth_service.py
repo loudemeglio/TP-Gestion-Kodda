@@ -4,12 +4,12 @@ from datetime import datetime, timedelta, timezone
 
 from sqlalchemy.orm import Session
 
-from app.config import get_settings
-from app.models import User
-from app.repositories.refresh_token_repository import RefreshTokenRepository
-from app.repositories.user_repository import UserRepository
-from app.services.user_service import UserService
-from app.tokens import create_access_token
+from app.core.config import get_settings
+from app.core.tokens import create_access_token
+from app.users.models import User
+from app.users.repositories.refresh_token_repository import RefreshTokenRepository
+from app.users.repositories.user_repository import UserRepository
+from app.users.services.user_service import UserService
 
 
 def hash_refresh_token(plain: str) -> str:
@@ -19,7 +19,11 @@ def hash_refresh_token(plain: str) -> str:
 class AuthService:
     @staticmethod
     def authenticate(db: Session, username: str, password: str) -> User | None:
-        user = UserRepository.get_by_username(db, username)
+        """OAuth2 envía el identificador en `username`; acepta nombre de usuario o email."""
+        ident = (username or "").strip()
+        user = UserRepository.get_by_username(db, ident)
+        if not user and "@" in ident:
+            user = UserRepository.get_by_email(db, ident)
         if not user:
             return None
         if not UserService.verify_password(password, user.hashed_password):

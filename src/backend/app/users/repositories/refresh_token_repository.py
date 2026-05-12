@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
 
-from app.models import RefreshToken
+from app.users.models import RefreshToken
 
 
 class RefreshTokenRepository:

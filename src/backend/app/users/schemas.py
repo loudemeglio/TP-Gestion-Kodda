@@ -1,17 +1,20 @@
-from pydantic import BaseModel, EmailStr, Field
-from typing import Optional
 from datetime import datetime
 from enum import Enum
+from typing import Optional
+
+from pydantic import BaseModel, EmailStr, Field
 
 
 class UserRole(str, Enum):
-    """Roles disponibles"""
+    """Roles disponibles (DTO / API)."""
+
     ADMIN = "admin"
     USER = "user"
 
 
 class UserCreateDTO(BaseModel):
     """DTO para crear un nuevo usuario"""
+
     username: str = Field(..., min_length=3, max_length=50, description="Nombre de usuario")
     email: EmailStr = Field(..., description="Correo electrónico único")
     password: str = Field(..., min_length=6, description="Contraseña")
@@ -22,6 +25,7 @@ class UserCreateDTO(BaseModel):
 
 class UserUpdateDTO(BaseModel):
     """DTO para actualizar un usuario"""
+
     username: Optional[str] = Field(None, min_length=3, max_length=50)
     email: Optional[EmailStr] = Field(None)
     password: Optional[str] = Field(None, min_length=6)
@@ -63,6 +67,7 @@ class MessageResponse(BaseModel):
 
 class UserDTO(BaseModel):
     """DTO para respuestas con datos del usuario"""
+
     id: int
     username: str
     email: str

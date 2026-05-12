@@ -1,14 +1,14 @@
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.config import get_settings
-from app.database import get_db
-from app.deps.auth import get_current_user, get_current_user_optional, require_admin
-from app.models import User, UserRole as UserRoleModel
-from app.repositories.user_repository import UserRepository
-from app.schemas import UserCreateDTO, UserUpdateDTO, UserDTO
-from app.services.email_verification_service import EmailVerificationService
-from app.services.user_service import UserService
+from app.core.config import get_settings
+from app.core.database import get_db
+from app.users.deps.auth import get_current_user, get_current_user_optional, require_admin
+from app.users.models import User, UserRole as UserRoleModel
+from app.users.repositories.user_repository import UserRepository
+from app.users.schemas import UserCreateDTO, UserDTO, UserUpdateDTO
+from app.users.services.email_verification_service import EmailVerificationService
+from app.users.services.user_service import UserService
 
 router = APIRouter(prefix="/api/users", tags=["users"])
 

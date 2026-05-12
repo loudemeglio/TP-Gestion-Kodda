@@ -2,11 +2,12 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
-from app.config import get_settings
-from app.database import get_db
-from app.deps.auth import get_current_user
-from app.models import User
-from app.schemas import (
+from app.core.config import get_settings
+from app.core.database import get_db
+from app.users.deps.auth import get_current_user
+from app.users.models import User
+from app.users.repositories.user_repository import UserRepository
+from app.users.schemas import (
     ForgotPasswordRequest,
     LogoutRequest,
     MessageResponse,
@@ -16,10 +17,9 @@ from app.schemas import (
     UserDTO,
     VerifyEmailRequest,
 )
-from app.repositories.user_repository import UserRepository
-from app.services.auth_service import AuthService
-from app.services.email_verification_service import EmailVerificationService
-from app.services.password_reset_service import PasswordResetService
+from app.users.services.auth_service import AuthService
+from app.users.services.email_verification_service import EmailVerificationService
+from app.users.services.password_reset_service import PasswordResetService
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -96,7 +96,6 @@ def forgot_password(
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ):
-    # TODO: rate limiting por IP/email en producción
     PasswordResetService.request_reset(db, body.email, background_tasks)
     return MessageResponse(message=_FORGOT_NEUTRAL)
 

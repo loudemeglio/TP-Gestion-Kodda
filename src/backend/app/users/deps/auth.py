@@ -3,10 +3,10 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError
 from sqlalchemy.orm import Session
 
-from app.database import get_db
-from app.models import User, UserRole
-from app.repositories.user_repository import UserRepository
-from app.tokens import decode_access_token
+from app.core.database import get_db
+from app.core.tokens import decode_access_token
+from app.users.models import User, UserRole
+from app.users.repositories.user_repository import UserRepository
 
 security = HTTPBearer(auto_error=False)
 

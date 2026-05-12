@@ -3,8 +3,8 @@ from typing import Callable
 
 from fastapi import Depends, HTTPException, status
 
-from app.deps.auth import get_current_user
-from app.models import User, UserRole
+from app.users.deps.auth import get_current_user
+from app.users.models import User, UserRole
 
 
 def require_role(*allowed_roles: UserRole):

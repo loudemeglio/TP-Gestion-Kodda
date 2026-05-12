@@ -1,26 +1,24 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.config import get_settings
-from app.database import Base, engine
-from app.routes.auth_routes import router as auth_router
-from app.routes.user_routes import router as user_router
-from app.schema_bootstrap import apply_schema_patches
+from app.core.config import get_settings
+from app.core.database import Base, engine
+from app.core.schema_bootstrap import apply_schema_patches
+from app.users.routes.auth import router as auth_router
+from app.users.routes.users import router as users_router
 
-# Crear tablas nuevas; las ya existentes no se modifican solas.
+# Los routers importan modelos SQLAlchemy → metadata registrada antes de create_all
 Base.metadata.create_all(bind=engine)
 apply_schema_patches(engine)
 
 settings = get_settings()
 
-# Este es el objeto "app" que busca Uvicorn
 app = FastAPI(
     title="User Management API",
     description="API para gestionar usuarios",
-    version="1.0.0"
+    version="1.0.0",
 )
 
-# Configurar CORS para permitir requests desde el frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.frontend_origins,
@@ -30,7 +28,7 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
-app.include_router(user_router)
+app.include_router(users_router)
 
 
 @app.get("/")
@@ -54,7 +52,7 @@ def home():
             "actualizar_usuario": "PUT /api/users/{user_id}",
             "eliminar_usuario": "DELETE /api/users/{user_id}",
             "documentacion": "/docs",
-        }
+        },
     }
 
 

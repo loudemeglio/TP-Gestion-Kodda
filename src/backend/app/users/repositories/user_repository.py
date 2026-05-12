@@ -1,8 +1,9 @@
 from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
-from app.models import User, UserRole
-from app.schemas import UserCreateDTO, UserUpdateDTO
+
+from app.users.models import User, UserRole
+from app.users.schemas import UserCreateDTO, UserUpdateDTO
 
 
 class UserRepository:
@@ -68,10 +69,10 @@ class UserRepository:
     def update(db: Session, user_id: int, user_data: UserUpdateDTO, hashed_password: str = None) -> User:
         """Actualizar un usuario"""
         db_user = UserRepository.get_by_id(db, user_id)
-        
+
         if not db_user:
             return None
-        
+
         if user_data.username is not None:
             db_user.username = user_data.username
         if user_data.email is not None:
@@ -84,7 +85,7 @@ class UserRepository:
             db_user.height = user_data.height
         if user_data.address is not None:
             db_user.address = user_data.address
-        
+
         db.commit()
         db.refresh(db_user)
         return db_user
@@ -93,10 +94,10 @@ class UserRepository:
     def delete(db: Session, user_id: int) -> bool:
         """Eliminar un usuario"""
         db_user = UserRepository.get_by_id(db, user_id)
-        
+
         if not db_user:
             return False
-        
+
         db.delete(db_user)
         db.commit()
         return True
@@ -115,10 +116,10 @@ class UserRepository:
     def change_role(db: Session, user_id: int, new_role: UserRole) -> User:
         """Cambiar el rol de un usuario"""
         db_user = UserRepository.get_by_id(db, user_id)
-        
+
         if not db_user:
             return None
-        
+
         db_user.role = new_role
         db.commit()
         db.refresh(db_user)

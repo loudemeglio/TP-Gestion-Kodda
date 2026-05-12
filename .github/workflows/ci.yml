@@ -1,0 +1,56 @@
+# CI: backend con PostgreSQL — dependencias, pytest (incl. tests/user) y smoke de import.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (Python + Postgres)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: mydatabase
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U user -d mydatabase"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://user:password@localhost:5432/mydatabase
+    defaults:
+      run:
+        working-directory: src/backend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: src/backend/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run tests
+        run: pytest -v
+
+      - name: Verify application imports and DB schema
+        run: |
+          python -c "import main; print('OK: FastAPI app and DB init')"

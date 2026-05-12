@@ -7,7 +7,7 @@ COMPOSE    := $(SRC)/docker-compose.yml
 UVICORN    := $(BACKEND)/.venv/bin/uvicorn
 PIP        := $(BACKEND)/.venv/bin/pip
 
-.PHONY: help install setup-env db-up db-down wait-db backend frontend test stop
+.PHONY: help install setup-env db-up db-down wait-db backend frontend test pytest stop
 
 help:
 	@echo "Estructura: $(ROOT) -> src/ -> backend/ | frontend/"
@@ -15,7 +15,8 @@ help:
 	@echo "Objetivos principales:"
 	@echo "  make install    - Crea venv en $(BACKEND), pip install y npm install en $(FRONTEND)"
 	@echo "  make setup-env  - Copia .env.example -> .env si no existen"
-	@echo "  make test       - setup-env, levanta Postgres, espera a la BD y arranca API + React (2 procesos)"
+	@echo "  make test       - Entorno local: Postgres + API (:8000) + React (:3000). No ejecuta pytest."
+	@echo "  make pytest     - Tests automáticos del backend (pytest); levanta Postgres si hace falta."
 	@echo "  make db-up      - Solo Postgres (docker compose, puerto 5432)"
 	@echo "  make db-down    - Detiene contenedores del compose"
 	@echo "  make backend    - Solo API (http://localhost:8000) — requiere BD y .env"
@@ -60,5 +61,11 @@ frontend: $(FRONTEND)/node_modules
 # Levanta BD + API + frontend en paralelo (dos procesos en primer plano).
 test: setup-env db-up wait-db
 	@$(MAKE) -j2 backend frontend
+
+# Tests de integración del backend (requieren PostgreSQL; usa DATABASE_URL del .env del backend).
+pytest: $(UVICORN) setup-env db-up wait-db
+	@cd $(BACKEND) && \
+	if [ -f .env ]; then set -a && . ./.env && set +a; fi && \
+	.venv/bin/pytest -v
 
 stop: db-down

@@ -5,12 +5,12 @@ from datetime import datetime, timedelta, timezone
 from fastapi import BackgroundTasks
 from sqlalchemy.orm import Session
 
-from app.config import get_settings
-from app.repositories.password_reset_token_repository import PasswordResetTokenRepository
-from app.repositories.user_repository import UserRepository
-from app.services.auth_service import AuthService
-from app.services.mail_service import send_email
-from app.services.user_service import UserService
+from app.core.config import get_settings
+from app.core.mail_service import send_email
+from app.users.repositories.password_reset_token_repository import PasswordResetTokenRepository
+from app.users.repositories.user_repository import UserRepository
+from app.users.services.auth_service import AuthService
+from app.users.services.user_service import UserService
 
 
 def _opaque_token_hash(plain: str) -> str:
