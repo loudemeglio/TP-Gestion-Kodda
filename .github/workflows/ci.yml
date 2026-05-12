@@ -48,6 +48,9 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Run tests (pytest)
+        run: pytest -v
+
       - name: Verify application imports and DB schema
         run: |
           python -c "import main; print('OK: FastAPI app and DB init')"
