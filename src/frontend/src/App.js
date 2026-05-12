@@ -1,8 +1,8 @@
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import './App.css';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import Dashboard from './components/Dashboard';
 import ForgotPassword from './components/ForgotPassword';
+import Home from './components/Home';
 import Login from './components/Login';
 import ResetPassword from './components/ResetPassword';
 import VerifyEmail from './components/VerifyEmail';
@@ -31,7 +31,7 @@ function AppRoutes() {
         path="/"
         element={
           <PrivateRoute>
-            <Dashboard />
+            <Home />
           </PrivateRoute>
         }
       />

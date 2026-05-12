@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client';
+import { KoddaLogo } from './KoddaLogo';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
@@ -24,29 +25,35 @@ export default function ForgotPassword() {
   }
 
   return (
-    <div className="auth-page">
-      <h1>Olvidé mi contraseña</h1>
-      <p className="auth-hint">Te enviaremos un enlace si el correo está registrado.</p>
-      <form onSubmit={handleSubmit} className="auth-form">
-        <label>
-          Correo
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            autoComplete="email"
-            required
-          />
-        </label>
-        {error ? <p className="auth-error">{error}</p> : null}
-        {message ? <p className="auth-success">{message}</p> : null}
-        <button type="submit" disabled={submitting}>
-          {submitting ? 'Enviando…' : 'Enviar enlace'}
-        </button>
-      </form>
-      <p>
-        <Link to="/login">Volver al inicio de sesión</Link>
-      </p>
+    <div className="kodda-auth-simple">
+      <div className="kodda-auth-card">
+        <KoddaLogo compact />
+        <h1 style={{ marginTop: '1rem' }}>Olvidé mi contraseña</h1>
+        <p className="kodda-auth-sub">Si el correo está en Kodda, recibirás un enlace para restablecerla.</p>
+
+        <form onSubmit={handleSubmit}>
+          <label className="kodda-field">
+            <span>Correo</span>
+            <input
+              className="kodda-input"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+              required
+            />
+          </label>
+          {error ? <p className="kodda-auth-error">{error}</p> : null}
+          {message ? <p className="kodda-auth-success">{message}</p> : null}
+          <button className="kodda-btn-primary" type="submit" disabled={submitting}>
+            {submitting ? 'Enviando…' : 'Enviar enlace'}
+          </button>
+        </form>
+
+        <div className="kodda-auth-links">
+          <Link to="/login">Volver al inicio de sesión</Link>
+        </div>
+      </div>
     </div>
   );
 }

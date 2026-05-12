@@ -1,0 +1,588 @@
+/* Kodda — identidad: moda circular, IA, claridad (Lean personas) */
+:root {
+  --kd-ink: #0f1412;
+  --kd-ink-soft: #2d3834;
+  --kd-mist: #5a6b66;
+  --kd-paper: #f7f4ee;
+  --kd-paper-deep: #ebe6dc;
+  --kd-card: #ffffff;
+  --kd-accent: #0f766e;
+  --kd-accent-mid: #14b8a6;
+  --kd-accent-glow: rgba(20, 184, 166, 0.22);
+  --kd-warm: #c2410c;
+  --kd-warm-soft: #ea580c;
+  --kd-line: rgba(15, 20, 18, 0.08);
+  --kd-danger: #b91c1c;
+  --kd-success: #047857;
+  --kd-radius: 16px;
+  --kd-radius-sm: 10px;
+  --kd-font: 'DM Sans', system-ui, sans-serif;
+  --kd-display: 'Syne', var(--kd-font);
+  --kd-shadow: 0 18px 50px rgba(15, 20, 18, 0.08);
+  --kd-shadow-sm: 0 8px 24px rgba(15, 20, 18, 0.06);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--kd-font);
+  font-optical-sizing: auto;
+  color: var(--kd-ink);
+  background: var(--kd-paper);
+  background-image:
+    radial-gradient(ellipse 120% 80% at 100% -10%, var(--kd-accent-glow), transparent 55%),
+    radial-gradient(ellipse 90% 60% at 0% 100%, rgba(194, 65, 12, 0.06), transparent 50%);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Logo Kodda */
+.kodda-logo-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.kodda-logo-word {
+  font-family: var(--kd-display);
+  font-weight: 800;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: inherit;
+}
+
+.kodda-logo-wrap--compact .kodda-logo-word {
+  font-size: 1.35rem;
+}
+
+.kodda-logo-wrap--compact .kodda-logo-tagline {
+  display: none;
+}
+
+.kodda-logo-tagline {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+
+.kodda-auth-brand .kodda-logo-wrap {
+  color: #ecfdf5;
+}
+
+.kodda-topbar .kodda-logo-wrap {
+  color: var(--kd-ink);
+}
+
+.kodda-topbar .kodda-logo-tagline {
+  display: none;
+}
+
+/* ----- Login / auth split ----- */
+.kodda-auth-root {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+}
+
+@media (max-width: 900px) {
+  .kodda-auth-root {
+    grid-template-columns: 1fr;
+  }
+}
+
+.kodda-auth-brand {
+  position: relative;
+  padding: clamp(2rem, 5vw, 4rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: linear-gradient(155deg, #0c2f2b 0%, #134e4a 42%, #0f766e 78%, #115e59 100%);
+  color: #ecfdf5;
+  overflow: hidden;
+}
+
+.kodda-auth-brand::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5 L35 25 L55 30 L35 35 L30 55 L25 35 L5 30 L25 25 Z' fill='none' stroke='%23ffffff' stroke-opacity='0.06' stroke-width='0.8'/%3E%3C/svg%3E");
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.kodda-auth-brand-inner {
+  position: relative;
+  z-index: 1;
+}
+
+.kodda-auth-eyebrow {
+  font-size: 0.75rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  opacity: 0.85;
+  margin: 0 0 1rem;
+  font-weight: 600;
+}
+
+.kodda-auth-headline {
+  font-family: var(--kd-display);
+  font-weight: 700;
+  font-size: clamp(1.75rem, 4vw, 2.35rem);
+  line-height: 1.15;
+  margin: 0 0 1rem;
+  max-width: 18ch;
+}
+
+.kodda-auth-lead {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.55;
+  max-width: 34ch;
+  opacity: 0.92;
+}
+
+.kodda-auth-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 2rem;
+}
+
+.kodda-pill {
+  font-size: 0.78rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(6px);
+}
+
+.kodda-auth-footer-note {
+  position: relative;
+  z-index: 1;
+  font-size: 0.8rem;
+  opacity: 0.75;
+  max-width: 36ch;
+  line-height: 1.45;
+}
+
+.kodda-auth-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  background: var(--kd-paper);
+}
+
+.kodda-auth-card {
+  width: 100%;
+  max-width: 400px;
+  padding: clamp(1.75rem, 4vw, 2.5rem);
+  background: var(--kd-card);
+  border-radius: var(--kd-radius);
+  box-shadow: var(--kd-shadow);
+  border: 1px solid var(--kd-line);
+}
+
+.kodda-auth-card h1 {
+  font-family: var(--kd-display);
+  font-size: 1.45rem;
+  font-weight: 700;
+  margin: 0 0 0.35rem;
+  color: var(--kd-ink);
+}
+
+.kodda-auth-sub {
+  margin: 0 0 1.5rem;
+  color: var(--kd-mist);
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.kodda-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+.kodda-field span {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--kd-ink-soft);
+}
+
+.kodda-input {
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  font-size: 1rem;
+  font-family: inherit;
+  border: 1px solid var(--kd-line);
+  border-radius: var(--kd-radius-sm);
+  background: #fafaf8;
+  color: var(--kd-ink);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.kodda-input:focus {
+  outline: none;
+  border-color: var(--kd-accent-mid);
+  box-shadow: 0 0 0 3px var(--kd-accent-glow);
+  background: #fff;
+}
+
+.kodda-btn-primary {
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0.85rem 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: #fff;
+  background: linear-gradient(135deg, var(--kd-accent) 0%, #0d9488 100%);
+  border: none;
+  border-radius: var(--kd-radius-sm);
+  cursor: pointer;
+  transition: transform 0.12s, filter 0.12s;
+}
+
+.kodda-btn-primary:hover:not(:disabled) {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+
+.kodda-btn-primary:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.kodda-auth-error {
+  margin: 0 0 0.75rem;
+  padding: 0.65rem 0.75rem;
+  font-size: 0.88rem;
+  color: var(--kd-danger);
+  background: rgba(185, 28, 28, 0.08);
+  border-radius: var(--kd-radius-sm);
+  border: 1px solid rgba(185, 28, 28, 0.15);
+}
+
+.kodda-auth-success {
+  margin: 0 0 0.75rem;
+  padding: 0.65rem 0.75rem;
+  font-size: 0.88rem;
+  color: var(--kd-success);
+  background: rgba(4, 120, 87, 0.08);
+  border-radius: var(--kd-radius-sm);
+  border: 1px solid rgba(4, 120, 87, 0.15);
+}
+
+.kodda-auth-links {
+  margin-top: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  font-size: 0.9rem;
+}
+
+.kodda-auth-links a {
+  color: var(--kd-accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.kodda-auth-links a:hover {
+  text-decoration: underline;
+}
+
+.kodda-auth-muted {
+  color: var(--kd-mist);
+  font-size: 0.88rem;
+}
+
+/* Auth pages simple (forgot, reset, verify) */
+.kodda-auth-simple {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.kodda-auth-simple .kodda-auth-card {
+  max-width: 440px;
+}
+
+/* ----- Home ----- */
+.kodda-home {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.kodda-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.85rem clamp(1rem, 3vw, 2rem);
+  background: rgba(247, 244, 238, 0.88);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--kd-line);
+}
+
+.kodda-topbar-spacer {
+  flex: 1;
+}
+
+.kodda-search {
+  flex: 1;
+  min-width: 180px;
+  max-width: 420px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.85rem;
+  background: var(--kd-card);
+  border: 1px solid var(--kd-line);
+  border-radius: 999px;
+  color: var(--kd-mist);
+  font-size: 0.9rem;
+}
+
+.kodda-search input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font: inherit;
+  min-width: 0;
+  color: var(--kd-ink);
+}
+
+.kodda-search input:focus {
+  outline: none;
+}
+
+.kodda-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.kodda-btn-ghost {
+  padding: 0.5rem 0.9rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--kd-ink-soft);
+  background: transparent;
+  border: 1px solid var(--kd-line);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.kodda-btn-ghost:hover {
+  background: rgba(15, 20, 18, 0.04);
+}
+
+.kodda-btn-accent-outline {
+  padding: 0.5rem 1rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--kd-accent);
+  background: rgba(15, 118, 110, 0.08);
+  border: 1px solid rgba(15, 118, 110, 0.25);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.kodda-btn-accent-outline:hover {
+  background: rgba(15, 118, 110, 0.14);
+}
+
+.kodda-user-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.6rem 0.35rem 0.35rem;
+  background: var(--kd-card);
+  border: 1px solid var(--kd-line);
+  border-radius: 999px;
+  font-size: 0.85rem;
+}
+
+.kodda-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--kd-accent), var(--kd-accent-mid));
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.kodda-home-main {
+  flex: 1;
+  padding: clamp(1.25rem, 3vw, 2.5rem) clamp(1rem, 3vw, 2rem) 3rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.kodda-hello {
+  font-family: var(--kd-display);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 700;
+  margin: 0 0 0.35rem;
+}
+
+.kodda-hello-sub {
+  margin: 0 0 2rem;
+  color: var(--kd-mist);
+  font-size: 1rem;
+}
+
+.kodda-section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.kodda-section-title h2 {
+  font-family: var(--kd-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.kodda-badge-ia {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.3rem 0.55rem;
+  border-radius: 6px;
+  background: linear-gradient(135deg, rgba(15, 118, 110, 0.12), rgba(20, 184, 166, 0.15));
+  color: var(--kd-accent);
+  border: 1px solid rgba(15, 118, 110, 0.2);
+}
+
+.kodda-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.25rem;
+}
+
+.kodda-card-product {
+  background: var(--kd-card);
+  border-radius: var(--kd-radius);
+  overflow: hidden;
+  border: 1px solid var(--kd-line);
+  box-shadow: var(--kd-shadow-sm);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.kodda-card-product:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--kd-shadow);
+}
+
+.kodda-card-visual {
+  aspect-ratio: 4 / 5;
+  background: linear-gradient(145deg, var(--kd-paper-deep), #dfe8e6);
+  position: relative;
+}
+
+.kodda-card-visual::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.35), transparent 55%);
+}
+
+.kodda-card-body {
+  padding: 1rem 1rem 1.1rem;
+  text-align: left;
+}
+
+.kodda-card-body h3 {
+  margin: 0 0 0.35rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.kodda-card-meta {
+  font-size: 0.8rem;
+  color: var(--kd-mist);
+  margin: 0 0 0.5rem;
+}
+
+.kodda-price {
+  font-weight: 700;
+  color: var(--kd-ink);
+  font-size: 1.05rem;
+}
+
+.kodda-strip {
+  margin-top: 2.5rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: var(--kd-radius);
+  background: linear-gradient(90deg, rgba(15, 118, 110, 0.1), rgba(194, 65, 12, 0.08));
+  border: 1px solid var(--kd-line);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.kodda-strip p {
+  margin: 0;
+  max-width: 48ch;
+  font-size: 0.95rem;
+  color: var(--kd-ink-soft);
+  line-height: 1.5;
+}
+
+.kodda-home-footer {
+  margin-top: auto;
+  padding: 1.25rem clamp(1rem, 3vw, 2rem);
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--kd-mist);
+  border-top: 1px solid var(--kd-line);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.loading {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  font-family: var(--kd-font);
+  color: var(--kd-mist);
+}

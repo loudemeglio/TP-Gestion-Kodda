@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { api } from '../api/client';
+import { KoddaLogo } from './KoddaLogo';
 
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();
@@ -34,30 +35,38 @@ export default function ResetPassword() {
   }
 
   return (
-    <div className="auth-page">
-      <h1>Nueva contraseña</h1>
-      {!token ? <p className="auth-error">Enlace inválido (sin token).</p> : null}
-      <form onSubmit={handleSubmit} className="auth-form">
-        <label>
-          Nueva contraseña
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete="new-password"
-            minLength={6}
-            required
-          />
-        </label>
-        {error ? <p className="auth-error">{error}</p> : null}
-        {message ? <p className="auth-success">{message}</p> : null}
-        <button type="submit" disabled={submitting || !token}>
-          {submitting ? 'Guardando…' : 'Guardar contraseña'}
-        </button>
-      </form>
-      <p>
-        <Link to="/login">Ir al inicio de sesión</Link>
-      </p>
+    <div className="kodda-auth-simple">
+      <div className="kodda-auth-card">
+        <KoddaLogo compact />
+        <h1 style={{ marginTop: '1rem' }}>Nueva contraseña</h1>
+        <p className="kodda-auth-sub">Elegí una clave segura para volver a entrar a Kodda.</p>
+
+        {!token ? <p className="kodda-auth-error">Enlace inválido (sin token).</p> : null}
+
+        <form onSubmit={handleSubmit}>
+          <label className="kodda-field">
+            <span>Nueva contraseña</span>
+            <input
+              className="kodda-input"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="new-password"
+              minLength={6}
+              required
+            />
+          </label>
+          {error ? <p className="kodda-auth-error">{error}</p> : null}
+          {message ? <p className="kodda-auth-success">{message}</p> : null}
+          <button className="kodda-btn-primary" type="submit" disabled={submitting || !token}>
+            {submitting ? 'Guardando…' : 'Guardar contraseña'}
+          </button>
+        </form>
+
+        <div className="kodda-auth-links">
+          <Link to="/login">Ir al inicio de sesión</Link>
+        </div>
+      </div>
     </div>
   );
 }
