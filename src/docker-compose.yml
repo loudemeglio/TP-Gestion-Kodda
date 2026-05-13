@@ -17,7 +17,10 @@ services:
     container_name: fastapi_backend
     ports:
       - "8000:8000"
+    env_file:
+      - ./backend/.env
     environment:
+      # Sobrescribe el host de la DB del .env local (suele ser localhost) por el servicio en la red de Compose.
       DATABASE_URL: postgresql://user:password@db:5432/mydatabase
     depends_on:
       - db
@@ -28,6 +31,9 @@ services:
     ports:
       - "3000:3000"
     stdin_open: true # Para que React no se cierre en Docker
+    environment:
+      # setupProxy.js reenvía /api aquí; dentro de Docker 127.0.0.1 es este contenedor, no el backend.
+      PROXY_API_TARGET: http://backend:8000
     depends_on:
       - backend
 

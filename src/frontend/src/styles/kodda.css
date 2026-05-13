@@ -215,6 +215,13 @@ body {
   line-height: 1.45;
 }
 
+.kodda-auth-optional-note {
+  margin: 1.25rem 0 0.75rem;
+  color: var(--kd-mist);
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
 .kodda-field {
   display: flex;
   flex-direction: column;

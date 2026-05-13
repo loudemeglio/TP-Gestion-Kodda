@@ -6,6 +6,7 @@ import { KoddaLogo } from './KoddaLogo';
 export default function Login() {
   const { user, login } = useAuth();
   const location = useLocation();
+  const registerFlash = typeof location.state?.registerFlash === 'string' ? location.state.registerFlash : '';
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -66,6 +67,7 @@ export default function Login() {
           <p className="kodda-auth-sub">Ingresá tu usuario o email y tu contraseña para entrar a tu espacio Kodda.</p>
 
           <form onSubmit={handleSubmit}>
+            {registerFlash ? <p className="kodda-auth-success">{registerFlash}</p> : null}
             {error ? <p className="kodda-auth-error">{error}</p> : null}
 
             <label className="kodda-field">
@@ -100,7 +102,6 @@ export default function Login() {
 
           <div className="kodda-auth-links">
             <Link to="/forgot-password">Olvidé mi contraseña</Link>
-            <span className="kodda-auth-muted">¿Primera vez? El registro público depende de la configuración del servidor.</span>
             <span className="kodda-auth-muted">
               ¿No tenés cuenta?{' '}
               <Link to="/register" className="kodda-auth-link">Registrate</Link>

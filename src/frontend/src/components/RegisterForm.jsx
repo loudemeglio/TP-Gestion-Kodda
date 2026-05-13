@@ -1,18 +1,42 @@
-
 import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { KoddaLogo } from './KoddaLogo';
 import { api } from '../api/client';
 
+function buildRegisterBody(username, email, password, weightRaw, heightRaw, addressRaw) {
+  const body = { username, email, password };
+  const w = weightRaw.trim().replace(',', '.');
+  if (w !== '') {
+    const n = Number.parseFloat(w);
+    if (Number.isNaN(n) || n < 0) {
+      throw new Error('Peso inválido: usá un número en kg (ej. 70,5) o dejalo vacío.');
+    }
+    body.weight = n;
+  }
+  const h = heightRaw.trim().replace(',', '.');
+  if (h !== '') {
+    const n = Number.parseFloat(h);
+    if (Number.isNaN(n) || n < 0) {
+      throw new Error('Altura inválida: usá un número en cm (ej. 175) o dejalo vacío.');
+    }
+    body.height = n;
+  }
+  const addr = addressRaw.trim();
+  if (addr !== '') body.address = addr;
+  return body;
+}
 
 export default function RegisterForm() {
+  const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [weight, setWeight] = useState('');
+  const [height, setHeight] = useState('');
+  const [address, setAddress] = useState('');
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [registeredEmail, setRegisteredEmail] = useState(''); // Para pasos futuros de verificación
 
   function validateEmail(email) {
     // Simple regex for email validation
@@ -22,7 +46,6 @@ export default function RegisterForm() {
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
-    setSuccess(false);
 
     if (!validateEmail(email)) {
       setError('Ingresá un email válido.');
@@ -37,15 +60,24 @@ export default function RegisterForm() {
       return;
     }
 
+    let payload;
+    try {
+      payload = buildRegisterBody(username, email, password, weight, height, address);
+    } catch (validationErr) {
+      setError(validationErr.message);
+      return;
+    }
+
     setSubmitting(true);
     try {
-      await api.post('/api/users/', { username, email, password });
-      setSuccess(true);
-      setRegisteredEmail(email); // Guardar email registrado para pasos futuros
-      setUsername('');
-      setEmail('');
-      setPassword('');
-      setConfirmPassword('');
+      await api.post('/api/users/', payload);
+      navigate('/login', {
+        replace: true,
+        state: {
+          registerFlash:
+            'Registro exitoso. Te enviamos un correo para verificar tu cuenta (revisá también spam). Después podés iniciar sesión.',
+        },
+      });
     } catch (err) {
       // Manejo de errores FastAPI
       const resp = err.response;
@@ -71,6 +103,9 @@ export default function RegisterForm() {
               if (d.loc.includes('email')) return 'Email inválido o ya registrado.';
               if (d.loc.includes('username')) return 'Nombre de usuario inválido o ya en uso.';
               if (d.loc.includes('password')) return 'Contraseña inválida.';
+              if (d.loc.includes('weight')) return 'Peso inválido.';
+              if (d.loc.includes('height')) return 'Altura inválida.';
+              if (d.loc.includes('address')) return 'Dirección inválida.';
               return d.msg;
             }
             return typeof d === 'string' ? d : '';
@@ -118,7 +153,6 @@ export default function RegisterForm() {
 
           <form onSubmit={handleSubmit}>
             {error ? <p className="kodda-auth-error">{error}</p> : null}
-            {success ? <p className="kodda-auth-success">¡Registro exitoso! Revisá tu email para verificar la cuenta.</p> : null}
 
             <label className="kodda-field">
               <span>Usuario</span>
@@ -172,10 +206,62 @@ export default function RegisterForm() {
               />
             </label>
 
+            <p className="kodda-auth-optional-note">
+              Los siguientes datos son opcionales. Podés registrarte sin completarlos y cargarlos más adelante.
+            </p>
+
+            <label className="kodda-field">
+              <span>Peso (kg)</span>
+              <input
+                className="kodda-input"
+                type="text"
+                inputMode="decimal"
+                value={weight}
+                onChange={(e) => setWeight(e.target.value)}
+                autoComplete="off"
+                placeholder="ej. 70,5"
+              />
+            </label>
+
+            <label className="kodda-field">
+              <span>Altura (cm)</span>
+              <input
+                className="kodda-input"
+                type="text"
+                inputMode="decimal"
+                value={height}
+                onChange={(e) => setHeight(e.target.value)}
+                autoComplete="off"
+                placeholder="ej. 175"
+              />
+            </label>
+
+            <label className="kodda-field">
+              <span>Dirección</span>
+              <input
+                className="kodda-input"
+                type="text"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                autoComplete="street-address"
+                placeholder="Calle, ciudad…"
+                maxLength={200}
+              />
+            </label>
+
             <button className="kodda-btn-primary" type="submit" disabled={submitting}>
               {submitting ? 'Registrando…' : 'Crear cuenta'}
             </button>
           </form>
+
+          <div className="kodda-auth-links">
+            <span className="kodda-auth-muted">
+              ¿Ya tenés cuenta?{' '}
+              <Link to="/login" className="kodda-auth-link">
+                Iniciar sesión
+              </Link>
+            </span>
+          </div>
         </div>
       </main>
     </div>
