@@ -1,18 +1,38 @@
-import { useState } from 'react';
-import { Link, Navigate, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { KoddaLogo } from './KoddaLogo';
 
 export default function Login() {
-  const { user, login } = useAuth();
+  const { user, login, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const cambiarCuenta = searchParams.get('cambiar') === '1';
+
   const registerFlash = typeof location.state?.registerFlash === 'string' ? location.state.registerFlash : '';
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  if (user) {
+  useEffect(() => {
+    if (!user || !cambiarCuenta) return;
+    void (async () => {
+      await logout();
+      navigate('/login', { replace: true });
+    })();
+  }, [user, cambiarCuenta, logout, navigate]);
+
+  if (user && cambiarCuenta) {
+    return (
+      <div className="loading" role="status">
+        Cambiando de cuenta…
+      </div>
+    );
+  }
+
+  if (user && !cambiarCuenta) {
     const to = location.state?.from?.pathname || '/';
     return <Navigate to={to} replace />;
   }
