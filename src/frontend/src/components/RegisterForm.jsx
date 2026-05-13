@@ -1,5 +1,8 @@
+
 import { useState } from 'react';
 import { KoddaLogo } from './KoddaLogo';
+import { api } from '../api/client';
+
 
 export default function RegisterForm() {
   const [username, setUsername] = useState('');
@@ -9,6 +12,7 @@ export default function RegisterForm() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState(''); // Para pasos futuros de verificación
 
   function validateEmail(email) {
     // Simple regex for email validation
@@ -35,23 +39,49 @@ export default function RegisterForm() {
 
     setSubmitting(true);
     try {
-      const res = await fetch('/api/users/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, email, password })
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        setError(data.detail || 'No se pudo registrar el usuario.');
-      } else {
-        setSuccess(true);
-        setUsername('');
-        setEmail('');
-        setPassword('');
-        setConfirmPassword('');
-      }
+      await api.post('/api/users/', { username, email, password });
+      setSuccess(true);
+      setRegisteredEmail(email); // Guardar email registrado para pasos futuros
+      setUsername('');
+      setEmail('');
+      setPassword('');
+      setConfirmPassword('');
     } catch (err) {
-      setError('No hay conexión con el servidor.');
+      // Manejo de errores FastAPI
+      const resp = err.response;
+      if (!resp) {
+        setError('No hay conexión con el servidor.');
+      } else if (resp.data) {
+        const detail = resp.data.detail;
+        // 1. detail string (ej: "Email ya registrado")
+        if (typeof detail === 'string') {
+          if (detail.toLowerCase().includes('email')) {
+            setError('El email ya está registrado.');
+          } else if (detail.toLowerCase().includes('username')) {
+            setError('El nombre de usuario ya está en uso.');
+          } else {
+            setError(detail);
+          }
+        }
+        // 2. detail array (422 validation error)
+        else if (Array.isArray(detail)) {
+          // Buscar errores de campo
+          const messages = detail.map((d) => {
+            if (d?.msg && d?.loc?.length) {
+              if (d.loc.includes('email')) return 'Email inválido o ya registrado.';
+              if (d.loc.includes('username')) return 'Nombre de usuario inválido o ya en uso.';
+              if (d.loc.includes('password')) return 'Contraseña inválida.';
+              return d.msg;
+            }
+            return typeof d === 'string' ? d : '';
+          });
+          setError(messages.filter(Boolean).join(' '));
+        } else {
+          setError('No se pudo registrar el usuario.');
+        }
+      } else {
+        setError('No se pudo registrar el usuario.');
+      }
     } finally {
       setSubmitting(false);
     }

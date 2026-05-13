@@ -101,6 +101,10 @@ export default function Login() {
           <div className="kodda-auth-links">
             <Link to="/forgot-password">Olvidé mi contraseña</Link>
             <span className="kodda-auth-muted">¿Primera vez? El registro público depende de la configuración del servidor.</span>
+            <span className="kodda-auth-muted">
+              ¿No tenés cuenta?{' '}
+              <Link to="/register" className="kodda-auth-link">Registrate</Link>
+            </span>
           </div>
         </div>
       </main>

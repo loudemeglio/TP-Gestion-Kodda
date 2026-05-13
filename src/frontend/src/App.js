@@ -7,6 +7,7 @@ import Login from './components/Login';
 import ResetPassword from './components/ResetPassword';
 import UserList from './components/UserList';
 import VerifyEmail from './components/VerifyEmail';
+import RegisterForm from './components/RegisterForm';
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
@@ -25,6 +26,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<RegisterForm />} />
       <Route path="/verify-email" element={<VerifyEmail />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
