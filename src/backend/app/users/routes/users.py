@@ -1,14 +1,14 @@
-
-# from  app.core.mail_service import send_email
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status, Body
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
 from app.core.database import get_db
+from app.core.mail_service import send_email
 from app.users.deps.auth import get_current_user, get_current_user_optional, require_admin
 from app.users.models import User, UserRole as UserRoleModel
 from app.users.repositories.user_repository import UserRepository
 from app.users.schemas import UserCreateDTO, UserDTO, UserUpdateDTO
+from app.users.services.auth_service import AuthService
 from app.users.services.email_verification_service import EmailVerificationService
 from app.users.services.user_service import UserService
 
@@ -175,37 +175,48 @@ def delete_user(
 @router.patch("/{user_id}/status", response_model=UserDTO)
 def update_user_status(
     user_id: int,
-    background_tasks: BackgroundTasks,  # Agregado para enviar email en caso de suspensión
-    action: str = Body(..., embed=True), # "block" o "suspend"
-    reason: str = Body(None, embed=True),
+    background_tasks: BackgroundTasks,
+    action: str = Body(..., embed=True),
+    reason: str | None = Body(None, embed=True),
     db: Session = Depends(get_db),
-    admin: User = Depends(require_admin), # Solo admins
+    admin: User = Depends(require_admin),
 ):
     db_user = UserRepository.get_by_id(db, user_id)
     if not db_user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
-    if action == "block":
-        db_user.is_active = False
-        db_user.status_message = reason or "Cuenta bloqueada por seguridad."
-        
-    elif action == "suspend":
-        db_user.is_active = False
-        db_user.status_message = "Tu cuenta ha sido suspendida temporalmente."
-        
-        subject = "Notificación de suspensión de cuenta"
-        body = (
-            f"Hola {db_user.username},\n\n"
-            f"Te informamos que tu cuenta ha sido suspendida temporalmente.\n"
-            f"Razón: {reason if reason else 'Incumplimiento de las normas de la comunidad.'}\n\n"
-            "Si crees que esto es un error, por favor contacta al soporte técnico."
+    if action == "block" and user_id == admin.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No podés bloquear tu propia cuenta.",
         )
 
-        # TODO: Enviar email de suspensión (requiere configurar SMTP y MAIL_SUPPRESS=false)
-        # background_tasks.add_task(send_email, db_user.email, subject, body)
-    
+    if action == "block":
+        reason_text = (reason or "").strip() or "Incumplimiento de las normas de la comunidad de Kodda."
+        db_user.is_active = False
+        db_user.status_message = (
+            f"Tu cuenta en Kodda fue bloqueada. Motivo: {reason_text} "
+            "Si creés que es un error, contactá a soporte."
+        )
+        subject = "Tu cuenta en Kodda fue bloqueada"
+        mail_body = (
+            f"Hola {db_user.username},\n\n"
+            "Tu cuenta fue bloqueada y no podés iniciar sesión por el momento.\n\n"
+            f"Motivo: {reason_text}\n\n"
+            "Si creés que esto es un error, contactá al soporte técnico.\n"
+        )
+        background_tasks.add_task(send_email, db_user.email, subject, mail_body)
+        AuthService.revoke_all_refresh_for_user(db, db_user.id)
+
+    elif action == "unblock":
+        db_user.is_active = True
+        db_user.status_message = None
+
     else:
-        raise HTTPException(status_code=400, detail="Acción no válida (usar 'block' o 'suspend')")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Acción no válida (usar 'block' o 'unblock')",
+        )
 
     db.commit()
     db.refresh(db_user)

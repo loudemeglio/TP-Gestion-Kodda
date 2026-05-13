@@ -26,7 +26,9 @@ def api_client():
     # y los tests de registro público necesitan alta sin JWT de admin.
     os.environ["ALLOW_PUBLIC_SIGNUP"] = "true"
     os.environ.setdefault("MAIL_SUPPRESS", "true")
-    os.environ.setdefault("REQUIRE_EMAIL_VERIFICATION_FOR_LOGIN", "false")
+    # Igual que ALLOW_PUBLIC_SIGNUP: forzar false para que el .env del dev no rompa
+    # tests que esperan login sin verificar; los que necesitan true usan monkeypatch.
+    os.environ["REQUIRE_EMAIL_VERIFICATION_FOR_LOGIN"] = "false"
 
     from app.core.config import get_settings
 

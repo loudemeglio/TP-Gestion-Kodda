@@ -78,6 +78,8 @@ class UserDTO(BaseModel):
     created_at: datetime
     updated_at: Optional[datetime] = None
     email_verified_at: Optional[datetime] = None
+    is_active: bool = True
+    status_message: Optional[str] = None
 
     class Config:
         from_attributes = True

@@ -22,6 +22,12 @@ def _user_from_payload(db: Session, payload: dict) -> User:
     user = UserRepository.get_by_id(db, user_id)
     if user is None:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Usuario no encontrado")
+    if not user.is_active:
+        raise HTTPException(
+            status.HTTP_401_UNAUTHORIZED,
+            detail=user.status_message or "Tu cuenta se encuentra desactivada.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     return user
 
 

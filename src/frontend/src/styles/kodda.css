@@ -670,3 +670,45 @@ body {
   color: var(--kd-mist);
   font-size: 1rem;
 }
+
+.kodda-status-badge {
+  display: inline-block;
+  padding: 0.22rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.kodda-status-badge--active {
+  background: rgba(34, 197, 94, 0.12);
+  color: rgb(21, 128, 61);
+  border: 1px solid rgba(34, 197, 94, 0.28);
+}
+
+.kodda-status-badge--inactive {
+  background: rgba(220, 38, 38, 0.08);
+  color: rgb(185, 28, 28);
+  border: 1px solid rgba(220, 38, 38, 0.22);
+}
+
+.kodda-userlist-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.kodda-userlist-actions .kodda-btn-ghost,
+.kodda-userlist-actions .kodda-btn-accent-outline {
+  padding: 0.28rem 0.55rem;
+  font-size: 0.78rem;
+  line-height: 1.2;
+}
+
+.kodda-userlist-actions .kodda-btn-ghost:disabled,
+.kodda-userlist-actions .kodda-btn-accent-outline:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

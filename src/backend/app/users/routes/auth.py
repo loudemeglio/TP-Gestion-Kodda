@@ -17,7 +17,7 @@ from app.users.schemas import (
     UserDTO,
     VerifyEmailRequest,
 )
-from app.users.services.auth_service import AuthService
+from app.users.services.auth_service import AuthService, InactiveAccountRefreshError
 from app.users.services.email_verification_service import EmailVerificationService
 from app.users.services.password_reset_service import PasswordResetService
 
@@ -61,6 +61,11 @@ def refresh_tokens(body: RefreshTokenRequest, db: Session = Depends(get_db)):
     try:
         access_token, refresh_token = AuthService.rotate_refresh(db, body.refresh_token)
         return TokenPairResponse(access_token=access_token, refresh_token=refresh_token)
+    except InactiveAccountRefreshError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(e),
+        )
     except ValueError as e:
         detail = str(e)
         if "verificar" in detail.lower():
