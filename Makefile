@@ -7,7 +7,7 @@ COMPOSE    := $(SRC)/docker-compose.yml
 UVICORN    := $(BACKEND)/.venv/bin/uvicorn
 PIP        := $(BACKEND)/.venv/bin/pip
 
-.PHONY: help install setup-env db-up db-down wait-db backend frontend test pytest stop
+.PHONY: help install setup-env db-up db-down db-purge db-test-create wait-db backend frontend test pytest stop
 
 help:
 	@echo "Estructura: $(ROOT) -> src/ -> backend/ | frontend/"
@@ -16,9 +16,12 @@ help:
 	@echo "  make install    - Crea venv en $(BACKEND), pip install y npm install en $(FRONTEND)"
 	@echo "  make setup-env  - Copia .env.example -> .env si no existen"
 	@echo "  make test       - Entorno local: Postgres + API (:8000) + React (:3000). No ejecuta pytest."
-	@echo "  make pytest     - Tests automáticos del backend (pytest); levanta Postgres si hace falta."
+	@echo "  make pytest     - Pytest en BD kodda_test (no vacía mydatabase). make db-purge solo si querés borrar todo."
 	@echo "  make db-up      - Solo Postgres (docker compose, puerto 5432)"
-	@echo "  make db-down    - Detiene contenedores del compose"
+	@echo "  make db-down    - Detiene contenedores (los datos en volumen persisten)"
+	@echo "  make db-purge   - Para Postgres y ELIMINA el volumen (BD vacía la próxima vez; usalo solo a propósito)"
+	@echo "  make db-test-create - Crea la base kodda_test si no existe (para pytest)"
+	@echo "  Tip: export COMPOSE_PROJECT_NAME=kodda antes de docker compose si movés el repo y querés el mismo volumen."
 	@echo "  make backend    - Solo API (http://localhost:8000) — requiere BD y .env"
 	@echo "  make frontend   - Solo React (http://localhost:3000); la API debe estar en :8000 para login"
 	@echo ""
@@ -42,6 +45,20 @@ db-up:
 db-down:
 	docker compose -f $(COMPOSE) down
 
+# Borra el volumen nombrado de Postgres (pérdida total de datos). Usalo solo cuando quieras empezar de cero.
+db-purge:
+	docker compose -f $(COMPOSE) down -v
+	@echo "Volumen de Postgres eliminado. La próxima vez que corras make db-up la base arrancará vacía."
+
+# Base separada para pytest (TRUNCATE en tests no afecta mydatabase de desarrollo).
+db-test-create: db-up wait-db
+	@if docker compose -f $(COMPOSE) exec -T db psql -U user -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='kodda_test'" | grep -q 1; then \
+		echo "Base kodda_test ya existe."; \
+	else \
+		docker compose -f $(COMPOSE) exec -T db psql -U user -d postgres -c "CREATE DATABASE kodda_test;"; \
+		echo "Creada base kodda_test (pytest). Opcional en .env: PYTEST_DATABASE_URL=postgresql://user:password@localhost:5432/kodda_test"; \
+	fi
+
 wait-db:
 	@echo "Esperando a Postgres (user@localhost:5432/mydatabase)..."
 	@until docker compose -f $(COMPOSE) exec -T db pg_isready -U user -d mydatabase >/dev/null 2>&1; do sleep 1; done
@@ -63,9 +80,11 @@ test: setup-env db-up wait-db
 	@$(MAKE) -j2 backend frontend
 
 # Tests de integración del backend (requieren PostgreSQL; usa DATABASE_URL del .env del backend).
-pytest: $(UVICORN) setup-env db-up wait-db
+pytest: $(UVICORN) setup-env db-up wait-db db-test-create
 	@cd $(BACKEND) && \
 	if [ -f .env ]; then set -a && . ./.env && set +a; fi && \
+	DEFAULT_PYTEST_DB_URL="postgresql://user:password@localhost:5432/kodda_test" && \
+	export DATABASE_URL="$${PYTEST_DATABASE_URL:-$$DEFAULT_PYTEST_DB_URL}" && \
 	.venv/bin/pytest -v
 
 stop: db-down

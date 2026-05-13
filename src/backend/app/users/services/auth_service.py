@@ -16,6 +16,10 @@ def hash_refresh_token(plain: str) -> str:
     return hashlib.sha256(plain.encode("utf-8")).hexdigest()
 
 
+class InactiveAccountRefreshError(ValueError):
+    """Usuario inactivo: no se renueva la sesión por refresh token."""
+
+
 class AuthService:
     @staticmethod
     def authenticate(db: Session, username: str, password: str) -> User | None:
@@ -50,6 +54,10 @@ class AuthService:
             user = UserRepository.get_by_id(db, active.user_id)
             if not user:
                 raise ValueError("Usuario no encontrado")
+            if not user.is_active:
+                raise InactiveAccountRefreshError(
+                    user.status_message or "Tu cuenta se encuentra desactivada."
+                )
             if settings.require_email_verification_for_login and user.email_verified_at is None:
                 raise ValueError("Debés verificar tu correo antes de renovar la sesión.")
             access = create_access_token(str(user.id), user.role.value)
