@@ -12,6 +12,9 @@ export default function UserList() {
   const [error, setError] = useState(null);
   const [actionError, setActionError] = useState(null);
   const [busyId, setBusyId] = useState(null);
+  const [blockModalUser, setBlockModalUser] = useState(null);
+  const [blockReasonDraft, setBlockReasonDraft] = useState('');
+  const [unblockModalUser, setUnblockModalUser] = useState(null);
 
   const fetchUsers = useCallback(async () => {
     const { data } = await api.get('/api/users/');
@@ -59,17 +62,31 @@ export default function UserList() {
     }
   };
 
-  const onBlock = (u) => {
-    const reason = window.prompt(
-      'Motivo del bloqueo (opcional). Se enviará por correo y se mostrará al intentar iniciar sesión:'
-    );
-    if (reason === null) return;
-    void patchStatus(u.id, 'block', reason);
+  const openBlockModal = (u) => {
+    setBlockReasonDraft('');
+    setBlockModalUser(u);
   };
 
-  const onUnblock = (u) => {
-    if (!window.confirm(`¿Desbloquear la cuenta de ${u.username}?`)) return;
-    void patchStatus(u.id, 'unblock', null);
+  const closeBlockModal = () => {
+    setBlockModalUser(null);
+    setBlockReasonDraft('');
+  };
+
+  const confirmBlock = () => {
+    if (!blockModalUser) return;
+    const uid = blockModalUser.id;
+    const reason = blockReasonDraft;
+    closeBlockModal();
+    void patchStatus(uid, 'block', reason);
+  };
+
+  const openUnblockModal = (u) => setUnblockModalUser(u);
+
+  const confirmUnblock = () => {
+    if (!unblockModalUser) return;
+    const uid = unblockModalUser.id;
+    setUnblockModalUser(null);
+    void patchStatus(uid, 'unblock', null);
   };
 
   // Admin guard — redirect non-admin users to home
@@ -91,6 +108,13 @@ export default function UserList() {
             </span>
             <span>{user?.username || 'Usuario'}</span>
           </div>
+          <Link
+            to="/login?cambiar=1"
+            className="kodda-link-cuenta"
+            title="Para ver dos cuentas a la vez: ventana normal + ventana privada"
+          >
+            Cambiar de cuenta
+          </Link>
           <button type="button" className="kodda-btn-ghost" onClick={() => logout()}>
             Salir
           </button>
@@ -164,7 +188,7 @@ export default function UserList() {
                                 type="button"
                                 className="kodda-btn-accent-outline"
                                 disabled={rowBusy}
-                                onClick={() => onBlock(u)}
+                                onClick={() => openBlockModal(u)}
                               >
                                 {rowBusy ? '…' : 'Bloquear'}
                               </button>
@@ -173,7 +197,7 @@ export default function UserList() {
                                 type="button"
                                 className="kodda-btn-accent-outline"
                                 disabled={rowBusy}
-                                onClick={() => onUnblock(u)}
+                                onClick={() => openUnblockModal(u)}
                               >
                                 {rowBusy ? '…' : 'Desbloquear'}
                               </button>
@@ -198,6 +222,99 @@ export default function UserList() {
       </main>
 
       <footer className="kodda-home-footer">Kodda — moda circular inteligente · Prototipo de producto</footer>
+
+      {blockModalUser ? (
+        <div
+          className="kodda-modal-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="kodda-block-title"
+          onClick={(e) => e.target === e.currentTarget && closeBlockModal()}
+        >
+          <div className="kodda-modal">
+            <div className="kodda-modal-head">
+              <div className="kodda-modal-icon" aria-hidden="true">
+                ⛔
+              </div>
+              <h2 id="kodda-block-title" className="kodda-modal-title">
+                Bloquear cuenta
+              </h2>
+              <p className="kodda-modal-sub">
+                <strong>{blockModalUser.username}</strong>
+                <span style={{ color: 'var(--kd-mist)' }}> · {blockModalUser.email}</span>
+              </p>
+            </div>
+            <div className="kodda-modal-body">
+              <label className="kodda-modal-label" htmlFor="kodda-block-reason">
+                Motivo (opcional)
+              </label>
+              <textarea
+                id="kodda-block-reason"
+                className="kodda-modal-textarea"
+                value={blockReasonDraft}
+                onChange={(e) => setBlockReasonDraft(e.target.value)}
+                placeholder="Ej.: incumplimiento de normas de la comunidad…"
+                maxLength={2000}
+              />
+              <p className="kodda-modal-hint">
+                El texto se envía por correo al usuario y se muestra si intenta iniciar sesión.
+              </p>
+              <div className="kodda-modal-actions">
+                <button type="button" className="kodda-btn-ghost" onClick={closeBlockModal}>
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  className="kodda-btn-danger-outline"
+                  disabled={busyId === blockModalUser.id}
+                  onClick={confirmBlock}
+                >
+                  {busyId === blockModalUser.id ? 'Bloqueando…' : 'Bloquear cuenta'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {unblockModalUser ? (
+        <div
+          className="kodda-modal-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="kodda-unblock-title"
+          onClick={(e) => e.target === e.currentTarget && setUnblockModalUser(null)}
+        >
+          <div className="kodda-modal">
+            <div className="kodda-modal-head">
+              <div className="kodda-modal-icon" aria-hidden="true">
+                ✓
+              </div>
+              <h2 id="kodda-unblock-title" className="kodda-modal-title">
+                Desbloquear cuenta
+              </h2>
+              <p className="kodda-modal-sub">
+                ¿Restaurar el acceso de <strong>{unblockModalUser.username}</strong>?
+              </p>
+            </div>
+            <div className="kodda-modal-body">
+              <div className="kodda-modal-actions">
+                <button type="button" className="kodda-btn-ghost" onClick={() => setUnblockModalUser(null)}>
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  className="kodda-btn-accent-outline"
+                  disabled={busyId === unblockModalUser.id}
+                  onClick={confirmUnblock}
+                >
+                  {busyId === unblockModalUser.id ? '…' : 'Desbloquear'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

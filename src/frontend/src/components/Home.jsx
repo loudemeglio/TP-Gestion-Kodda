@@ -35,6 +35,13 @@ export default function Home() {
             </span>
             <span>{user?.username || 'Usuario'}</span>
           </div>
+          <Link
+            to="/login?cambiar=1"
+            className="kodda-link-cuenta"
+            title="Para demo con dos cuentas: esta ventana + otra en modo privado (misma URL)"
+          >
+            Cambiar de cuenta
+          </Link>
           <button type="button" className="kodda-btn-ghost" onClick={() => logout()}>
             Salir
           </button>
