@@ -33,7 +33,29 @@ export default function Login() {
   }
 
   if (user && !cambiarCuenta) {
-    const to = location.state?.from?.pathname || '/';
+    const from = location.state?.from?.pathname;
+    const isAdmin = user.role === 'admin';
+    let to;
+
+    if (from && from !== '/login') {
+      const fromAdminZone = from === '/admin' || from.startsWith('/admin/');
+      if (!isAdmin && (fromAdminZone || from === '/users')) {
+        to = '/';
+      } else if (isAdmin) {
+        if (from === '/users' || from === '/admin/users') {
+          to = '/admin/users';
+        } else if (from === '/' || from === '/admin') {
+          to = '/admin';
+        } else {
+          to = from;
+        }
+      } else {
+        to = from;
+      }
+    } else {
+      to = isAdmin ? '/admin' : '/';
+    }
+
     return <Navigate to={to} replace />;
   }
 

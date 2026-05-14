@@ -1,12 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
-import { KoddaLogo } from './KoddaLogo';
-import '../styles/kodda.css';
 
 export default function UserList() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -94,51 +92,24 @@ export default function UserList() {
     return <Navigate to="/" replace />;
   }
 
-  const initial = (user?.username || user?.email || '?').charAt(0).toUpperCase();
-
   return (
-    <div className="kodda-home">
-      <header className="kodda-topbar">
-        <KoddaLogo compact />
-        <div className="kodda-topbar-spacer" />
-        <nav className="kodda-nav-actions" aria-label="Acciones principales">
-          <div className="kodda-user-chip">
-            <span className="kodda-avatar" aria-hidden="true">
-              {initial}
-            </span>
-            <span>{user?.username || 'Usuario'}</span>
-          </div>
-          <Link
-            to="/login?cambiar=1"
-            className="kodda-link-cuenta"
-            title="Para ver dos cuentas a la vez: ventana normal + ventana privada"
-          >
-            Cambiar de cuenta
-          </Link>
-          <button type="button" className="kodda-btn-ghost" onClick={() => logout()}>
-            Salir
-          </button>
-        </nav>
-      </header>
-
-      <main className="kodda-home-main">
-        <div className="kodda-section-title">
+    <>
+      <div className="kodda-admin-page">
+        <div className="kodda-section-title kodda-admin-userlist-head">
           <h2>Listado de usuarios</h2>
-          <Link to="/" className="kodda-btn-accent-outline">
-            ← Volver al inicio
-          </Link>
+          <p className="kodda-admin-userlist-sub">
+            Gestioná el acceso a la plataforma; los cambios aplican al iniciar sesión.
+          </p>
         </div>
 
-        {loading && (
-          <div className="kodda-userlist-status">Cargando usuarios…</div>
-        )}
+        {loading && <div className="kodda-userlist-status">Cargando usuarios…</div>}
 
-        {error && (
-          <div className="kodda-auth-error">{error}</div>
-        )}
+        {error && <div className="kodda-auth-error">{error}</div>}
 
         {!loading && !error && actionError && (
-          <div className="kodda-auth-error" style={{ marginBottom: '1rem' }}>{actionError}</div>
+          <div className="kodda-auth-error" style={{ marginBottom: '1rem' }}>
+            {actionError}
+          </div>
         )}
 
         {!loading && !error && (
@@ -165,14 +136,14 @@ export default function UserList() {
                       <td>{u.username}</td>
                       <td>{u.email}</td>
                       <td>
-                        <span className={`kodda-role-badge kodda-role-badge--${u.role}`}>
-                          {u.role}
-                        </span>
+                        <span className={`kodda-role-badge kodda-role-badge--${u.role}`}>{u.role}</span>
                       </td>
                       <td>
                         <span
                           className={
-                            active ? 'kodda-status-badge kodda-status-badge--active' : 'kodda-status-badge kodda-status-badge--inactive'
+                            active
+                              ? 'kodda-status-badge kodda-status-badge--active'
+                              : 'kodda-status-badge kodda-status-badge--inactive'
                           }
                         >
                           {active ? 'Activo' : 'Inactivo'}
@@ -180,7 +151,9 @@ export default function UserList() {
                       </td>
                       <td>
                         {isSelf ? (
-                          <span className="kodda-auth-muted" style={{ fontSize: '0.85rem' }}>Tu cuenta</span>
+                          <span className="kodda-auth-muted" style={{ fontSize: '0.85rem' }}>
+                            Tu cuenta
+                          </span>
                         ) : (
                           <div className="kodda-userlist-actions">
                             {active ? (
@@ -219,9 +192,7 @@ export default function UserList() {
             </table>
           </div>
         )}
-      </main>
-
-      <footer className="kodda-home-footer">Kodda — moda circular inteligente · Prototipo de producto</footer>
+      </div>
 
       {blockModalUser ? (
         <div
@@ -315,6 +286,6 @@ export default function UserList() {
           </div>
         </div>
       ) : null}
-    </div>
+    </>
   );
 }

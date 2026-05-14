@@ -1,7 +1,10 @@
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import './App.css';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import AdminHome from './components/admin/AdminHome';
+import AdminLayout from './components/admin/AdminLayout';
 import ForgotPassword from './components/ForgotPassword';
+import ConsumerHome from './components/ConsumerHome';
 import Home from './components/Home';
 import Login from './components/Login';
 import ResetPassword from './components/ResetPassword';
@@ -18,6 +21,14 @@ function PrivateRoute({ children }) {
   }
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+  return children;
+}
+
+function AdminRoute({ children }) {
+  const { user } = useAuth();
+  if (user?.role !== 'admin') {
+    return <Navigate to="/" replace />;
   }
   return children;
 }
@@ -39,10 +50,31 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/explorador"
+        element={
+          <PrivateRoute>
+            <ConsumerHome allowAdminPreview />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          <PrivateRoute>
+            <AdminRoute>
+              <AdminLayout />
+            </AdminRoute>
+          </PrivateRoute>
+        }
+      >
+        <Route index element={<AdminHome />} />
+        <Route path="users" element={<UserList />} />
+      </Route>
+      <Route
         path="/users"
         element={
           <PrivateRoute>
-            <UserList />
+            <Navigate to="/admin/users" replace />
           </PrivateRoute>
         }
       />
