@@ -42,9 +42,9 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
               Panel admin
             </Link>
           ) : null}
-          <button type="button" className="kodda-btn-accent-outline" disabled title="Próximamente">
+          <Link to="/publicar" className="kodda-btn-accent-outline">
             Vender prenda
-          </button>
+          </Link>
           <button type="button" className="kodda-btn-ghost" disabled title="Próximamente">
             Chat Kodda
           </button>
