@@ -6,6 +6,8 @@ from app.core.database import Base, engine
 from app.core.schema_bootstrap import apply_schema_patches
 from app.users.routes.auth import router as auth_router
 from app.users.routes.users import router as users_router
+from app.products.routes.products import router as catalog_router
+import app.products.models  # noqa: F401 — registra metadata antes de create_all
 
 # Los routers importan modelos SQLAlchemy → metadata registrada antes de create_all
 Base.metadata.create_all(bind=engine)
@@ -35,6 +37,7 @@ app.add_middleware(
 
 app.include_router(auth_router)
 app.include_router(users_router)
+app.include_router(catalog_router)
 
 
 @app.get("/")

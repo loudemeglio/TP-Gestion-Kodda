@@ -10,6 +10,7 @@ import Login from './components/Login';
 import ResetPassword from './components/ResetPassword';
 import UserList from './components/UserList';
 import VerifyEmail from './components/VerifyEmail';
+import PublishProduct from './components/PublishProduct';
 import RegisterForm from './components/RegisterForm';
 
 function PrivateRoute({ children }) {
@@ -46,6 +47,14 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <Home />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/publicar"
+        element={
+          <PrivateRoute>
+            <PublishProduct />
           </PrivateRoute>
         }
       />
