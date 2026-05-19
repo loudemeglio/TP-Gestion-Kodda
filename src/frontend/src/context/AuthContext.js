@@ -7,6 +7,11 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [avatarVersion, setAvatarVersion] = useState(0);
+
+  const bumpAvatarVersion = useCallback(() => {
+    setAvatarVersion((v) => v + 1);
+  }, []);
 
   const loadMe = useCallback(async () => {
     const access = localStorage.getItem('access_token');
@@ -66,8 +71,10 @@ export function AuthProvider({ children }) {
       logout,
       setUser,
       reloadUser: loadMe,
+      avatarVersion,
+      bumpAvatarVersion,
     }),
-    [user, loading, login, logout, loadMe]
+    [user, loading, login, logout, loadMe, avatarVersion, bumpAvatarVersion]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

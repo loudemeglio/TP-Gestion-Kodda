@@ -15,4 +15,11 @@ module.exports = function setupProxy(app) {
       changeOrigin: true,
     })
   );
+  app.use(
+    '/uploads',
+    createProxyMiddleware({
+      target,
+      changeOrigin: true,
+    })
+  );
 };

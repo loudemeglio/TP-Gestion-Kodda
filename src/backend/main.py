@@ -1,5 +1,8 @@
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.core.config import get_settings
 from app.core.database import Base, engine
@@ -14,6 +17,10 @@ Base.metadata.create_all(bind=engine)
 apply_schema_patches(engine)
 
 settings = get_settings()
+
+upload_path = Path(settings.upload_dir)
+upload_path.mkdir(parents=True, exist_ok=True)
+(upload_path / "avatars").mkdir(parents=True, exist_ok=True)
 
 app = FastAPI(
     title="Kodda API",
@@ -34,6 +41,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.mount("/uploads", StaticFiles(directory=str(upload_path)), name="uploads")
 
 app.include_router(auth_router)
 app.include_router(users_router)
@@ -60,6 +69,9 @@ def home():
             "obtener_usuario_por_username": "GET /api/users/username/{username}",
             "listar_usuarios": "GET /api/users/",
             "actualizar_usuario": "PUT /api/users/{user_id}",
+            "mi_perfil": "GET /api/users/me/profile",
+            "editar_mi_perfil": "PATCH /api/users/me/profile",
+            "subir_avatar": "POST /api/users/me/avatar",
             "eliminar_usuario": "DELETE /api/users/{user_id}",
             "documentacion": "/docs",
         },

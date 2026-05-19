@@ -22,6 +22,9 @@ services:
     environment:
       # Sobrescribe el host de la DB del .env local (suele ser localhost) por el servicio en la red de Compose.
       DATABASE_URL: postgresql://user:password@db:5432/mydatabase
+      UPLOAD_DIR: /app/uploads
+    volumes:
+      - upload_data:/app/uploads
     depends_on:
       - db
 
@@ -39,3 +42,4 @@ services:
 
 volumes:
   postgres_data:
+  upload_data:
