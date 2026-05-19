@@ -11,6 +11,8 @@ import ResetPassword from './components/ResetPassword';
 import UserList from './components/UserList';
 import VerifyEmail from './components/VerifyEmail';
 import PublishProduct from './components/PublishProduct';
+import ProfileEdit from './components/ProfileEdit';
+import ProfileView from './components/ProfileView';
 import RegisterForm from './components/RegisterForm';
 
 function PrivateRoute({ children }) {
@@ -63,6 +65,22 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <ConsumerHome allowAdminPreview />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/perfil"
+        element={
+          <PrivateRoute>
+            <ProfileView />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/perfil/editar"
+        element={
+          <PrivateRoute>
+            <ProfileEdit />
           </PrivateRoute>
         }
       />

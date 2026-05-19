@@ -1,4 +1,4 @@
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status, Body
+from fastapi import APIRouter, BackgroundTasks, Body, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
@@ -7,9 +7,10 @@ from app.core.mail_service import send_email
 from app.users.deps.auth import get_current_user, get_current_user_optional, require_admin
 from app.users.models import User, UserRole as UserRoleModel
 from app.users.repositories.user_repository import UserRepository
-from app.users.schemas import UserCreateDTO, UserDTO, UserUpdateDTO
+from app.users.schemas import UserCreateDTO, UserDTO, UserProfileDTO, UserProfileUpdateDTO, UserUpdateDTO
 from app.users.services.auth_service import AuthService
 from app.users.services.email_verification_service import EmailVerificationService
+from app.users.services.profile_service import ProfileService
 from app.users.services.user_service import UserService
 
 router = APIRouter(prefix="/api/users", tags=["users"])
@@ -81,6 +82,41 @@ def get_all_users(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error al obtener los usuarios",
         )
+
+
+@router.get("/me/profile", response_model=UserProfileDTO)
+def get_my_profile(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    try:
+        return ProfileService.get_own_profile(db, current_user.id)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
+@router.patch("/me/profile", response_model=UserProfileDTO)
+def update_my_profile(
+    data: UserProfileUpdateDTO,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    try:
+        return ProfileService.update_own_profile(db, current_user.id, data)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@router.post("/me/avatar", response_model=UserProfileDTO)
+async def upload_my_avatar(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    try:
+        return await ProfileService.save_avatar(db, current_user.id, file)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 @router.get("/username/{username}", response_model=UserDTO)

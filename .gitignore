@@ -2,6 +2,9 @@
 src/backend/.venv/
 node_modules/
 
+# Uploads locales (avatares, etc.)
+src/backend/uploads/
+
 # Python
 __pycache__/
 .pytest_cache/

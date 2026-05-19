@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 
 from app.users.models import User, UserRole
-from app.users.schemas import UserCreateDTO, UserUpdateDTO
+from app.users.schemas import UserCreateDTO, UserProfileUpdateDTO, UserUpdateDTO
 
 
 class UserRepository:
@@ -86,6 +86,44 @@ class UserRepository:
         if user_data.address is not None:
             db_user.address = user_data.address
 
+        db.commit()
+        db.refresh(db_user)
+        return db_user
+
+    @staticmethod
+    def update_profile(db: Session, user_id: int, data: UserProfileUpdateDTO) -> User | None:
+        """Actualizar campos de perfil del usuario."""
+        db_user = UserRepository.get_by_id(db, user_id)
+        if not db_user:
+            return None
+
+        if data.username is not None:
+            db_user.username = data.username
+        if data.bio is not None:
+            db_user.bio = data.bio
+        if data.weight is not None:
+            db_user.weight = data.weight
+        if data.height is not None:
+            db_user.height = data.height
+        if data.address is not None:
+            db_user.address = data.address
+        if data.shoe_size is not None:
+            db_user.shoe_size = data.shoe_size
+        if data.top_size is not None:
+            db_user.top_size = data.top_size
+        if data.bottom_size is not None:
+            db_user.bottom_size = data.bottom_size
+
+        db.commit()
+        db.refresh(db_user)
+        return db_user
+
+    @staticmethod
+    def set_profile_image_url(db: Session, user_id: int, url: str) -> User | None:
+        db_user = UserRepository.get_by_id(db, user_id)
+        if not db_user:
+            return None
+        db_user.profile_image_url = url
         db.commit()
         db.refresh(db_user)
         return db_user

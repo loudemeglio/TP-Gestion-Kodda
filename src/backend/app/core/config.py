@@ -40,3 +40,6 @@ class _Settings:
         self.email_verification_expire_hours = int(os.getenv("EMAIL_VERIFICATION_EXPIRE_HOURS", "48"))
         self.password_reset_expire_minutes = int(os.getenv("PASSWORD_RESET_EXPIRE_MINUTES", "60"))
         self.require_email_verification_for_login = _bool_env("REQUIRE_EMAIL_VERIFICATION_FOR_LOGIN", "false")
+
+        self.upload_dir = os.getenv("UPLOAD_DIR", "uploads")
+        self.avatar_max_bytes = int(os.getenv("AVATAR_MAX_BYTES", str(2 * 1024 * 1024)))

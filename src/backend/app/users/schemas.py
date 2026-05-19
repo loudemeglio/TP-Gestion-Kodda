@@ -75,6 +75,11 @@ class UserDTO(BaseModel):
     weight: Optional[float]
     height: Optional[float]
     address: Optional[str]
+    profile_image_url: Optional[str] = None
+    bio: Optional[str] = None
+    shoe_size: Optional[str] = None
+    top_size: Optional[str] = None
+    bottom_size: Optional[str] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
     email_verified_at: Optional[datetime] = None
@@ -83,3 +88,37 @@ class UserDTO(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class UserProfileDTO(BaseModel):
+    """Perfil propio del usuario (lectura)."""
+
+    id: int
+    username: str
+    email: str
+    profile_image_url: Optional[str] = None
+    bio: Optional[str] = None
+    weight: Optional[float] = None
+    height: Optional[float] = None
+    address: Optional[str] = None
+    shoe_size: Optional[str] = None
+    top_size: Optional[str] = None
+    bottom_size: Optional[str] = None
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+class UserProfileUpdateDTO(BaseModel):
+    """Actualización parcial del perfil propio."""
+
+    username: Optional[str] = Field(None, min_length=3, max_length=50)
+    bio: Optional[str] = Field(None, max_length=2000)
+    weight: Optional[float] = Field(None, ge=0)
+    height: Optional[float] = Field(None, ge=0)
+    address: Optional[str] = Field(None, max_length=200)
+    shoe_size: Optional[str] = Field(None, max_length=20)
+    top_size: Optional[str] = Field(None, max_length=20)
+    bottom_size: Optional[str] = Field(None, max_length=20)
