@@ -1,0 +1,484 @@
+/* My Products Page Styles */
+
+.kodda-my-products-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.kodda-my-products-main {
+  flex: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 3rem 2rem;
+}
+
+.kodda-my-products-header {
+  margin-bottom: 3rem;
+}
+
+.kodda-my-products-header h1 {
+  font-family: var(--kd-display);
+  font-weight: var(--kd-display-weight-strong);
+  font-size: clamp(2rem, 5vw, 3rem);
+  color: var(--kd-ink);
+  margin: 0 0 0.5rem 0;
+  line-height: 1.1;
+}
+
+.kodda-my-products-header p {
+  font-size: 1.1rem;
+  color: var(--kd-mist);
+  margin: 0;
+}
+
+/* Products Grid */
+.kodda-products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+/* Product Card */
+.kodda-product-card {
+  background: var(--kd-card);
+  border-radius: var(--kd-radius);
+  overflow: hidden;
+  box-shadow: var(--kd-shadow-sm);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.kodda-product-card:hover:not(.kodda-product-card--editing) {
+  box-shadow: var(--kd-shadow);
+  transform: translateY(-2px);
+}
+
+/* Product Image */
+.kodda-product-card-image {
+  width: 100%;
+  height: 200px;
+  background: var(--kd-paper-deep);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.kodda-product-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.kodda-product-card-image-placeholder {
+  color: var(--kd-mist);
+  font-size: 2.5rem;
+  text-align: center;
+}
+
+/* Paused Overlay */
+.kodda-product-paused-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 20, 18, 0.5);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kodda-product-paused-badge {
+  background: rgba(220, 38, 38, 0.9);
+  color: #fff;
+  padding: 0.65rem 1rem;
+  border-radius: var(--kd-radius-sm);
+  font-weight: 700;
+  font-size: 0.95rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* Product Content */
+.kodda-product-card-content {
+  padding: 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.kodda-product-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.kodda-product-card-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--kd-ink);
+  flex: 1;
+  word-break: break-word;
+}
+
+.kodda-product-badge {
+  background: var(--kd-accent-glow);
+  color: var(--kd-accent);
+  padding: 0.35rem 0.85rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.kodda-product-description {
+  color: var(--kd-mist);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0 0 1.5rem 0;
+  flex: 1;
+}
+
+/* Product Info Grid */
+.kodda-product-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  padding: 1rem 0;
+  border-top: 1px solid var(--kd-line);
+  border-bottom: 1px solid var(--kd-line);
+  margin-bottom: 1rem;
+}
+
+.kodda-product-info-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.kodda-product-label {
+  font-size: 0.75rem;
+  color: var(--kd-mist);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.3rem;
+  font-weight: 600;
+}
+
+.kodda-product-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--kd-ink);
+}
+
+.kodda-product-value--zero {
+  color: var(--kd-danger);
+}
+
+/* Product Actions */
+.kodda-product-actions {
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.kodda-product-actions button {
+  flex: 1;
+  min-width: 100px;
+  font-size: 0.85rem;
+}
+
+.kodda-btn-secondary {
+  padding: 0.65rem 0.85rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--kd-ink-soft);
+  background: rgba(15, 20, 18, 0.06);
+  border: 1px solid var(--kd-line);
+  border-radius: var(--kd-radius-sm);
+  cursor: pointer;
+  transition: background 0.15s, transform 0.12s;
+}
+
+.kodda-btn-secondary:hover:not(:disabled) {
+  background: rgba(15, 20, 18, 0.12);
+  transform: translateY(-1px);
+}
+
+.kodda-btn-secondary:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.kodda-btn-danger {
+  padding: 0.65rem 0.85rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--kd-danger);
+  background: rgba(185, 28, 28, 0.08);
+  border: 1px solid rgba(185, 28, 28, 0.25);
+  border-radius: var(--kd-radius-sm);
+  cursor: pointer;
+  transition: background 0.15s, transform 0.12s;
+}
+
+.kodda-btn-danger:hover:not(:disabled) {
+  background: rgba(185, 28, 28, 0.16);
+  transform: translateY(-1px);
+}
+
+.kodda-btn-danger:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.kodda-btn-ghost-small {
+  padding: 0.35rem 0.5rem;
+  font-size: 1.2rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--kd-mist);
+  transition: color 0.15s;
+}
+
+.kodda-btn-ghost-small:hover {
+  color: var(--kd-ink);
+}
+
+.kodda-btn-ghost-small:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Editing State */
+.kodda-product-card--editing {
+  grid-column: 1 / -1;
+  box-shadow: var(--kd-shadow);
+}
+
+.kodda-product-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.kodda-product-edit-actions {
+  display: flex;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--kd-line);
+}
+
+.kodda-product-edit-actions button {
+  flex: 1;
+}
+
+/* Empty State */
+.kodda-my-products-empty {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.kodda-my-products-empty p {
+  font-size: 1.2rem;
+  color: var(--kd-mist);
+  margin-bottom: 2rem;
+}
+
+/* Modal Styles */
+.kodda-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: rgba(15, 20, 18, 0.45);
+  backdrop-filter: blur(8px);
+  animation: kodda-modal-fade 0.2s ease;
+}
+
+@keyframes kodda-modal-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.kodda-modal {
+  width: 100%;
+  max-width: 420px;
+  border-radius: var(--kd-radius);
+  background: var(--kd-card);
+  border: 1px solid var(--kd-line);
+  box-shadow: var(--kd-shadow), 0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+  overflow: hidden;
+  animation: kodda-modal-pop 0.22s cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+
+@keyframes kodda-modal-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.kodda-modal-head {
+  padding: 1.15rem 1.25rem 0.85rem;
+  background: linear-gradient(145deg, rgba(15, 118, 110, 0.08), rgba(194, 65, 12, 0.05));
+  border-bottom: 1px solid var(--kd-line);
+}
+
+.kodda-modal-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 1.35rem;
+  background: linear-gradient(135deg, rgba(15, 118, 110, 0.15), rgba(20, 184, 166, 0.12));
+  border: 1px solid rgba(15, 118, 110, 0.2);
+  margin-bottom: 0.65rem;
+}
+
+.kodda-modal-title {
+  font-family: var(--kd-display);
+  font-size: 1.25rem;
+  font-weight: var(--kd-display-weight);
+  margin: 0;
+  color: var(--kd-ink);
+  letter-spacing: 0.02em;
+}
+
+.kodda-modal-body {
+  padding: 1.15rem 1.25rem 1.25rem;
+}
+
+.kodda-modal-body p {
+  margin: 0 0 1.25rem;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--kd-ink-soft);
+}
+
+.kodda-modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  justify-content: flex-end;
+}
+
+.kodda-btn-ghost {
+  padding: 0.65rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--kd-ink-soft);
+  background: transparent;
+  border: 1px solid var(--kd-line);
+  border-radius: var(--kd-radius-sm);
+  cursor: pointer;
+  transition: background 0.15s, transform 0.12s;
+}
+
+.kodda-btn-ghost:hover:not(:disabled) {
+  background: rgba(15, 20, 18, 0.04);
+  transform: translateY(-1px);
+}
+
+.kodda-btn-ghost:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.kodda-btn-primary {
+  padding: 0.65rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: #fff;
+  background: linear-gradient(135deg, var(--kd-accent) 0%, #0d9488 100%);
+  border: none;
+  border-radius: var(--kd-radius-sm);
+  cursor: pointer;
+  transition: transform 0.12s, filter 0.12s;
+}
+
+.kodda-btn-primary:hover:not(:disabled) {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+
+.kodda-btn-primary:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.kodda-btn-danger-outline {
+  padding: 0.65rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--kd-danger);
+  background: rgba(185, 28, 28, 0.06);
+  border: 1px solid rgba(185, 28, 28, 0.35);
+  border-radius: var(--kd-radius-sm);
+  cursor: pointer;
+  transition: background 0.15s, transform 0.12s;
+}
+
+.kodda-btn-danger-outline:hover:not(:disabled) {
+  background: rgba(185, 28, 28, 0.12);
+  transform: translateY(-1px);
+}
+
+.kodda-btn-danger-outline:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .kodda-my-products-main {
+    padding: 2rem 1.5rem;
+  }
+
+  .kodda-products-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .kodda-product-info-grid {
+    gap: 0.75rem;
+  }
+
+  .kodda-product-info-item {
+    min-width: 0;
+  }
+
+  .kodda-product-value {
+    font-size: 1rem;
+  }
+
+  .kodda-product-actions {
+    flex-direction: column;
+  }
+
+  .kodda-product-actions button {
+    width: 100%;
+  }
+}
