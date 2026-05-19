@@ -35,6 +35,19 @@ class ProductRepository:
         return db.query(Product).offset(skip).limit(limit).all()
 
     @staticmethod
+    def get_all_active(db: Session, skip: int = 0, limit: int = 100):
+        """Obtener todos los productos activos (no pausados) con paginación."""
+        return db.query(Product).filter(Product.is_paused == False).offset(skip).limit(limit).all()
+
+    @staticmethod
+    def get_all_active_except_user(db: Session, user_id: int, skip: int = 0, limit: int = 100):
+        """Obtener todos los productos activos (no pausados) excepto los del usuario especificado."""
+        return db.query(Product).filter(
+            Product.is_paused == False,
+            Product.seller_id != user_id
+        ).offset(skip).limit(limit).all()
+
+    @staticmethod
     def get_by_seller(db: Session, seller_id: int, skip: int = 0, limit: int = 100):
         """Obtener productos de un vendedor específico."""
         return db.query(Product).filter(Product.seller_id == seller_id).offset(skip).limit(limit).all()
