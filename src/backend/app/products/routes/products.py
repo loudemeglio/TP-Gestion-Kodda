@@ -33,3 +33,125 @@ def create_product(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error al crear el producto",
         )
+
+
+@router.get("/products/my", response_model=list[ProductDTO])
+def get_my_products(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    skip: int = 0,
+    limit: int = 100,
+):
+    """
+    Obtener todos los productos publicados por el usuario actual.
+    
+    Requiere usuario autenticado (JWT).
+    """
+    try:
+        return ProductService.get_user_products(db, current_user.id, skip, limit)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error al obtener tus productos",
+        )
+
+
+@router.put("/products/{product_id}", response_model=ProductDTO)
+def update_product(
+    product_id: int,
+    product_data: ProductCreateDTO,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Actualizar un producto existente.
+    
+    Requiere usuario autenticado. Solo el dueño del producto puede editarlo.
+    """
+    try:
+        return ProductService.update_product(db, product_id, product_data, current_user.id)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND if "no encontrado" in str(e).lower() else status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error al actualizar el producto",
+        )
+
+
+@router.delete("/products/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_product(
+    product_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Eliminar un producto existente.
+    
+    Requiere usuario autenticado. Solo el dueño del producto puede eliminarlo.
+    """
+    try:
+        ProductService.delete_product(db, product_id, current_user.id)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e),
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error al eliminar el producto",
+        )
+
+
+@router.patch("/products/{product_id}/pause", response_model=ProductDTO)
+def pause_product(
+    product_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Pausar un producto existente.
+    
+    Requiere usuario autenticado. Solo el dueño del producto puede pausarlo.
+    """
+    try:
+        return ProductService.pause_product(db, product_id, current_user.id)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e),
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error al pausar el producto",
+        )
+
+
+@router.patch("/products/{product_id}/resume", response_model=ProductDTO)
+def resume_product(
+    product_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Reanudar un producto existente.
+    
+    Requiere usuario autenticado. Solo el dueño del producto puede reanudarlo.
+    """
+    try:
+        return ProductService.resume_product(db, product_id, current_user.id)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e),
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error al reanudar el producto",
+        )

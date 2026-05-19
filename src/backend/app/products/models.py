@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -17,6 +17,7 @@ class Product(Base):
     stock = Column(Integer, nullable=False)
     category = Column(String, nullable=False)
     main_image_url = Column(String, nullable=True)
+    is_paused = Column(Boolean, default=False, nullable=False)
     seller_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
