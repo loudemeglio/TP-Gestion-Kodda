@@ -25,6 +25,7 @@ class ProductDTO(BaseModel):
     stock: int
     category: str
     main_image_url: Optional[str]
+    is_paused: bool
     seller_id: int
     created_at: datetime
     updated_at: Optional[datetime] = None

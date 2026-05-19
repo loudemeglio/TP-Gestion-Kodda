@@ -38,3 +38,73 @@ class ProductRepository:
     def get_by_seller(db: Session, seller_id: int, skip: int = 0, limit: int = 100):
         """Obtener productos de un vendedor específico."""
         return db.query(Product).filter(Product.seller_id == seller_id).offset(skip).limit(limit).all()
+
+    @staticmethod
+    def update(db: Session, product_id: int, product_data: ProductCreateDTO, seller_id: int) -> Product:
+        """Actualizar un producto. Solo el dueño puede actualizar."""
+        product = db.query(Product).filter(
+            Product.id == product_id,
+            Product.seller_id == seller_id
+        ).first()
+        
+        if not product:
+            return None
+        
+        product.name = product_data.name
+        product.description = product_data.description
+        product.price = product_data.price
+        product.stock = product_data.stock
+        product.category = product_data.category
+        if product_data.main_image_url:
+            product.main_image_url = product_data.main_image_url
+        
+        db.commit()
+        db.refresh(product)
+        return product
+
+    @staticmethod
+    def delete(db: Session, product_id: int, seller_id: int) -> bool:
+        """Eliminar un producto. Solo el dueño puede eliminar."""
+        product = db.query(Product).filter(
+            Product.id == product_id,
+            Product.seller_id == seller_id
+        ).first()
+        
+        if not product:
+            return False
+        
+        db.delete(product)
+        db.commit()
+        return True
+
+    @staticmethod
+    def pause(db: Session, product_id: int, seller_id: int) -> Product:
+        """Pausar un producto. Solo el dueño puede pausar."""
+        product = db.query(Product).filter(
+            Product.id == product_id,
+            Product.seller_id == seller_id
+        ).first()
+        
+        if not product:
+            return None
+        
+        product.is_paused = True
+        db.commit()
+        db.refresh(product)
+        return product
+
+    @staticmethod
+    def resume(db: Session, product_id: int, seller_id: int) -> Product:
+        """Reanudar un producto. Solo el dueño puede reanudar."""
+        product = db.query(Product).filter(
+            Product.id == product_id,
+            Product.seller_id == seller_id
+        ).first()
+        
+        if not product:
+            return None
+        
+        product.is_paused = False
+        db.commit()
+        db.refresh(product)
+        return product

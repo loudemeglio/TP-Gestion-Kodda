@@ -191,12 +191,10 @@ export default function ProfileView() {
               </section>
 
               <div className="kodda-profile-view-nav">
-                <button
-                  type="button"
+                <Link
+                  to="/mis-publicaciones"
                   className="kodda-profile-view-nav-item"
-                  disabled
-                  aria-disabled="true"
-                  aria-label="Mis publicaciones activas"
+                  style={{ textDecoration: 'none', color: 'inherit' }}
                 >
                   <span className="kodda-profile-view-nav-icon" aria-hidden="true">
                     🏷️
@@ -210,7 +208,7 @@ export default function ProfileView() {
                   <span className="kodda-profile-view-nav-chevron" aria-hidden="true">
                     ›
                   </span>
-                </button>
+                </Link>
               </div>
             </div>
           </>

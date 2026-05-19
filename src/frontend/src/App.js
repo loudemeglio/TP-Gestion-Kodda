@@ -14,6 +14,7 @@ import PublishProduct from './components/PublishProduct';
 import ProfileEdit from './components/ProfileEdit';
 import ProfileView from './components/ProfileView';
 import RegisterForm from './components/RegisterForm';
+import MyProducts from './components/MyProducts';
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
@@ -81,6 +82,14 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <ProfileEdit />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/mis-publicaciones"
+        element={
+          <PrivateRoute>
+            <MyProducts />
           </PrivateRoute>
         }
       />
