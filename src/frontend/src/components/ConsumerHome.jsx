@@ -15,9 +15,9 @@ const PLACEHOLDER_FEED = [
  * @param {{ allowAdminPreview?: boolean }} props — si es true y el usuario es admin, muestra aviso y acceso al panel.
  */
 export default function ConsumerHome({ allowAdminPreview = false }) {
-  const { user, logout } = useAuth();
+  const { user, logout, avatarVersion } = useAuth();
   const initial = (user?.username || user?.email || '?').charAt(0).toUpperCase();
-  const avatarSrc = resolveMediaUrl(user?.profile_image_url);
+  const avatarSrc = resolveMediaUrl(user?.profile_image_url, avatarVersion || undefined);
   const showAdminPreviewBar = allowAdminPreview && user?.role === 'admin';
 
   return (
@@ -52,7 +52,7 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
           </button>
           <Link to="/perfil" className="kodda-user-chip" title="Mi perfil">
             {avatarSrc ? (
-              <img src={avatarSrc} alt="" className="kodda-avatar kodda-avatar-img" />
+              <img key={avatarSrc} src={avatarSrc} alt="" className="kodda-avatar kodda-avatar-img" />
             ) : (
               <span className="kodda-avatar" aria-hidden="true">
                 {initial}

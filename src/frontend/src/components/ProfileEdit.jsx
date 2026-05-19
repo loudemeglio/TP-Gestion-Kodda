@@ -43,7 +43,7 @@ function buildPatchBody(form) {
 export default function ProfileEdit() {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
-  const { reloadUser } = useAuth();
+  const { reloadUser, avatarVersion, bumpAvatarVersion } = useAuth();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -73,7 +73,7 @@ export default function ProfileEdit() {
         setShoeSize(data.shoe_size || '');
         setTopSize(data.top_size || '');
         setBottomSize(data.bottom_size || '');
-        setAvatarPreview(resolveMediaUrl(data.profile_image_url));
+        setAvatarPreview(resolveMediaUrl(data.profile_image_url, avatarVersion || undefined));
       } catch (err) {
         if (!cancelled) {
           setError(err.response?.data?.detail || 'No se pudo cargar tu perfil.');
@@ -92,22 +92,24 @@ export default function ProfileEdit() {
     if (!file) return;
     setError('');
     setUploadingAvatar(true);
-    const preview = URL.createObjectURL(file);
-    setAvatarPreview(preview);
+    const objectUrl = URL.createObjectURL(file);
+    setAvatarPreview(objectUrl);
     try {
       const formData = new FormData();
       formData.append('file', file);
       const { data } = await api.post('/api/users/me/avatar', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      URL.revokeObjectURL(preview);
-      setAvatarPreview(resolveMediaUrl(data.profile_image_url));
+      bumpAvatarVersion();
+      const bust = Date.now();
+      setAvatarPreview(resolveMediaUrl(data.profile_image_url, bust));
+      URL.revokeObjectURL(objectUrl);
       await reloadUser();
     } catch (err) {
-      URL.revokeObjectURL(preview);
+      URL.revokeObjectURL(objectUrl);
       try {
         const { data } = await api.get('/api/users/me/profile');
-        setAvatarPreview(resolveMediaUrl(data.profile_image_url));
+        setAvatarPreview(resolveMediaUrl(data.profile_image_url, avatarVersion || undefined));
       } catch {
         setAvatarPreview(null);
       }
@@ -188,7 +190,12 @@ export default function ProfileEdit() {
               <div className="kodda-profile-avatar-block">
                 <div className="kodda-profile-avatar-ring">
                   {avatarPreview ? (
-                    <img src={avatarPreview} alt="" className="kodda-profile-avatar-preview" />
+                    <img
+                      key={avatarPreview}
+                      src={avatarPreview}
+                      alt=""
+                      className="kodda-profile-avatar-preview"
+                    />
                   ) : (
                     <span className="kodda-profile-avatar-placeholder" aria-hidden="true">
                       {initial}

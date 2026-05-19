@@ -20,3 +20,5 @@ __pycache__/
 
 # Frontend: salida de producción (regenerar con npm run build)
 src/frontend/build/
+
+.vercel

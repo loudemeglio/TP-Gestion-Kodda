@@ -24,7 +24,7 @@ const MEASURE_STATS = [
 
 export default function ProfileView() {
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, logout, avatarVersion } = useAuth();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -47,7 +47,7 @@ export default function ProfileView() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [location.state?.profileSaved, avatarVersion]);
 
   useEffect(() => {
     if (!savedFlash) return undefined;
@@ -55,7 +55,10 @@ export default function ProfileView() {
     return () => window.clearTimeout(t);
   }, [savedFlash]);
 
-  const avatarSrc = resolveMediaUrl(profile?.profile_image_url);
+  const avatarSrc = resolveMediaUrl(
+    profile?.profile_image_url,
+    avatarVersion || undefined
+  );
   const initial = (profile?.username || user?.username || '?').charAt(0).toUpperCase();
 
   const filledStats = profile
@@ -104,7 +107,12 @@ export default function ProfileView() {
               <div className="kodda-profile-view-hero-main">
                 <div className="kodda-profile-avatar-ring kodda-profile-avatar-ring--view">
                   {avatarSrc ? (
-                    <img src={avatarSrc} alt="" className="kodda-profile-avatar-preview kodda-profile-avatar-preview--view" />
+                    <img
+                      key={avatarSrc}
+                      src={avatarSrc}
+                      alt=""
+                      className="kodda-profile-avatar-preview kodda-profile-avatar-preview--view"
+                    />
                   ) : (
                     <span className="kodda-profile-avatar-placeholder kodda-profile-avatar-placeholder--view" aria-hidden="true">
                       {initial}
@@ -182,12 +190,28 @@ export default function ProfileView() {
                 )}
               </section>
 
-              <section className="kodda-profile-view-section kodda-profile-view-section--muted">
-                <h2 className="kodda-profile-edit-section-title">Mis publicaciones activas</h2>
-                <p className="kodda-profile-view-coming-soon">
-                  Próximamente vas a ver acá un resumen de lo que tenés publicado en Kodda.
-                </p>
-              </section>
+              <div className="kodda-profile-view-nav">
+                <button
+                  type="button"
+                  className="kodda-profile-view-nav-item"
+                  disabled
+                  aria-disabled="true"
+                  aria-label="Mis publicaciones activas"
+                >
+                  <span className="kodda-profile-view-nav-icon" aria-hidden="true">
+                    🏷️
+                  </span>
+                  <span className="kodda-profile-view-nav-text">
+                    <span className="kodda-profile-view-nav-title">Mis publicaciones activas</span>
+                    <span className="kodda-profile-view-nav-desc">
+                      Ver y gestionar lo que publicaste en Kodda
+                    </span>
+                  </span>
+                  <span className="kodda-profile-view-nav-chevron" aria-hidden="true">
+                    ›
+                  </span>
+                </button>
+              </div>
             </div>
           </>
         ) : null}
