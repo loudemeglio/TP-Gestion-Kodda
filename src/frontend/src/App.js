@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import './App.css';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { CarritoProvider } from './context/CarritoContext';
 import AdminHome from './components/admin/AdminHome';
 import AdminLayout from './components/admin/AdminLayout';
 import ForgotPassword from './components/ForgotPassword';
@@ -15,6 +16,7 @@ import ProfileEdit from './components/ProfileEdit';
 import ProfileView from './components/ProfileView';
 import RegisterForm from './components/RegisterForm';
 import MyProducts from './components/MyProducts';
+import Cart from './components/Cart';
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
@@ -94,6 +96,14 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/carrito"
+        element={
+          <PrivateRoute>
+            <Cart />
+          </PrivateRoute>
+        }
+      />
+      <Route
         path="/admin"
         element={
           <PrivateRoute>
@@ -123,7 +133,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppRoutes />
+        <CarritoProvider>
+          <AppRoutes />
+        </CarritoProvider>
       </AuthProvider>
     </BrowserRouter>
   );

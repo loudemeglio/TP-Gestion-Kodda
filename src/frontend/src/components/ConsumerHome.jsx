@@ -1,14 +1,12 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useCarrito } from '../context/CarritoContext';
 import { resolveMediaUrl } from '../utils/mediaUrl';
 import { KoddaLogo } from './KoddaLogo';
+import { api } from '../api/client';
+import { useEffect, useState } from 'react';
 
-const PLACEHOLDER_FEED = [
-  { title: 'Campera técnica', meta: 'The North Face · Estado verificado por IA', price: '$ 42.000', hint: 'Talle sugerido: L' },
-  { title: 'Jean recto vintage', meta: "Levi's 501 · Segunda mano", price: '$ 18.500', hint: 'Ajuste: recto en cintura' },
-  { title: 'Remera lino', meta: 'Zara · Sin etiqueta', price: '$ 9.200', hint: 'Coincide con tus medidas' },
-  { title: 'Buzo oversize', meta: 'Marca local · Como nuevo', price: '$ 24.000', hint: 'Feed curado para vos' },
-];
+
 
 /**
  * Vista de inicio tipo usuario (feed prototipo + cuenta).
@@ -16,9 +14,33 @@ const PLACEHOLDER_FEED = [
  */
 export default function ConsumerHome({ allowAdminPreview = false }) {
   const { user, logout, avatarVersion } = useAuth();
+  const { agregarAlCarrito, obtenerCantidadTotal } = useCarrito();
+  const [productos, setProductos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const initial = (user?.username || user?.email || '?').charAt(0).toUpperCase();
   const avatarSrc = resolveMediaUrl(user?.profile_image_url, avatarVersion || undefined);
   const showAdminPreviewBar = allowAdminPreview && user?.role === 'admin';
+  const cantidadCarrito = obtenerCantidadTotal();
+
+  useEffect(() => {
+    const cargarProductos = async () => {
+      try {
+        setLoading(true);
+        const { data } = await api.get('/api/catalog/products?limit=100');
+        setProductos(data);
+        setError(null);
+      } catch (err) {
+        console.error('Error al cargar productos:', err);
+        setError('Error al cargar los productos');
+        setProductos([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    cargarProductos();
+  }, []);
 
   return (
     <div className="kodda-home">
@@ -50,6 +72,10 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
           <button type="button" className="kodda-btn-ghost" disabled title="Próximamente">
             Chat Kodda
           </button>
+          <Link to="/carrito" className="kodda-cart-icon-link" title="Mi carrito">
+            🛒
+            {cantidadCarrito > 0 && <span className="kodda-cart-badge">{cantidadCarrito}</span>}
+          </Link>
           <Link to="/perfil" className="kodda-user-chip" title="Mi perfil">
             {avatarSrc ? (
               <img key={avatarSrc} src={avatarSrc} alt="" className="kodda-avatar kodda-avatar-img" />
@@ -76,39 +102,61 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
       <main className="kodda-home-main">
         <p className="kodda-hello">Hola, {user?.username || 'explorador'} 👋</p>
         <p className="kodda-hello-sub">
-          Acá verás recomendaciones según tus gustos, compras y medidas — priorizando lo que mejor te queda, no solo lo
-          que “entra”.
+          Acá verás prendas publicadas por otros usuarios — priorizando lo que mejor te queda.
         </p>
 
         <div className="kodda-section-title">
-          <h2>Recomendados para vos</h2>
-          <span className="kodda-badge-ia">IA + historial</span>
+          <h2>Prendas disponibles</h2>
+          <span className="kodda-badge-ia">Catálogo en vivo</span>
         </div>
 
-        <div className="kodda-grid" role="list">
-          {PLACEHOLDER_FEED.map((item) => (
-            <article key={item.title} className="kodda-card-product" role="listitem">
-              <div className="kodda-card-visual" />
-              <div className="kodda-card-body">
-                <h3>{item.title}</h3>
-                <p className="kodda-card-meta">{item.meta}</p>
-                <div className="kodda-price">{item.price}</div>
-                <p className="kodda-card-meta" style={{ marginTop: '0.35rem' }}>
-                  {item.hint}
-                </p>
-              </div>
-            </article>
-          ))}
-        </div>
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
+            <p>Cargando prendas...</p>
+          </div>
+        ) : error ? (
+          <div style={{ textAlign: 'center', padding: '2rem', color: '#c00' }}>
+            <p>{error}</p>
+          </div>
+        ) : productos.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
+            <p>No hay prendas disponibles por el momento</p>
+          </div>
+        ) : (
+          <div className="kodda-grid" role="list">
+            {productos.map((producto) => (
+              <article key={producto.id} className="kodda-card-product" role="listitem">
+                <div className="kodda-card-visual" />
+                <div className="kodda-card-body">
+                  <h3>{producto.name}</h3>
+                  <p className="kodda-card-meta">{producto.category}</p>
+                  <div className="kodda-price">${producto.price.toLocaleString('es-AR')}</div>
+                  <p className="kodda-card-meta" style={{ marginTop: '0.35rem' }}>
+                    {producto.stock > 0 ? `Stock: ${producto.stock}` : 'Sin stock'}
+                  </p>
+                  <button
+                    type="button"
+                    className="kodda-btn-add-to-cart"
+                    onClick={() => agregarAlCarrito(producto)}
+                    disabled={producto.stock === 0}
+                    title={producto.stock === 0 ? 'Sin stock disponible' : 'Agregar al carrito'}
+                  >
+                    {producto.stock === 0 ? 'Sin stock' : 'Agregar al carrito'}
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
 
         <div className="kodda-strip">
           <p>
             <strong>Kodda</strong> conecta vendedores y compradores; la IA autocompleta datos desde fotos, sugiere
             precios y estima talle comparando tus medidas con la prenda — vos tenés la última palabra.
           </p>
-          <button type="button" className="kodda-btn-accent-outline" disabled>
-            Explorar catálogo
-          </button>
+          <Link to="/carrito" className="kodda-btn-accent-outline">
+            Ver carrito
+          </Link>
         </div>
 
         <section style={{ marginTop: '2rem' }}>
