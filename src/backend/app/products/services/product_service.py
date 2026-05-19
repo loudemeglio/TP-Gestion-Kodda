@@ -26,6 +26,18 @@ class ProductService:
         return [ProductDTO.from_orm(product) for product in products]
 
     @staticmethod
+    def get_all_active_products(db: Session, skip: int = 0, limit: int = 100) -> list[ProductDTO]:
+        """Obtener todos los productos activos (no pausados) del catálogo."""
+        products = ProductRepository.get_all_active(db, skip, limit)
+        return [ProductDTO.from_orm(product) for product in products]
+
+    @staticmethod
+    def get_all_active_products_except_user(db: Session, user_id: int, skip: int = 0, limit: int = 100) -> list[ProductDTO]:
+        """Obtener todos los productos activos (no pausados) excepto los del usuario especificado."""
+        products = ProductRepository.get_all_active_except_user(db, user_id, skip, limit)
+        return [ProductDTO.from_orm(product) for product in products]
+
+    @staticmethod
     def update_product(db: Session, product_id: int, product_data: ProductCreateDTO, seller_id: int) -> ProductDTO:
         """Actualizar un producto. Solo el dueño puede actualizar."""
         if product_data.price <= 0:

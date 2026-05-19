@@ -1923,3 +1923,66 @@ a.kodda-user-chip {
 a.kodda-user-chip:hover {
   background: rgba(0, 0, 0, 0.04);
 }
+
+/* Carrito */
+.kodda-btn-add-to-cart {
+  width: 100%;
+  padding: 0.6rem 1rem;
+  margin-top: 0.5rem;
+  background: var(--kd-accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.kodda-btn-add-to-cart:hover:not(:disabled) {
+  background: var(--kd-accent-mid);
+}
+
+.kodda-btn-add-to-cart:disabled {
+  background: var(--kd-mist);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.kodda-cart-icon-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: transparent;
+  font-size: 1.4rem;
+  text-decoration: none;
+  color: var(--kd-ink);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.kodda-cart-icon-link:hover {
+  background: rgba(15, 20, 18, 0.06);
+}
+
+.kodda-cart-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 4px;
+  background: var(--kd-warm-soft);
+  color: white;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 700;
+}

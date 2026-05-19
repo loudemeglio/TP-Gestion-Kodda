@@ -35,6 +35,27 @@ def create_product(
         )
 
 
+@router.get("/products", response_model=list[ProductDTO])
+def get_all_products(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    skip: int = 0,
+    limit: int = 100,
+):
+    """
+    Obtener todos los productos del catálogo (públicos y activos) excepto los del usuario actual.
+    
+    Requiere autenticación. Devuelve productos no pausados de otros usuarios.
+    """
+    try:
+        return ProductService.get_all_active_products_except_user(db, current_user.id, skip, limit)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error al obtener productos",
+        )
+
+
 @router.get("/products/my", response_model=list[ProductDTO])
 def get_my_products(
     db: Session = Depends(get_db),
