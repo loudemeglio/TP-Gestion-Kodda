@@ -124,9 +124,15 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
           </div>
         ) : (
           <div className="kodda-grid" role="list">
-            {productos.map((producto) => (
+            {productos.map((producto) => {
+              const imageSrc = resolveMediaUrl(producto.main_image_url);
+              return (
               <article key={producto.id} className="kodda-card-product" role="listitem">
-                <div className="kodda-card-visual" />
+                <div className="kodda-card-visual">
+                  {imageSrc ? (
+                    <img src={imageSrc} alt={producto.name} />
+                  ) : null}
+                </div>
                 <div className="kodda-card-body">
                   <h3>{producto.name}</h3>
                   <p className="kodda-card-meta">{producto.category}</p>
@@ -145,7 +151,8 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
                   </button>
                 </div>
               </article>
-            ))}
+            );
+            })}
           </div>
         )}
 
