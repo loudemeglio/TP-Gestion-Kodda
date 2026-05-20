@@ -34,6 +34,8 @@ services:
     ports:
       - "3000:3000"
     stdin_open: true # Para que React no se cierre en Docker
+    env_file:
+      - ./frontend/.env
     environment:
       # setupProxy.js reenvía /api aquí; dentro de Docker 127.0.0.1 es este contenedor, no el backend.
       PROXY_API_TARGET: http://backend:8000
