@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCarrito } from '../context/CarritoContext';
+import { resolveMediaUrl } from '../utils/mediaUrl';
 import { KoddaLogo } from './KoddaLogo';
 import '../styles/cart.css';
 
@@ -70,10 +71,16 @@ export default function Cart() {
           ) : (
             <div className="kodda-cart-content">
               <div className="kodda-cart-items">
-                {items.map((item) => (
-                  <article key={item.id} className="kodda-cart-item">
-                    <div className="kodda-cart-item-visual" />
-                    <div className="kodda-cart-item-body">
+                {items.map((item) => {
+                  const imageSrc = resolveMediaUrl(item.main_image_url);
+                  return (
+                    <article key={item.id} className="kodda-cart-item">
+                      <div className="kodda-cart-item-visual">
+                        {imageSrc ? (
+                          <img src={imageSrc} alt={item.name} />
+                        ) : null}
+                      </div>
+                      <div className="kodda-cart-item-body">
                       <h3>{item.name}</h3>
                       <p className="kodda-cart-item-meta">{item.category}</p>
                       <div className="kodda-cart-item-price">${item.price.toLocaleString('es-AR')}</div>
@@ -111,7 +118,8 @@ export default function Cart() {
                       </button>
                     </div>
                   </article>
-                ))}
+                  );
+                })}
               </div>
 
               <div className="kodda-cart-summary">
