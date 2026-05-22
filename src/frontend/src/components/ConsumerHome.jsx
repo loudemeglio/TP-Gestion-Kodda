@@ -2,9 +2,11 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCarrito } from '../context/CarritoContext';
 import { resolveMediaUrl } from '../utils/mediaUrl';
+import { buildCatalogQueryParams, hasActiveCatalogFilters } from '../utils/productFilters';
 import { KoddaLogo } from './KoddaLogo';
+import ProductFilters, { EMPTY_CATALOG_FILTERS } from './ProductFilters';
 import { api } from '../api/client';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 
 
@@ -18,29 +20,48 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [filterDraft, setFilterDraft] = useState(EMPTY_CATALOG_FILTERS);
+  const [appliedFilters, setAppliedFilters] = useState(EMPTY_CATALOG_FILTERS);
   const initial = (user?.username || user?.email || '?').charAt(0).toUpperCase();
   const avatarSrc = resolveMediaUrl(user?.profile_image_url, avatarVersion || undefined);
   const showAdminPreviewBar = allowAdminPreview && user?.role === 'admin';
   const cantidadCarrito = obtenerCantidadTotal();
 
-  useEffect(() => {
-    const cargarProductos = async () => {
-      try {
-        setLoading(true);
-        const { data } = await api.get('/api/catalog/products?limit=100');
-        setProductos(data);
-        setError(null);
-      } catch (err) {
-        console.error('Error al cargar productos:', err);
-        setError('Error al cargar los productos');
-        setProductos([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    cargarProductos();
+  const cargarProductos = useCallback(async (filters) => {
+    try {
+      setLoading(true);
+      const params = buildCatalogQueryParams(filters);
+      const { data } = await api.get(`/api/catalog/products?${params.toString()}`);
+      setProductos(data);
+      setError(null);
+    } catch (err) {
+      console.error('Error al cargar productos:', err);
+      const detail = err.response?.data?.detail;
+      const msg =
+        typeof detail === 'string'
+          ? detail
+          : Array.isArray(detail)
+            ? detail.map((d) => d.msg || d).join(', ')
+            : 'Error al cargar los productos';
+      setError(msg);
+      setProductos([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    cargarProductos(appliedFilters);
+  }, [appliedFilters, cargarProductos]);
+
+  const handleApplyFilters = () => {
+    setAppliedFilters({ ...filterDraft });
+  };
+
+  const handleClearFilters = () => {
+    setFilterDraft(EMPTY_CATALOG_FILTERS);
+    setAppliedFilters(EMPTY_CATALOG_FILTERS);
+  };
 
   return (
     <div className="kodda-home">
@@ -105,9 +126,19 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
           Acá verás prendas publicadas por otros usuarios — priorizando lo que mejor te queda.
         </p>
 
+        <ProductFilters
+          values={filterDraft}
+          onChange={setFilterDraft}
+          onApply={handleApplyFilters}
+          onClear={handleClearFilters}
+          loading={loading}
+        />
+
         <div className="kodda-section-title">
           <h2>Prendas disponibles</h2>
-          <span className="kodda-badge-ia">Catálogo en vivo</span>
+          <span className="kodda-badge-ia">
+            {hasActiveCatalogFilters(appliedFilters) ? 'Filtrado' : 'Catálogo en vivo'}
+          </span>
         </div>
 
         {loading ? (
@@ -120,7 +151,11 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
           </div>
         ) : productos.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
-            <p>No hay prendas disponibles por el momento</p>
+            <p>
+              {hasActiveCatalogFilters(appliedFilters)
+                ? 'No hay prendas que coincidan con los filtros'
+                : 'No hay prendas disponibles por el momento'}
+            </p>
           </div>
         ) : (
           <div className="kodda-grid" role="list">
