@@ -22,6 +22,13 @@ export const CATALOG_FILTER_FIELDS = [
     autoComplete: 'off',
   },
   {
+    key: 'size',
+    type: 'text',
+    label: 'Talle',
+    placeholder: 'Ej: M, L, 42',
+    autoComplete: 'off',
+  },
+  {
     key: 'price_min',
     type: 'number',
     label: 'Precio desde ($)',

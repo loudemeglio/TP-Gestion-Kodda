@@ -20,6 +20,7 @@ def _create_product(client, token: str, **overrides):
         "price": 15000,
         "stock": 2,
         "category": "Camperas",
+        "size": "M",
         "main_image_url": None,
     }
     body.update(overrides)
@@ -80,6 +81,25 @@ def test_catalog_filter_by_description(api_client):
     assert r.status_code == 200
     assert len(r.json()) == 1
     assert r.json()[0]["name"] == "Vestido floral"
+
+
+@pytest.mark.postgres
+def test_catalog_filter_by_size(api_client):
+    seller_token = _register_and_token(api_client, "seller_sz", "seller_sz@example.com")
+    buyer_token = _register_and_token(api_client, "buyer_sz", "buyer_sz@example.com")
+
+    _create_product(api_client, seller_token, name="Remera básica", size="M", category="Remeras")
+    _create_product(api_client, seller_token, name="Remera oversize", size="XL", category="Remeras")
+
+    r = api_client.get(
+        "/api/catalog/products",
+        params={"size": "XL"},
+        headers={"Authorization": f"Bearer {buyer_token}"},
+    )
+    assert r.status_code == 200
+    assert len(r.json()) == 1
+    assert r.json()[0]["name"] == "Remera oversize"
+    assert r.json()[0]["size"] == "XL"
 
 
 @pytest.mark.postgres

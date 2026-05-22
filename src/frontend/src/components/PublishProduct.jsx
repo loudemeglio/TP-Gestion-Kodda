@@ -32,6 +32,7 @@ export default function PublishProduct() {
   const [price, setPrice] = useState('');
   const [stock, setStock] = useState('');
   const [category, setCategory] = useState('');
+  const [size, setSize] = useState('');
   const [mainImageUrl, setMainImageUrl] = useState('');
 
   // IA
@@ -110,6 +111,7 @@ export default function PublishProduct() {
     if (!price) missing.push('Precio');
     if (stock === '' || stock === null || stock === undefined) missing.push('Stock');
     if (!category) missing.push('Categoría');
+    if (!size.trim()) missing.push('Talle');
 
     if (missing.length > 0) {
       return `Faltan campos obligatorios: ${missing.join(', ')}.`;
@@ -144,6 +146,7 @@ export default function PublishProduct() {
       price: Number(price),
       stock: Number(stock),
       category,
+      size: size.trim(),
     };
 
     const imageUrl = mainImageUrl.trim();
@@ -176,6 +179,7 @@ export default function PublishProduct() {
               if (d.loc.includes('name')) return 'Nombre es obligatorio.';
               if (d.loc.includes('description')) return 'Descripción es obligatoria.';
               if (d.loc.includes('category')) return 'Categoría es obligatoria.';
+              if (d.loc.includes('size')) return 'Talle es obligatorio.';
               return d.msg;
             }
             return typeof d === 'string' ? d : '';
@@ -322,6 +326,19 @@ export default function PublishProduct() {
                   </option>
                 ))}
               </select>
+            </label>
+
+            <label className="kodda-field">
+              <span>Talle</span>
+              <input
+                className="kodda-input"
+                type="text"
+                value={size}
+                onChange={(e) => setSize(e.target.value)}
+                placeholder="ej. M, L, 42, Único"
+                maxLength={20}
+                required
+              />
             </label>
 
             <label className="kodda-field">

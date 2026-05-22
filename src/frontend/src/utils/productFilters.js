@@ -11,6 +11,7 @@ export const EMPTY_CATALOG_FILTERS = {
   price_min: '',
   price_max: '',
   category: '',
+  size: '',
 };
 
 /** Convierte el estado del formulario en query params para GET /api/catalog/products */
@@ -35,6 +36,9 @@ export function buildCatalogQueryParams(filters, { limit = 100 } = {}) {
   if (filters.category) {
     params.set('category', filters.category);
   }
+  if (filters.size?.trim()) {
+    params.set('size', filters.size.trim());
+  }
 
   return params;
 }
@@ -45,7 +49,8 @@ export function hasActiveCatalogFilters(filters) {
     Boolean(filters.description?.trim()) ||
     parsePrice(filters.price_min) !== null ||
     parsePrice(filters.price_max) !== null ||
-    Boolean(filters.category)
+    Boolean(filters.category) ||
+    Boolean(filters.size?.trim())
   );
 }
 

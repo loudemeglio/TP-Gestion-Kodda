@@ -17,6 +17,7 @@ class ProductRepository:
             price=product_data.price,
             stock=product_data.stock,
             category=product_data.category,
+            size=product_data.size,
             main_image_url=product_data.main_image_url,
             seller_id=seller_id,
         )
@@ -78,6 +79,7 @@ class ProductRepository:
         product.price = product_data.price
         product.stock = product_data.stock
         product.category = product_data.category
+        product.size = product_data.size
         if product_data.main_image_url:
             product.main_image_url = product_data.main_image_url
         

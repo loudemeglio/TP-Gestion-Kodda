@@ -21,6 +21,7 @@ class ProductCatalogFilters(BaseModel):
     price_min: Optional[float] = Field(None, ge=0, description="Precio mínimo (inclusive)")
     price_max: Optional[float] = Field(None, ge=0, description="Precio máximo (inclusive)")
     category: Optional[str] = Field(None, max_length=100, description="Categoría exacta")
+    size: Optional[str] = Field(None, max_length=20, description="Coincidencia parcial en el talle")
 
     @model_validator(mode="after")
     def validate_price_range(self) -> "ProductCatalogFilters":
@@ -32,7 +33,7 @@ class ProductCatalogFilters(BaseModel):
         """True si al menos un filtro tiene valor."""
         return any(
             v is not None and (v != "" if isinstance(v, str) else True)
-            for v in (self.name, self.description, self.price_min, self.price_max, self.category)
+            for v in (self.name, self.description, self.price_min, self.price_max, self.category, self.size)
         )
 
 
@@ -48,4 +49,6 @@ def apply_catalog_filters(query: Query, filters: ProductCatalogFilters) -> Query
         query = query.filter(Product.price <= filters.price_max)
     if filters.category and filters.category.strip():
         query = query.filter(Product.category == filters.category.strip())
+    if filters.size and filters.size.strip():
+        query = query.filter(Product.size.ilike(f"%{filters.size.strip()}%"))
     return query

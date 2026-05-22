@@ -171,6 +171,7 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
                 <div className="kodda-card-body">
                   <h3>{producto.name}</h3>
                   <p className="kodda-card-meta">{producto.category}</p>
+                  <p className="kodda-card-meta">Talle: {producto.size || '—'}</p>
                   <div className="kodda-price">${producto.price.toLocaleString('es-AR')}</div>
                   <p className="kodda-card-meta" style={{ marginTop: '0.35rem' }}>
                     {producto.stock > 0 ? `Stock: ${producto.stock}` : 'Sin stock'}

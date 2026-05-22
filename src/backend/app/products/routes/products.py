@@ -47,7 +47,7 @@ def get_all_products(
     """
     Catálogo público: productos activos de otros usuarios.
 
-    Filtros opcionales (query): name, description, price_min, price_max, category.
+    Filtros opcionales (query): name, description, price_min, price_max, category, size.
     """
     try:
         return ProductService.get_all_active_products_except_user(
