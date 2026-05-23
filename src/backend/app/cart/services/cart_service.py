@@ -19,6 +19,7 @@ class CartService:
             price=product.price,
             stock=product.stock,
             category=product.category,
+            size=product.size,
             main_image_url=product.main_image_url,
             is_paused=product.is_paused,
             seller_id=product.seller_id,

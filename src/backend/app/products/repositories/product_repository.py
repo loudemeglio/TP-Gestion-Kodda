@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 
+from app.products.filters import ProductCatalogFilters, apply_catalog_filters
 from app.products.models import Product
 from app.products.schemas import ProductCreateDTO
 
@@ -16,6 +17,7 @@ class ProductRepository:
             price=product_data.price,
             stock=product_data.stock,
             category=product_data.category,
+            size=product_data.size,
             main_image_url=product_data.main_image_url,
             seller_id=seller_id,
         )
@@ -40,12 +42,21 @@ class ProductRepository:
         return db.query(Product).filter(Product.is_paused == False).offset(skip).limit(limit).all()
 
     @staticmethod
-    def get_all_active_except_user(db: Session, user_id: int, skip: int = 0, limit: int = 100):
-        """Obtener todos los productos activos (no pausados) excepto los del usuario especificado."""
-        return db.query(Product).filter(
+    def get_all_active_except_user(
+        db: Session,
+        user_id: int,
+        skip: int = 0,
+        limit: int = 100,
+        filters: ProductCatalogFilters | None = None,
+    ):
+        """Obtener productos activos de otros usuarios, con filtros opcionales del catálogo."""
+        query = db.query(Product).filter(
             Product.is_paused == False,
-            Product.seller_id != user_id
-        ).offset(skip).limit(limit).all()
+            Product.seller_id != user_id,
+        )
+        if filters is not None and filters.is_active():
+            query = apply_catalog_filters(query, filters)
+        return query.offset(skip).limit(limit).all()
 
     @staticmethod
     def get_by_seller(db: Session, seller_id: int, skip: int = 0, limit: int = 100):
@@ -68,6 +79,7 @@ class ProductRepository:
         product.price = product_data.price
         product.stock = product_data.stock
         product.category = product_data.category
+        product.size = product_data.size
         if product_data.main_image_url:
             product.main_image_url = product_data.main_image_url
         
