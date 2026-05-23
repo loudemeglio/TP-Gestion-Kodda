@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.users.deps.auth import get_current_user
 from app.users.models import User
-from app.products.filters import ProductCatalogFilters
+from app.products.filters import ProductCatalogFilters, get_product_catalog_filters
 from app.products.schemas import ProductCreateDTO, ProductDTO
 from app.products.services.product_service import ProductService
 
@@ -42,7 +42,7 @@ def get_all_products(
     current_user: User = Depends(get_current_user),
     skip: int = 0,
     limit: int = 100,
-    filters: ProductCatalogFilters = Depends(),
+    filters: ProductCatalogFilters = Depends(get_product_catalog_filters),
 ):
     """
     Catálogo público: productos activos de otros usuarios.

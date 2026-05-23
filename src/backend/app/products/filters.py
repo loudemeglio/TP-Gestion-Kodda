@@ -2,8 +2,9 @@
 
 from typing import Optional
 
-from pydantic import BaseModel, Field, model_validator
-from sqlalchemy.orm import Query
+from fastapi import HTTPException, Query, status
+from pydantic import BaseModel, Field
+from sqlalchemy.orm import Query as SqlQuery
 
 from app.products.models import Product
 
@@ -23,12 +24,6 @@ class ProductCatalogFilters(BaseModel):
     category: Optional[str] = Field(None, max_length=100, description="Categoría exacta")
     size: Optional[str] = Field(None, max_length=20, description="Coincidencia parcial en el talle")
 
-    @model_validator(mode="after")
-    def validate_price_range(self) -> "ProductCatalogFilters":
-        if self.price_min is not None and self.price_max is not None and self.price_min > self.price_max:
-            raise ValueError("price_min no puede ser mayor que price_max")
-        return self
-
     def is_active(self) -> bool:
         """True si al menos un filtro tiene valor."""
         return any(
@@ -37,7 +32,31 @@ class ProductCatalogFilters(BaseModel):
         )
 
 
-def apply_catalog_filters(query: Query, filters: ProductCatalogFilters) -> Query:
+def get_product_catalog_filters(
+    name: Optional[str] = Query(None, max_length=200),
+    description: Optional[str] = Query(None, max_length=500),
+    price_min: Optional[float] = Query(None, ge=0),
+    price_max: Optional[float] = Query(None, ge=0),
+    category: Optional[str] = Query(None, max_length=100),
+    size: Optional[str] = Query(None, max_length=20),
+) -> ProductCatalogFilters:
+    """Parsea query params planos y valida el rango de precios (422 si es inválido)."""
+    if price_min is not None and price_max is not None and price_min > price_max:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="price_min no puede ser mayor que price_max",
+        )
+    return ProductCatalogFilters(
+        name=name,
+        description=description,
+        price_min=price_min,
+        price_max=price_max,
+        category=category,
+        size=size,
+    )
+
+
+def apply_catalog_filters(query: SqlQuery, filters: ProductCatalogFilters) -> SqlQuery:
     """Aplica filtros opcionales sobre una query de Product."""
     if filters.name and filters.name.strip():
         query = query.filter(Product.name.ilike(f"%{filters.name.strip()}%"))
