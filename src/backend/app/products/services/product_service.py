@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 
+from app.products.filters import ProductCatalogFilters
 from app.products.repositories.product_repository import ProductRepository
 from app.products.schemas import ProductCreateDTO, ProductDTO
 
@@ -32,9 +33,17 @@ class ProductService:
         return [ProductDTO.from_orm(product) for product in products]
 
     @staticmethod
-    def get_all_active_products_except_user(db: Session, user_id: int, skip: int = 0, limit: int = 100) -> list[ProductDTO]:
-        """Obtener todos los productos activos (no pausados) excepto los del usuario especificado."""
-        products = ProductRepository.get_all_active_except_user(db, user_id, skip, limit)
+    def get_all_active_products_except_user(
+        db: Session,
+        user_id: int,
+        skip: int = 0,
+        limit: int = 100,
+        filters: ProductCatalogFilters | None = None,
+    ) -> list[ProductDTO]:
+        """Obtener productos activos de otros usuarios, con filtros opcionales."""
+        products = ProductRepository.get_all_active_except_user(
+            db, user_id, skip, limit, filters=filters
+        )
         return [ProductDTO.from_orm(product) for product in products]
 
     @staticmethod

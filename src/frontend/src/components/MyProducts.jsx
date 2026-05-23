@@ -152,6 +152,19 @@ function ProductCard({ product, onEdit, onEditCancel, isEditing, editData, onEdi
           </label>
 
           <label className="kodda-field">
+            <span>Talle</span>
+            <input
+              className="kodda-input"
+              type="text"
+              value={editData.size || ''}
+              onChange={(e) => onEditChange('size', e.target.value)}
+              placeholder="ej. M, L, 42, Único"
+              maxLength={20}
+              required
+            />
+          </label>
+
+          <label className="kodda-field">
             <span>Imagen principal URL (opcional)</span>
             <input
               className="kodda-input"
@@ -220,6 +233,10 @@ function ProductCard({ product, onEdit, onEditCancel, isEditing, editData, onEdi
               <span className={`kodda-product-value ${product.stock === 0 ? 'kodda-product-value--zero' : ''}`}>
                 {product.stock}
               </span>
+            </div>
+            <div className="kodda-product-info-item">
+              <span className="kodda-product-label">Talle</span>
+              <span className="kodda-product-value">{product.size || '—'}</span>
             </div>
             <div className="kodda-product-info-item">
               <span className="kodda-product-label">Publicado</span>
@@ -314,6 +331,7 @@ export default function MyProducts() {
       price: product.price,
       stock: product.stock,
       category: product.category,
+      size: product.size || '',
       main_image_url: product.main_image_url || '',
     });
     setSaveError('');
@@ -358,6 +376,10 @@ export default function MyProducts() {
       setSaveError('La categoría es obligatoria.');
       return;
     }
+    if (!editData.size?.trim()) {
+      setSaveError('El talle es obligatorio.');
+      return;
+    }
 
     setIsSaving(true);
     try {
@@ -367,6 +389,7 @@ export default function MyProducts() {
         price: priceNum,
         stock: stockNum,
         category: editData.category,
+        size: editData.size.trim(),
         main_image_url: editData.main_image_url?.trim() || null,
       };
 

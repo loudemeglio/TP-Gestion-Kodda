@@ -12,6 +12,7 @@ class CartItemDTO(BaseModel):
     price: float
     stock: int
     category: str
+    size: str
     main_image_url: Optional[str]
     is_paused: bool
     seller_id: int
