@@ -16,6 +16,7 @@ import ProfileEdit from './components/ProfileEdit';
 import ProfileView from './components/ProfileView';
 import RegisterForm from './components/RegisterForm';
 import MyProducts from './components/MyProducts';
+import BillingInfo from './components/BillingInfo';
 import Cart from './components/Cart';
 
 function PrivateRoute({ children }) {
@@ -92,6 +93,14 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <MyProducts />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/datos-facturacion"
+        element={
+          <PrivateRoute>
+            <BillingInfo />
           </PrivateRoute>
         }
       />
