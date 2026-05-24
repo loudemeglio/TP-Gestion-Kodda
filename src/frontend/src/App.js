@@ -20,6 +20,7 @@ import BillingInfo from './components/BillingInfo';
 import Cart from './components/Cart';
 import Checkout from './components/Checkout';
 import CheckoutSuccess from './components/CheckoutSuccess';
+import PayPage from './components/PayPage';
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
@@ -45,6 +46,7 @@ function AdminRoute({ children }) {
 function AppRoutes() {
   return (
     <Routes>
+      <Route path="/pagar/:token" element={<PayPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<RegisterForm />} />
       <Route path="/verify-email" element={<VerifyEmail />} />

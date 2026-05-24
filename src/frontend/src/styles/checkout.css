@@ -263,3 +263,279 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Billetera virtual (QR) */
+.kodda-wallet-qr {
+  margin: 0;
+}
+
+.kodda-wallet-qr-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  list-style: none;
+  margin: 0 0 1.25rem;
+  padding: 0;
+}
+
+.kodda-wallet-qr-step {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.82rem;
+  color: var(--kd-mist);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.kodda-wallet-qr-step--current {
+  color: var(--kd-ink);
+  font-weight: 600;
+}
+
+.kodda-wallet-qr-step--done {
+  color: var(--kd-accent, #0f766e);
+}
+
+.kodda-wallet-qr-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  border: 1px solid var(--kd-line);
+  font-size: 0.75rem;
+  font-weight: 600;
+  flex-shrink: 0;
+  background: var(--kd-paper);
+}
+
+.kodda-wallet-qr-step--current .kodda-wallet-qr-step-num {
+  border-color: var(--kd-accent, #0f766e);
+  background: rgba(15, 118, 110, 0.1);
+  color: var(--kd-accent, #0f766e);
+}
+
+.kodda-wallet-qr-step--done .kodda-wallet-qr-step-num {
+  border-color: var(--kd-accent, #0f766e);
+  background: var(--kd-accent, #0f766e);
+  color: #fff;
+}
+
+.kodda-wallet-qr-step-label {
+  line-height: 1.3;
+}
+
+.kodda-wallet-qr-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 1.5rem 1.25rem;
+  border: 1px solid var(--kd-line);
+  border-radius: var(--kd-radius-sm);
+  background: linear-gradient(180deg, var(--kd-paper) 0%, rgba(15, 118, 110, 0.04) 100%);
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+
+.kodda-wallet-qr-card--paid {
+  border-color: rgba(15, 118, 110, 0.45);
+  box-shadow: 0 4px 24px var(--kd-accent-glow, rgba(20, 184, 166, 0.22));
+}
+
+.kodda-wallet-qr-badge {
+  display: inline-block;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.75rem;
+}
+
+.kodda-wallet-qr-badge--pending {
+  background: rgba(217, 119, 6, 0.12);
+  color: #b45309;
+}
+
+.kodda-wallet-qr-badge--paid {
+  background: rgba(15, 118, 110, 0.15);
+  color: var(--kd-accent, #0f766e);
+}
+
+.kodda-wallet-qr-badge--expired {
+  background: rgba(220, 38, 38, 0.1);
+  color: #b91c1c;
+}
+
+.kodda-wallet-qr-amount {
+  margin: 0 0 0.35rem;
+  font-size: 1.75rem;
+  font-weight: 700;
+  font-family: var(--kd-font-display);
+  color: var(--kd-ink);
+}
+
+.kodda-wallet-qr-lead {
+  margin-bottom: 1.25rem !important;
+  max-width: 22rem;
+}
+
+.kodda-wallet-qr-frame {
+  padding: 0.75rem;
+  background: #fff;
+  border-radius: var(--kd-radius-sm);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: 1rem;
+}
+
+.kodda-wallet-qr-code {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.kodda-wallet-qr-card--paid .kodda-wallet-qr-frame {
+  opacity: 0.45;
+}
+
+.kodda-wallet-qr-success {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  text-align: left;
+  width: 100%;
+  max-width: 20rem;
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--kd-radius-sm);
+  background: rgba(15, 118, 110, 0.1);
+  animation: kodda-wallet-qr-pop 0.35s ease-out;
+}
+
+.kodda-wallet-qr-success p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--kd-ink);
+  line-height: 1.45;
+}
+
+.kodda-wallet-qr-success-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background: var(--kd-accent, #0f766e);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+@keyframes kodda-wallet-qr-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.kodda-wallet-qr-actions {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.kodda-wallet-qr-reset {
+  font-size: 0.88rem;
+}
+
+.kodda-wallet-qr-link-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  margin-bottom: 0.75rem;
+}
+
+.kodda-wallet-qr-copy {
+  font-size: 0.88rem;
+}
+
+.kodda-wallet-qr-copy-feedback {
+  font-size: 0.82rem;
+  color: var(--kd-accent, #0f766e);
+  font-weight: 500;
+}
+
+.kodda-wallet-qr-open {
+  font-size: 0.85rem;
+}
+
+.kodda-wallet-qr-error {
+  margin: 0 0 0.75rem;
+  text-align: center;
+}
+
+.kodda-wallet-qr-hint {
+  margin: 0.75rem 0 0;
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+.kodda-pay-page {
+  min-height: 100vh;
+}
+
+.kodda-pay-page-main {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 2rem 1rem 3rem;
+}
+
+.kodda-pay-page-card {
+  width: 100%;
+  max-width: 22rem;
+}
+
+.kodda-pay-page-title {
+  margin: 0 0 1rem;
+  font-size: 1.25rem;
+  font-family: var(--kd-font-display);
+  text-align: center;
+}
+
+.kodda-pay-page-confirm {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.kodda-pay-page-success {
+  max-width: none;
+  width: 100%;
+}
+
+.kodda-pay-page-footer {
+  margin-top: 1.25rem;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .kodda-wallet-qr-steps {
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .kodda-wallet-qr-frame .kodda-wallet-qr-code {
+    width: 180px !important;
+    height: 180px !important;
+  }
+}

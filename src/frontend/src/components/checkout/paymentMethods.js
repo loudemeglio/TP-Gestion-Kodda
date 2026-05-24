@@ -1,5 +1,5 @@
 export const PAYMENT_METHODS = [
-  { value: 'mercado_pago', label: 'Mercado Pago' },
+  { value: 'mercado_pago', label: 'Billetera virtual (QR)' },
   { value: 'tarjeta_credito', label: 'Tarjeta de crédito' },
   { value: 'tarjeta_debito', label: 'Tarjeta de débito' },
 ];
@@ -11,7 +11,7 @@ export const PAYMENT_METHOD_LABELS = {
 
 export const EMPTY_PAYMENT_DETAILS = {
   mercado_pago: {
-    account_email: '',
+    walletPaid: false,
   },
   tarjeta_credito: {
     card_holder: '',
@@ -37,10 +37,8 @@ export function isPaymentDetailsComplete(method, details) {
   if (!method || !details) return false;
 
   switch (method) {
-    case 'mercado_pago': {
-      const email = details.mercado_pago?.account_email?.trim() || '';
-      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    }
+    case 'mercado_pago':
+      return details.mercado_pago?.walletPaid === true;
     case 'tarjeta_credito':
     case 'tarjeta_debito': {
       const d = details[method] || {};

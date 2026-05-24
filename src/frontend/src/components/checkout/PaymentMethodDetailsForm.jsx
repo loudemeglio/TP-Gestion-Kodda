@@ -1,4 +1,5 @@
 import { formatCardNumber, formatExpiry } from './paymentMethods';
+import WalletQrPayment from './WalletQrPayment';
 
 function Field({ label, children, hint, className = '' }) {
   return (
@@ -7,28 +8,6 @@ function Field({ label, children, hint, className = '' }) {
       {children}
       {hint ? <span className="kodda-field-hint">{hint}</span> : null}
     </label>
-  );
-}
-
-function MercadoPagoForm({ data, onChange, disabled }) {
-  return (
-    <div className="kodda-payment-details-form">
-      <p className="kodda-payment-details-lead">
-        Ingresá el correo asociado a tu cuenta de Mercado Pago.
-      </p>
-      <Field label="Email de Mercado Pago *">
-        <input
-          className="kodda-input"
-          type="email"
-          name="account_email"
-          value={data.account_email}
-          onChange={onChange}
-          required
-          disabled={disabled}
-          placeholder="tu@email.com"
-        />
-      </Field>
-    </div>
   );
 }
 
@@ -104,7 +83,13 @@ function CardForm({ data, onChange, disabled, isCredit }) {
   );
 }
 
-export default function PaymentMethodDetailsForm({ method, details, onChange, disabled }) {
+export default function PaymentMethodDetailsForm({
+  method,
+  details,
+  onChange,
+  orderTotal = 0,
+  disabled,
+}) {
   if (!method) return null;
 
   function handleChange(e) {
@@ -119,7 +104,7 @@ export default function PaymentMethodDetailsForm({ method, details, onChange, di
   }
 
   const sectionTitles = {
-    mercado_pago: 'Cuenta de Mercado Pago',
+    mercado_pago: 'Pago con billetera virtual',
     tarjeta_credito: 'Datos de la tarjeta',
     tarjeta_debito: 'Datos de la tarjeta',
   };
@@ -128,7 +113,12 @@ export default function PaymentMethodDetailsForm({ method, details, onChange, di
     <div className="kodda-payment-details-panel">
       <h3 className="kodda-payment-details-title">{sectionTitles[method]}</h3>
       {method === 'mercado_pago' ? (
-        <MercadoPagoForm data={details.mercado_pago} onChange={handleChange} disabled={disabled} />
+        <WalletQrPayment
+          total={orderTotal}
+          walletPaid={details.mercado_pago?.walletPaid === true}
+          onWalletPaidChange={(paid) => onChange('mercado_pago', 'walletPaid', paid)}
+          disabled={disabled}
+        />
       ) : null}
       {method === 'tarjeta_credito' ? (
         <CardForm

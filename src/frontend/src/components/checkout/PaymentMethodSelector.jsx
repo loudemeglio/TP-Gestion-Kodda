@@ -6,6 +6,7 @@ export default function PaymentMethodSelector({
   onChange,
   paymentDetails,
   onPaymentDetailsChange,
+  orderTotal = 0,
   disabled = false,
 }) {
   return (
@@ -40,6 +41,7 @@ export default function PaymentMethodSelector({
           method={value}
           details={paymentDetails}
           onChange={onPaymentDetailsChange}
+          orderTotal={orderTotal}
           disabled={disabled}
         />
       ) : null}

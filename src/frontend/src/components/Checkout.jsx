@@ -57,6 +57,14 @@ export default function Checkout() {
     }));
   }
 
+  function handlePaymentMethodChange(method) {
+    setPaymentMethod(method);
+    setPaymentDetails((prev) => ({
+      ...prev,
+      mercado_pago: { walletPaid: false },
+    }));
+  }
+
   if (!items.length) {
     return (
       <div className="kodda-home">
@@ -151,9 +159,10 @@ export default function Checkout() {
             <section className="kodda-checkout-panel kodda-checkout-panel--payment">
               <PaymentMethodSelector
                 value={paymentMethod}
-                onChange={setPaymentMethod}
+                onChange={handlePaymentMethodChange}
                 paymentDetails={paymentDetails}
                 onPaymentDetailsChange={handlePaymentDetailsChange}
+                orderTotal={total}
                 disabled={confirming}
               />
             </section>
@@ -232,7 +241,15 @@ export default function Checkout() {
           {billingReady && !paymentMethod ? (
             <p className="kodda-auth-muted">Seleccioná un medio de pago para continuar.</p>
           ) : null}
-          {billingReady && paymentMethod && !paymentDetailsReady ? (
+          {billingReady && paymentMethod === 'mercado_pago' && !paymentDetailsReady ? (
+            <p className="kodda-auth-muted">
+              Escaneá el código QR o copiá el enlace en tu celular para continuar.
+            </p>
+          ) : null}
+          {billingReady &&
+          paymentMethod &&
+          paymentMethod !== 'mercado_pago' &&
+          !paymentDetailsReady ? (
             <p className="kodda-auth-muted">Completá los datos del medio de pago elegido.</p>
           ) : null}
         </div>

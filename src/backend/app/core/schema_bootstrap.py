@@ -104,3 +104,32 @@ def apply_schema_patches(engine: Engine) -> None:
                 "WHERE payment_method IS NULL"
             )
         )
+
+        conn.execute(
+            text(
+                """
+                CREATE TABLE IF NOT EXISTS payment_intents (
+                    id SERIAL PRIMARY KEY,
+                    token VARCHAR(36) NOT NULL UNIQUE,
+                    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    amount DOUBLE PRECISION NOT NULL,
+                    status VARCHAR(50) NOT NULL DEFAULT 'pending',
+                    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                    approved_at TIMESTAMP WITH TIME ZONE
+                )
+                """
+            )
+        )
+        conn.execute(
+            text(
+                "CREATE INDEX IF NOT EXISTS ix_payment_intents_token "
+                "ON payment_intents (token)"
+            )
+        )
+        conn.execute(
+            text(
+                "CREATE INDEX IF NOT EXISTS ix_payment_intents_user_id "
+                "ON payment_intents (user_id)"
+            )
+        )
