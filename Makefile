@@ -73,7 +73,7 @@ $(FRONTEND)/node_modules: $(FRONTEND)/package.json
 	cd $(FRONTEND) && npm install
 
 frontend: $(FRONTEND)/node_modules
-	cd $(FRONTEND) && npm start
+	cd $(FRONTEND) && HOST=0.0.0.0 npm start
 
 # Levanta BD + API + frontend en paralelo (dos procesos en primer plano).
 test: setup-env db-up wait-db
@@ -85,6 +85,7 @@ pytest: $(UVICORN) setup-env db-up wait-db db-test-create
 	if [ -f .env ]; then set -a && . ./.env && set +a; fi && \
 	DEFAULT_PYTEST_DB_URL="postgresql://user:password@localhost:5432/kodda_test" && \
 	export DATABASE_URL="$${PYTEST_DATABASE_URL:-$$DEFAULT_PYTEST_DB_URL}" && \
+	export MAIL_SUPPRESS=true && \
 	.venv/bin/pytest -v
 
 stop: db-down

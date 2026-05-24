@@ -53,6 +53,12 @@ class User(Base):
     password_reset_tokens = relationship(
         "PasswordResetToken", back_populates="user", cascade="all, delete-orphan"
     )
+    billing_info = relationship(
+        "UserBillingInfo",
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
 
     def __repr__(self):
         return f"<User(id={self.id}, username={self.username}, email={self.email}, role={self.role})>"
@@ -97,3 +103,30 @@ class PasswordResetToken(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     user = relationship("User", back_populates="password_reset_tokens")
+
+
+class UserBillingInfo(Base):
+    """Datos de facturación del usuario (relación 1:1)."""
+
+    __tablename__ = "user_billing_info"
+
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    legal_name = Column(String(200), nullable=False)
+    tax_id = Column(String(20), nullable=False)
+    tax_condition = Column(String(50), nullable=False)
+    billing_address = Column(String(300), nullable=False)
+    city = Column(String(100), nullable=True)
+    province = Column(String(100), nullable=True)
+    postal_code = Column(String(20), nullable=True)
+    billing_email = Column(String(255), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+
+    user = relationship("User", back_populates="billing_info")
+
+    def __repr__(self):
+        return f"<UserBillingInfo(user_id={self.user_id}, tax_id={self.tax_id})>"

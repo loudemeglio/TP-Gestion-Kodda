@@ -1909,6 +1909,29 @@ a.kodda-admin-task-card:hover .kodda-admin-task-card-cta {
   grid-column: 1 / -1;
 }
 
+/* Facturación: CUIT/CUIL con formato XX-XXXXXXXX-X (13 caracteres visibles) */
+.kodda-profile-stat-grid--billing {
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+}
+
+.kodda-profile-stat--cuit {
+  grid-column: span 2;
+  min-width: 14.75rem;
+}
+
+.kodda-profile-stat-value--cuit {
+  white-space: nowrap;
+  letter-spacing: 0.03em;
+  font-size: 1.05rem;
+}
+
+@media (max-width: 420px) {
+  .kodda-profile-stat--cuit {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+}
+
 .kodda-profile-stat-icon {
   font-size: 1.1rem;
   line-height: 1;

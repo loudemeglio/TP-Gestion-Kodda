@@ -209,6 +209,24 @@ export default function ProfileView() {
                     ›
                   </span>
                 </Link>
+                <Link
+                  to="/datos-facturacion"
+                  className="kodda-profile-view-nav-item"
+                  style={{ textDecoration: 'none', color: 'inherit' }}
+                >
+                  <span className="kodda-profile-view-nav-icon" aria-hidden="true">
+                    🧾
+                  </span>
+                  <span className="kodda-profile-view-nav-text">
+                    <span className="kodda-profile-view-nav-title">Datos de facturación</span>
+                    <span className="kodda-profile-view-nav-desc">
+                      Ver y editar la información para recibir tu factura
+                    </span>
+                  </span>
+                  <span className="kodda-profile-view-nav-chevron" aria-hidden="true">
+                    ›
+                  </span>
+                </Link>
               </div>
             </div>
           </>
