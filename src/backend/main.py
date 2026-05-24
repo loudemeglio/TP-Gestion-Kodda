@@ -11,9 +11,11 @@ from app.users.routes.auth import router as auth_router
 from app.users.routes.users import router as users_router
 from app.products.routes.products import router as catalog_router
 from app.cart.routes.cart import router as cart_router
+from app.orders.routes.orders import router as orders_router
 import app.products.models  # noqa: F401 — registra metadata antes de create_all
 import app.cart.models  # noqa: F401 — registra metadata antes de create_all
 import app.users.models  # noqa: F401 — registra metadata antes de create_all
+import app.orders.models  # noqa: F401 — registra metadata antes de create_all
 
 # Los routers importan modelos SQLAlchemy → metadata registrada antes de create_all
 Base.metadata.create_all(bind=engine)
@@ -51,6 +53,7 @@ app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(catalog_router)
 app.include_router(cart_router)
+app.include_router(orders_router)
 
 
 @app.get("/")
@@ -78,6 +81,9 @@ def home():
             "subir_avatar": "POST /api/users/me/avatar",
             "mis_datos_facturacion": "GET /api/users/me/billing",
             "guardar_datos_facturacion": "PUT /api/users/me/billing",
+            "checkout": "POST /api/orders/checkout",
+            "mis_ordenes": "GET /api/orders/me",
+            "detalle_orden": "GET /api/orders/{order_id}",
             "eliminar_usuario": "DELETE /api/users/{user_id}",
             "documentacion": "/docs",
         },

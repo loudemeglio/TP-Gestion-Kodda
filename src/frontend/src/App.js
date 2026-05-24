@@ -18,6 +18,8 @@ import RegisterForm from './components/RegisterForm';
 import MyProducts from './components/MyProducts';
 import BillingInfo from './components/BillingInfo';
 import Cart from './components/Cart';
+import Checkout from './components/Checkout';
+import CheckoutSuccess from './components/CheckoutSuccess';
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
@@ -109,6 +111,22 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <Cart />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/checkout"
+        element={
+          <PrivateRoute>
+            <Checkout />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/checkout/exito/:orderId"
+        element={
+          <PrivateRoute>
+            <CheckoutSuccess />
           </PrivateRoute>
         }
       />
