@@ -73,7 +73,7 @@ $(FRONTEND)/node_modules: $(FRONTEND)/package.json
 	cd $(FRONTEND) && npm install
 
 frontend: $(FRONTEND)/node_modules
-	cd $(FRONTEND) && npm start
+	cd $(FRONTEND) && HOST=0.0.0.0 npm start
 
 # Levanta BD + API + frontend en paralelo (dos procesos en primer plano).
 test: setup-env db-up wait-db

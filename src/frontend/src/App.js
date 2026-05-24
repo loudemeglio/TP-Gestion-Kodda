@@ -16,7 +16,11 @@ import ProfileEdit from './components/ProfileEdit';
 import ProfileView from './components/ProfileView';
 import RegisterForm from './components/RegisterForm';
 import MyProducts from './components/MyProducts';
+import BillingInfo from './components/BillingInfo';
 import Cart from './components/Cart';
+import Checkout from './components/Checkout';
+import CheckoutSuccess from './components/CheckoutSuccess';
+import PayPage from './components/PayPage';
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
@@ -42,6 +46,7 @@ function AdminRoute({ children }) {
 function AppRoutes() {
   return (
     <Routes>
+      <Route path="/pagar/:token" element={<PayPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<RegisterForm />} />
       <Route path="/verify-email" element={<VerifyEmail />} />
@@ -96,10 +101,34 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/datos-facturacion"
+        element={
+          <PrivateRoute>
+            <BillingInfo />
+          </PrivateRoute>
+        }
+      />
+      <Route
         path="/carrito"
         element={
           <PrivateRoute>
             <Cart />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/checkout"
+        element={
+          <PrivateRoute>
+            <Checkout />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/checkout/exito/:orderId"
+        element={
+          <PrivateRoute>
+            <CheckoutSuccess />
           </PrivateRoute>
         }
       />

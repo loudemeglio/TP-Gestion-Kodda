@@ -7,8 +7,17 @@ from app.core.mail_service import send_email
 from app.users.deps.auth import get_current_user, get_current_user_optional, require_admin
 from app.users.models import User, UserRole as UserRoleModel
 from app.users.repositories.user_repository import UserRepository
-from app.users.schemas import UserCreateDTO, UserDTO, UserProfileDTO, UserProfileUpdateDTO, UserUpdateDTO
+from app.users.schemas import (
+    BillingInfoDTO,
+    BillingInfoUpsertDTO,
+    UserCreateDTO,
+    UserDTO,
+    UserProfileDTO,
+    UserProfileUpdateDTO,
+    UserUpdateDTO,
+)
 from app.users.services.auth_service import AuthService
+from app.users.services.billing_service import BillingService
 from app.users.services.email_verification_service import EmailVerificationService
 from app.users.services.profile_service import ProfileService
 from app.users.services.user_service import UserService
@@ -103,6 +112,29 @@ def update_my_profile(
 ):
     try:
         return ProfileService.update_own_profile(db, current_user.id, data)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@router.get("/me/billing", response_model=BillingInfoDTO)
+def get_my_billing(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    try:
+        return BillingService.get_own_billing(db, current_user.id)
+    except LookupError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
+@router.put("/me/billing", response_model=BillingInfoDTO)
+def upsert_my_billing(
+    data: BillingInfoUpsertDTO,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    try:
+        return BillingService.upsert_own_billing(db, current_user.id, data)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 

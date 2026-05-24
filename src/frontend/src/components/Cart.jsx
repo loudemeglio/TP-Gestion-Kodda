@@ -135,9 +135,9 @@ export default function Cart() {
                   <span>Total:</span>
                   <span>${total.toLocaleString('es-AR')}</span>
                 </div>
-                <button type="button" className="kodda-btn-checkout" disabled title="Próximamente: checkout">
+                <Link to="/checkout" className="kodda-btn-checkout kodda-btn-checkout--link">
                   Proceder al pago
-                </button>
+                </Link>
               </div>
             </div>
           )}

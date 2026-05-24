@@ -1,8 +1,9 @@
+import re
 from datetime import datetime
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
 
 class UserRole(str, Enum):
@@ -122,3 +123,66 @@ class UserProfileUpdateDTO(BaseModel):
     shoe_size: Optional[str] = Field(None, max_length=20)
     top_size: Optional[str] = Field(None, max_length=20)
     bottom_size: Optional[str] = Field(None, max_length=20)
+
+
+class TaxCondition(str, Enum):
+    """Condición ante IVA para facturación."""
+
+    CONSUMIDOR_FINAL = "consumidor_final"
+    MONOTRIBUTO = "monotributo"
+    RESPONSABLE_INSCRIPTO = "responsable_inscripto"
+    EXENTO = "exento"
+
+
+class BillingInfoDTO(BaseModel):
+    """Datos de facturación del usuario (lectura)."""
+
+    user_id: int
+    legal_name: str
+    tax_id: str
+    tax_condition: TaxCondition
+    billing_address: str
+    city: Optional[str] = None
+    province: Optional[str] = None
+    postal_code: Optional[str] = None
+    billing_email: str
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+class BillingInfoUpsertDTO(BaseModel):
+    """Creación o reemplazo completo de datos de facturación."""
+
+    legal_name: str = Field(..., min_length=1, max_length=200)
+    tax_id: str = Field(..., min_length=1, max_length=20)
+    tax_condition: TaxCondition
+    billing_address: str = Field(..., min_length=1, max_length=300)
+    city: Optional[str] = Field(None, max_length=100)
+    province: Optional[str] = Field(None, max_length=100)
+    postal_code: Optional[str] = Field(None, max_length=20)
+    billing_email: Optional[EmailStr] = None
+
+    @field_validator("tax_id", mode="before")
+    @classmethod
+    def normalize_tax_id(cls, value: str) -> str:
+        if value is None:
+            return value
+        return re.sub(r"[\s\-]", "", str(value))
+
+    @field_validator("legal_name", "billing_address", mode="before")
+    @classmethod
+    def strip_required_strings(cls, value: str) -> str:
+        if value is None:
+            return value
+        return str(value).strip()
+
+    @field_validator("city", "province", "postal_code", mode="before")
+    @classmethod
+    def strip_optional_strings(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        stripped = str(value).strip()
+        return stripped or None
