@@ -3,6 +3,21 @@
 from sqlalchemy import text
 from sqlalchemy.engine import Engine
 
+# Postgres: nuevos valores de ENUM no pueden usarse en la misma transacción que ADD VALUE.
+_PAYMENT_METHOD_ENUM_VALUES = (
+    "transferencia",
+    "mercado_pago",
+    "tarjeta_credito",
+    "tarjeta_debito",
+)
+
+
+def _ensure_paymentmethod_enum_values(conn) -> None:
+    for value in _PAYMENT_METHOD_ENUM_VALUES:
+        conn.execute(
+            text(f"ALTER TYPE paymentmethod ADD VALUE IF NOT EXISTS '{value}'")
+        )
+
 
 def apply_schema_patches(engine: Engine) -> None:
     """PostgreSQL: columnas nuevas en tablas viejas (p. ej. users sin email_verified_at)."""
@@ -98,21 +113,15 @@ def apply_schema_patches(engine: Engine) -> None:
         conn.execute(
             text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_method VARCHAR(50)")
         )
-        conn.execute(
-            text(
-                """
-                DO $$
-                BEGIN
-                    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'paymentmethod') THEN
-                        ALTER TYPE paymentmethod ADD VALUE IF NOT EXISTS 'transferencia';
-                        ALTER TYPE paymentmethod ADD VALUE IF NOT EXISTS 'mercado_pago';
-                        ALTER TYPE paymentmethod ADD VALUE IF NOT EXISTS 'tarjeta_credito';
-                        ALTER TYPE paymentmethod ADD VALUE IF NOT EXISTS 'tarjeta_debito';
-                    END IF;
-                END $$;
-                """
-            )
-        )
+
+        enum_exists = conn.execute(
+            text("SELECT 1 FROM pg_type WHERE typname = 'paymentmethod'")
+        ).scalar()
+        if enum_exists:
+            _ensure_paymentmethod_enum_values(conn)
+
+    # Segunda transacción: usar valores del enum recién agregados (requiere commit previo).
+    with engine.begin() as conn:
         conn.execute(
             text(
                 "UPDATE orders SET payment_method = 'mercado_pago' "
