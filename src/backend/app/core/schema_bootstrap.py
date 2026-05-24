@@ -100,7 +100,22 @@ def apply_schema_patches(engine: Engine) -> None:
         )
         conn.execute(
             text(
-                "UPDATE orders SET payment_method = 'transferencia' "
+                """
+                DO $$
+                BEGIN
+                    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'paymentmethod') THEN
+                        ALTER TYPE paymentmethod ADD VALUE IF NOT EXISTS 'transferencia';
+                        ALTER TYPE paymentmethod ADD VALUE IF NOT EXISTS 'mercado_pago';
+                        ALTER TYPE paymentmethod ADD VALUE IF NOT EXISTS 'tarjeta_credito';
+                        ALTER TYPE paymentmethod ADD VALUE IF NOT EXISTS 'tarjeta_debito';
+                    END IF;
+                END $$;
+                """
+            )
+        )
+        conn.execute(
+            text(
+                "UPDATE orders SET payment_method = 'mercado_pago' "
                 "WHERE payment_method IS NULL"
             )
         )
