@@ -241,7 +241,6 @@ export default function PublishProduct() {
             {GEMINI_URL ? (
               <>
                 <p className="kodda-auth-optional-note">
-                  <span className="kodda-badge-ia">IA · Gemini</span>{' '}
                   Subí una foto y la IA completa los datos automáticamente.
                 </p>
 

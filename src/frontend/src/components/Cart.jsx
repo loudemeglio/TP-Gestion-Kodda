@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCarrito } from '../context/CarritoContext';
@@ -8,6 +9,7 @@ import '../styles/cart.css';
 export default function Cart() {
   const { user, logout } = useAuth();
   const { items, eliminarDelCarrito, incrementarCantidad, decrementarCantidad, obtenerTotal, vaciarCarrito } = useCarrito();
+  const [menuOpen, setMenuOpen] = useState(false);
   const initial = (user?.username || user?.email || '?').charAt(0).toUpperCase();
 
   const total = obtenerTotal();
@@ -21,7 +23,16 @@ export default function Cart() {
           <input type="search" placeholder='Probá: "ropa para boda de día en noviembre"' disabled />
         </div>
         <div className="kodda-topbar-spacer" />
-        <nav className="kodda-nav-actions" aria-label="Acciones principales">
+        
+        <button 
+          className="kodda-hamburger" 
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Toggle menu"
+        >
+          {menuOpen ? '✕' : '☰'}
+        </button>
+
+        <nav className={`kodda-nav-actions-collapsible ${menuOpen ? 'open' : ''}`} aria-label="Acciones principales">
           <Link to="/" className="kodda-btn-accent-outline">
             Volver al feed
           </Link>

@@ -17,6 +17,7 @@ import { useCallback, useEffect, useState } from 'react';
 export default function ConsumerHome({ allowAdminPreview = false }) {
   const { user, logout, avatarVersion } = useAuth();
   const { agregarAlCarrito, obtenerCantidadTotal } = useCarrito();
+  const [menuOpen, setMenuOpen] = useState(false);
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -81,7 +82,16 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
           <input type="search" placeholder='Probá: "ropa para boda de día en noviembre"' disabled />
         </div>
         <div className="kodda-topbar-spacer" />
-        <nav className="kodda-nav-actions" aria-label="Acciones principales">
+        
+        <button 
+          className="kodda-hamburger" 
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Toggle menu"
+        >
+          {menuOpen ? '✕' : '☰'}
+        </button>
+
+        <nav className={`kodda-nav-actions-collapsible ${menuOpen ? 'open' : ''}`} aria-label="Acciones principales">
           {showAdminPreviewBar ? (
             <Link to="/admin" className="kodda-btn-accent-outline" title="Ir al panel de administración">
               Panel admin
