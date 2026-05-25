@@ -39,9 +39,11 @@ export default function CheckoutSuccess() {
       <header className="kodda-topbar">
         <KoddaLogo compact />
         <div className="kodda-topbar-spacer" />
-        <Link to="/" className="kodda-btn-ghost">
-          Inicio
-        </Link>
+        <nav className="kodda-nav-actions" aria-label="Navegación">
+          <Link to="/" className="kodda-btn-ghost">
+            Inicio
+          </Link>
+        </nav>
       </header>
 
       <main className="kodda-profile-edit-layout kodda-checkout-success-card">

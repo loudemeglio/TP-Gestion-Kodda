@@ -197,7 +197,18 @@ export default function PublishProduct() {
   }
 
   return (
-    <div className="kodda-auth-root">
+    <div className="kodda-home">
+      <header className="kodda-topbar">
+        <KoddaLogo compact />
+        <div className="kodda-topbar-spacer" />
+        <nav className="kodda-nav-actions" aria-label="Navegación">
+          <Link to="/" className="kodda-btn-ghost">
+            ← Inicio
+          </Link>
+        </nav>
+      </header>
+
+      <div className="kodda-auth-root" style={{ minHeight: 'auto', flex: 1 }}>
       <aside className="kodda-auth-brand" aria-hidden="false">
         <div className="kodda-auth-brand-inner">
           <KoddaLogo />
@@ -230,7 +241,6 @@ export default function PublishProduct() {
             {GEMINI_URL ? (
               <>
                 <p className="kodda-auth-optional-note">
-                  <span className="kodda-badge-ia">IA · Gemini</span>{' '}
                   Subí una foto y la IA completa los datos automáticamente.
                 </p>
 
@@ -362,6 +372,7 @@ export default function PublishProduct() {
           </div>
         </div>
       </main>
+      </div>
     </div>
   );
 }

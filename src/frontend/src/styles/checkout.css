@@ -187,9 +187,10 @@
 
 .kodda-payment-method-option {
   display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  padding: 0.75rem 1rem;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 0.85rem 1rem;
+  min-height: 48px;
   border: 1px solid var(--kd-line);
   border-radius: var(--kd-radius-sm);
   background: var(--kd-paper);
@@ -244,8 +245,14 @@
 
 .kodda-payment-details-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.85rem 1rem;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .kodda-payment-details-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .kodda-payment-details-grid .kodda-payment-details-grid-full {
@@ -258,12 +265,6 @@
   margin-top: 0.2rem;
 }
 
-@media (max-width: 640px) {
-  .kodda-payment-details-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
 /* Billetera virtual (QR) */
 .kodda-wallet-qr {
   margin: 0;
@@ -271,11 +272,19 @@
 
 .kodda-wallet-qr-steps {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem 1rem;
+  flex-direction: column;
+  gap: 0.65rem;
   list-style: none;
   margin: 0 0 1.25rem;
   padding: 0;
+}
+
+@media (min-width: 640px) {
+  .kodda-wallet-qr-steps {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+  }
 }
 
 .kodda-wallet-qr-step {
@@ -383,11 +392,14 @@
 }
 
 .kodda-wallet-qr-frame {
-  padding: 0.75rem;
+  position: relative;
+  width: min(200px, 80vw);
+  aspect-ratio: 1 / 1;
   background: #fff;
-  border-radius: var(--kd-radius-sm);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  margin-bottom: 1rem;
+  border-radius: 12px;
+  padding: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  margin: 0 auto 1.5rem;
 }
 
 .kodda-wallet-qr-code {
@@ -528,14 +540,3 @@
   text-align: center;
 }
 
-@media (max-width: 640px) {
-  .kodda-wallet-qr-steps {
-    flex-direction: column;
-    gap: 0.65rem;
-  }
-
-  .kodda-wallet-qr-frame .kodda-wallet-qr-code {
-    width: 180px !important;
-    height: 180px !important;
-  }
-}
