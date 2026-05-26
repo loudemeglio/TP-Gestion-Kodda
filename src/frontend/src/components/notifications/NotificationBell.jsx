@@ -56,6 +56,11 @@ export default function NotificationBell() {
       // el del vendedor contiene "confirmada" (Compra confirmada).
       const isBuyerNotif = notif.title.startsWith('¡Compra');
       navigate(isBuyerNotif ? `/mis-compras/${notif.order_id}` : `/mis-ventas/${notif.order_id}`);
+    } else if (
+      notif.title &&
+      notif.title.toLowerCase().includes('administrativa')
+    ) {
+      navigate('/admin/moderation');
     }
   }
 

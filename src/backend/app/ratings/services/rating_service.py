@@ -5,6 +5,7 @@ from app.orders.repositories.order_repository import OrderRepository
 from app.ratings.models import SellerRating, SellerReviewQueue
 from app.ratings.repositories.rating_repository import RatingRepository
 from app.users.repositories.user_repository import UserRepository
+from app.moderation.services.scam_moderation_service import ScamModerationService
 
 
 SCAM_REVIEW_THRESHOLD = 3
@@ -72,6 +73,12 @@ class RatingService:
                         reason=f"Acumuló {scam_count} reportes de posible estafa.",
                     ),
                 )
+
+            ScamModerationService.maybe_flag_seller_and_notify_admins(
+                db,
+                seller_id=seller_id,
+                scam_count=scam_count,
+            )
 
         return created
 

@@ -40,6 +40,9 @@ def apply_schema_patches(engine: Engine) -> None:
         conn.execute(
             text("ALTER TABLE users ADD COLUMN IF NOT EXISTS scam_report_count INTEGER DEFAULT 0")
         )
+        conn.execute(
+            text("ALTER TABLE users ADD COLUMN IF NOT EXISTS needs_review BOOLEAN DEFAULT FALSE")
+        )
 
         conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS is_paused BOOLEAN DEFAULT FALSE"))
         conn.execute(
@@ -279,5 +282,25 @@ def apply_schema_patches(engine: Engine) -> None:
             text(
                 "CREATE INDEX IF NOT EXISTS ix_notifications_user_id "
                 "ON notifications (user_id)"
+            )
+        )
+
+        conn.execute(
+            text(
+                """
+                CREATE TABLE IF NOT EXISTS system_settings (
+                    key VARCHAR(100) PRIMARY KEY,
+                    value INTEGER NOT NULL
+                )
+                """
+            )
+        )
+        conn.execute(
+            text(
+                """
+                INSERT INTO system_settings (key, value)
+                VALUES ('max_scam_reports', 1)
+                ON CONFLICT (key) DO NOTHING
+                """
             )
         )

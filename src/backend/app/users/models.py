@@ -49,6 +49,7 @@ class User(Base):
     # Reputación / alertas (extensible para futuras US)
     is_flagged = Column(Boolean, default=False, nullable=False)
     scam_report_count = Column(Integer, default=0, nullable=False)
+    needs_review = Column(Boolean, default=False, nullable=False)
 
     refresh_tokens = relationship("RefreshToken", back_populates="user", cascade="all, delete-orphan")
     email_verification_tokens = relationship(

@@ -1,6 +1,7 @@
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { KoddaLogo } from '../KoddaLogo';
+import NotificationBell from '../notifications/NotificationBell';
 
 export default function AdminLayout() {
   const { user, logout } = useAuth();
@@ -18,6 +19,7 @@ export default function AdminLayout() {
         <p className="kodda-admin-topbar-tagline">Gestioná la plataforma por fuera de la experiencia de compra/venta.</p>
         <div className="kodda-admin-topbar-spacer" />
         <nav className="kodda-admin-topnav" aria-label="Sesión">
+          <NotificationBell />
           <div className="kodda-user-chip kodda-user-chip--admin">
             <span className="kodda-avatar" aria-hidden="true">
               {initial}
@@ -62,6 +64,17 @@ export default function AdminLayout() {
               👥
             </span>
             Usuarios
+          </NavLink>
+          <NavLink
+            to="/admin/moderation"
+            className={({ isActive }) =>
+              `kodda-admin-navlink${isActive ? ' kodda-admin-navlink--active' : ''}`
+            }
+          >
+            <span className="kodda-admin-navlink-icon" aria-hidden="true">
+              ⚑
+            </span>
+            Moderación
           </NavLink>
 
           <p className="kodda-admin-nav-eyebrow kodda-admin-nav-eyebrow--spaced">Prototipo</p>
