@@ -229,11 +229,6 @@ export default function PublishProduct() {
             {/* IA Section — only shown if API key is available */}
             {GEMINI_URL ? (
               <>
-                <p className="kodda-auth-optional-note">
-                  <span className="kodda-badge-ia">IA · Gemini</span>{' '}
-                  Subí una foto y la IA completa los datos automáticamente.
-                </p>
-
                 <label className="kodda-field">
                   <span>Foto de la prenda (opcional)</span>
                   <input

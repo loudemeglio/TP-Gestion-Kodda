@@ -1620,9 +1620,9 @@ a.kodda-admin-task-card:hover .kodda-admin-task-card-cta {
 }
 
 .kodda-profile-edit-layout {
-  max-width: 640px;
+  max-width: 700px;
   margin: 0 auto;
-  padding: 0 clamp(1rem, 3vw, 2rem) 2.5rem;
+  padding: 0 clamp(1rem, 3vw, 2.5rem) 2.5rem;
 }
 
 .kodda-profile-edit-hero {
@@ -1674,6 +1674,7 @@ a.kodda-admin-task-card:hover .kodda-admin-task-card-cta {
   border: 1px solid var(--kd-line);
   box-shadow: var(--kd-shadow);
   overflow: hidden;
+  padding: 1.5rem 1.75rem;
 }
 
 .kodda-profile-edit-section {
@@ -1796,7 +1797,8 @@ a.kodda-admin-task-card:hover .kodda-admin-task-card-cta {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.75rem 1rem;
-  padding: 1.25rem 1.5rem;
+  margin: 1.5rem -1.75rem -1.5rem -1.75rem;
+  padding: 1.5rem 1.75rem;
   background: var(--kd-paper);
   border-top: 1px solid var(--kd-line);
 }

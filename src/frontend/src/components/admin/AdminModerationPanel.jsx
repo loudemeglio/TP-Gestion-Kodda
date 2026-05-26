@@ -113,7 +113,7 @@ export default function AdminModerationPanel() {
               </p>
 
               <label className="kodda-field">
-                <span>max_scam_reports</span>
+                <span>Reportes para analisis</span>
                 <input
                   className="kodda-input"
                   type="number"
