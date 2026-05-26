@@ -234,6 +234,42 @@ export default function ProfileView() {
                   </span>
                 </Link>
                 <Link
+                  to={`/vendedores/${user?.id}`}
+                  className="kodda-profile-view-nav-item"
+                  style={{ textDecoration: 'none', color: 'inherit' }}
+                >
+                  <span className="kodda-profile-view-nav-icon" aria-hidden="true">
+                    ⭐
+                  </span>
+                  <span className="kodda-profile-view-nav-text">
+                    <span className="kodda-profile-view-nav-title">Mi reputación como vendedor</span>
+                    <span className="kodda-profile-view-nav-desc">
+                      Historial de calificaciones y reseñas de tus compradores
+                    </span>
+                  </span>
+                  <span className="kodda-profile-view-nav-chevron" aria-hidden="true">
+                    ›
+                  </span>
+                </Link>
+                <Link
+                  to="/mi-reputacion-comprador"
+                  className="kodda-profile-view-nav-item"
+                  style={{ textDecoration: 'none', color: 'inherit' }}
+                >
+                  <span className="kodda-profile-view-nav-icon" aria-hidden="true">
+                    🛒
+                  </span>
+                  <span className="kodda-profile-view-nav-text">
+                    <span className="kodda-profile-view-nav-title">Mi reputación como comprador</span>
+                    <span className="kodda-profile-view-nav-desc">
+                      Reseñas que los vendedores dejaron sobre tus compras
+                    </span>
+                  </span>
+                  <span className="kodda-profile-view-nav-chevron" aria-hidden="true">
+                    ›
+                  </span>
+                </Link>
+                <Link
                   to="/mis-publicaciones"
                   className="kodda-profile-view-nav-item"
                   style={{ textDecoration: 'none', color: 'inherit' }}

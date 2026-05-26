@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.products.filters import ProductCatalogFilters, apply_catalog_filters
 from app.products.models import Product
@@ -39,7 +39,14 @@ class ProductRepository:
     @staticmethod
     def get_all_active(db: Session, skip: int = 0, limit: int = 100):
         """Obtener todos los productos activos (no pausados) con paginación."""
-        return db.query(Product).filter(Product.is_paused == False).offset(skip).limit(limit).all()
+        return (
+            db.query(Product)
+            .options(joinedload(Product.seller))
+            .filter(Product.is_paused == False)
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
     @staticmethod
     def get_all_active_except_user(
@@ -50,9 +57,13 @@ class ProductRepository:
         filters: ProductCatalogFilters | None = None,
     ):
         """Obtener productos activos de otros usuarios, con filtros opcionales del catálogo."""
-        query = db.query(Product).filter(
-            Product.is_paused == False,
-            Product.seller_id != user_id,
+        query = (
+            db.query(Product)
+            .options(joinedload(Product.seller))
+            .filter(
+                Product.is_paused == False,
+                Product.seller_id != user_id,
+            )
         )
         if filters is not None and filters.is_active():
             query = apply_catalog_filters(query, filters)

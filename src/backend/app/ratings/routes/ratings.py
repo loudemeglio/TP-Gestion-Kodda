@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.ratings.schemas import SellerRatingCreateDTO, SellerRatingDTO
+from app.ratings.schemas import SellerRatingCreateDTO, SellerRatingDTO, SellerReputationDTO
 from app.ratings.services.rating_service import RatingService
+from app.ratings.services.seller_reputation_service import SellerReputationService
 from app.users.deps.auth import get_current_user
 from app.users.models import User
 
@@ -34,4 +35,24 @@ def rate_seller_for_order(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@router.get("/sellers/{seller_id}/reputation", response_model=SellerReputationDTO)
+def get_seller_reputation(
+    seller_id: int,
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=20, ge=1, le=100),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Perfil público de reputación de un vendedor.
+
+    Devuelve puntaje consolidado, métricas de veracidad/envío y lista paginada de
+    calificaciones (sin reportes de estafa).
+    """
+    try:
+        return SellerReputationService.get_seller_reputation(db, seller_id, skip=skip, limit=limit)
+    except LookupError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 

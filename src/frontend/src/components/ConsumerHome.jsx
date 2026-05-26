@@ -182,6 +182,16 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
                 </div>
                 <div className="kodda-card-body">
                   <h3>{producto.name}</h3>
+                  <p className="kodda-card-meta" style={{ marginTop: '0.15rem', marginBottom: '0.4rem' }}>
+                    Publicada por{' '}
+                    <Link
+                      to={`/vendedores/${producto.seller_id}`}
+                      className="kodda-auth-link"
+                      title="Ver reputación del vendedor"
+                    >
+                      {producto.seller_username || `#${producto.seller_id}`}
+                    </Link>
+                  </p>
                   <p className="kodda-card-meta">{producto.category}</p>
                   <p className="kodda-card-meta">Talle: {producto.size || '—'}</p>
                   <div className="kodda-price">${producto.price.toLocaleString('es-AR')}</div>

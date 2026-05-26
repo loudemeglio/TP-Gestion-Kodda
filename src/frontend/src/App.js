@@ -26,6 +26,8 @@ import MySales from './components/orders/MySales';
 import PurchaseOrderDetail from './components/orders/PurchaseOrderDetail';
 import SaleOrderDetail from './components/orders/SaleOrderDetail';
 import BuyerPublicProfile from './components/profile/BuyerPublicProfile';
+import SellerPublicProfile from './components/profile/SellerPublicProfile';
+import BuyerOwnReputationProfile from './components/profile/BuyerOwnReputationProfile';
 import PayPage from './components/PayPage';
 
 function PrivateRoute({ children }) {
@@ -167,6 +169,22 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <BuyerPublicProfile />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/vendedores/:sellerId"
+        element={
+          <PrivateRoute>
+            <SellerPublicProfile />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/mi-reputacion-comprador"
+        element={
+          <PrivateRoute>
+            <BuyerOwnReputationProfile />
           </PrivateRoute>
         }
       />
