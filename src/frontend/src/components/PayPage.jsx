@@ -71,6 +71,7 @@ export default function PayPage() {
     <div className="kodda-home kodda-pay-page">
       <header className="kodda-topbar">
         <KoddaLogo compact />
+        <div className="kodda-topbar-spacer" />
       </header>
 
       <main className="kodda-pay-page-main">

@@ -71,9 +71,11 @@ export default function Checkout() {
         <header className="kodda-topbar">
           <KoddaLogo compact />
           <div className="kodda-topbar-spacer" />
-          <Link to="/carrito" className="kodda-btn-ghost">
-            Volver al carrito
-          </Link>
+          <nav className="kodda-nav-actions" aria-label="Navegación">
+            <Link to="/carrito" className="kodda-btn-ghost">
+              Volver al carrito
+            </Link>
+          </nav>
         </header>
         <main className="kodda-checkout-main">
           <p className="kodda-auth-muted">Tu carrito está vacío.</p>
