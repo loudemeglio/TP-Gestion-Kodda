@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session, joinedload
 
+from app.notifications.services.notification_service import NotificationService
 from app.orders.models import Invoice, Order, OrderItem, PaymentMethod
 
 
@@ -72,4 +73,46 @@ class OrderRepository:
 
         db.commit()
         db.refresh(order)
+        order_full = (
+            db.query(Order)
+            .options(joinedload(Order.items))
+            .filter(Order.id == order.id)
+            .first()
+        )
+        if order_full:
+            NotificationService.on_order_confirmed(db, order_full)
         return OrderRepository.get_by_id_for_user(db, order.id, user_id)
+
+    @staticmethod
+    def get_by_id_for_seller(db: Session, order_id: int, seller_id: int) -> Order | None:
+        order = (
+            db.query(Order)
+            .options(joinedload(Order.items), joinedload(Order.invoice))
+            .filter(Order.id == order_id)
+            .first()
+        )
+        if not order:
+            return None
+        seller_items = [i for i in (order.items or []) if i.seller_id == seller_id]
+        if not seller_items:
+            return None
+        order.items = seller_items
+        return order
+
+    @staticmethod
+    def list_for_seller(db: Session, seller_id: int, skip: int = 0, limit: int = 50) -> list[Order]:
+        order_ids = (
+            db.query(OrderItem.order_id)
+            .filter(OrderItem.seller_id == seller_id)
+            .distinct()
+            .subquery()
+        )
+        return (
+            db.query(Order)
+            .options(joinedload(Order.items))
+            .filter(Order.id.in_(order_ids))
+            .order_by(Order.created_at.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )

@@ -1,40 +1,16 @@
-import { useEffect, useState } from 'react';
-import { Link, useLocation, useParams } from 'react-router-dom';
-import { api } from '../api/client';
-import BillingView from './billing/BillingView';
-import { formatTaxIdDisplay } from './billing/billingUtils';
-import { PAYMENT_METHOD_LABELS } from './checkout/paymentMethods';
-import { KoddaLogo } from './KoddaLogo';
-import '../styles/checkout.css';
+import { useLocation, useParams } from 'react-router-dom';
+import PurchaseOrderDetail from './orders/PurchaseOrderDetail';
 
 export default function CheckoutSuccess() {
   const { orderId } = useParams();
   const location = useLocation();
-  const [order, setOrder] = useState(location.state?.order ?? null);
-  const [loading, setLoading] = useState(!location.state?.order);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    if (order) return undefined;
-    let cancelled = false;
-    (async () => {
-      try {
-        const { data } = await api.get(`/api/orders/${orderId}`);
-        if (!cancelled) setOrder(data);
-      } catch (err) {
-        if (!cancelled) {
-          setError(err.response?.data?.detail || 'No se pudo cargar la orden.');
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [order, orderId]);
 
   return (
+    <PurchaseOrderDetail
+      orderId={orderId}
+      initialOrder={location.state?.order ?? null}
+      showSuccessHero
+    />
     <div className="kodda-home kodda-profile-edit-page">
       <header className="kodda-topbar">
         <KoddaLogo compact />
