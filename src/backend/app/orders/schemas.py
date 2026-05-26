@@ -61,6 +61,10 @@ class OrderDetailDTO(BaseModel):
     created_at: datetime
     items: list[OrderItemDTO]
     invoice: InvoiceDTO
+    rated_seller_ids: list[int] = Field(
+        default_factory=list,
+        description="IDs de vendedores ya calificados por el comprador en esta orden",
+    )
 
     class Config:
         from_attributes = True

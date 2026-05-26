@@ -4,6 +4,7 @@ from app.cart.repositories.cart_repository import CartRepository
 from app.orders.models import Order, PaymentMethod
 from app.orders.repositories.order_repository import OrderRepository
 from app.orders.schemas import InvoiceDTO, OrderDetailDTO, OrderItemDTO, OrderSummaryDTO
+from app.ratings.services.rating_service import RatingService
 from app.users.repositories.billing_repository import BillingRepository
 from app.users.schemas import BillingInfoUpsertDTO
 from app.users.services.billing_service import BillingService
@@ -11,7 +12,7 @@ from app.users.services.billing_service import BillingService
 
 class CheckoutService:
     @staticmethod
-    def _order_to_detail(order: Order) -> OrderDetailDTO:
+    def _order_to_detail(order: Order, db: Session | None = None) -> OrderDetailDTO:
         items = [
             OrderItemDTO(
                 id=item.id,
@@ -30,6 +31,10 @@ class CheckoutService:
         else:
             payment_value = str(payment)
 
+        rated_seller_ids: list[int] = []
+        if db is not None:
+            rated_seller_ids = RatingService.rated_seller_ids_for_order(db, order.id, order.user_id)
+
         return OrderDetailDTO(
             id=order.id,
             user_id=order.user_id,
@@ -40,6 +45,7 @@ class CheckoutService:
             created_at=order.created_at,
             items=items,
             invoice=InvoiceDTO.model_validate(order.invoice),
+            rated_seller_ids=rated_seller_ids,
         )
 
     @staticmethod
@@ -132,14 +138,14 @@ class CheckoutService:
 
         CartRepository.clear(db, user_id)
 
-        return CheckoutService._order_to_detail(order)
+        return CheckoutService._order_to_detail(order, db)
 
     @staticmethod
     def get_order(db: Session, user_id: int, order_id: int) -> OrderDetailDTO:
         order = OrderRepository.get_by_id_for_user(db, order_id, user_id)
         if not order:
             raise LookupError("Orden no encontrada.")
-        return CheckoutService._order_to_detail(order)
+        return CheckoutService._order_to_detail(order, db)
 
     @staticmethod
     def list_my_orders(db: Session, user_id: int, skip: int = 0, limit: int = 50) -> list[OrderSummaryDTO]:

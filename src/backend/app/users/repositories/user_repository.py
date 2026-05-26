@@ -167,3 +167,15 @@ class UserRepository:
     def get_by_role(db: Session, role: UserRole, skip: int = 0, limit: int = 100):
         """Obtener todos los usuarios con un rol específico"""
         return db.query(User).filter(User.role == role).offset(skip).limit(limit).all()
+
+    @staticmethod
+    def apply_scam_report(db: Session, seller_id: int) -> User | None:
+        """Marca al vendedor y suma un reporte de estafa (no destructivo)."""
+        db_user = UserRepository.get_by_id(db, seller_id)
+        if not db_user:
+            return None
+        db_user.is_flagged = True
+        db_user.scam_report_count = (db_user.scam_report_count or 0) + 1
+        db.commit()
+        db.refresh(db_user)
+        return db_user

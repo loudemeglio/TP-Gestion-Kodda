@@ -82,6 +82,9 @@ export default function ProfileView() {
           <Link to="/" className="kodda-btn-ghost">
             Inicio
           </Link>
+          <Link to="/mis-compras" className="kodda-btn-ghost">
+            Mis compras
+          </Link>
           <Link to="/perfil/editar" className="kodda-btn-accent-outline">
             Editar
           </Link>
@@ -191,6 +194,24 @@ export default function ProfileView() {
               </section>
 
               <div className="kodda-profile-view-nav">
+                <Link
+                  to="/mis-compras"
+                  className="kodda-profile-view-nav-item"
+                  style={{ textDecoration: 'none', color: 'inherit' }}
+                >
+                  <span className="kodda-profile-view-nav-icon" aria-hidden="true">
+                    🛍️
+                  </span>
+                  <span className="kodda-profile-view-nav-text">
+                    <span className="kodda-profile-view-nav-title">Mis compras</span>
+                    <span className="kodda-profile-view-nav-desc">
+                      Historial de pedidos y calificación de vendedores
+                    </span>
+                  </span>
+                  <span className="kodda-profile-view-nav-chevron" aria-hidden="true">
+                    ›
+                  </span>
+                </Link>
                 <Link
                   to="/mis-publicaciones"
                   className="kodda-profile-view-nav-item"

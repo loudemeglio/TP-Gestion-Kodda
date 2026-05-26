@@ -1,0 +1,267 @@
+/* Mis compras — listado y detalle de órdenes */
+
+.kodda-purchases-layout {
+  max-width: 48rem;
+}
+
+.kodda-order-detail-layout {
+  max-width: 44rem;
+}
+
+.kodda-purchases-card {
+  padding: 0;
+}
+
+.kodda-purchases-empty {
+  padding: 2rem 1.5rem;
+  margin: 0;
+  text-align: center;
+}
+
+.kodda-rating-section-inner {
+  width: 100%;
+}
+
+.kodda-purchases-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.kodda-purchase-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1.25rem 1.5rem;
+  align-items: center;
+  padding: 1.35rem 1.5rem;
+  border-bottom: 1px solid var(--kd-line);
+}
+
+.kodda-purchase-card:last-child {
+  border-bottom: none;
+}
+
+.kodda-purchase-card-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--kd-ink);
+}
+
+.kodda-purchase-card-meta {
+  margin: 0 0 0.35rem;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--kd-mist);
+}
+
+.kodda-purchase-card-meta:last-child {
+  margin-bottom: 0;
+}
+
+.kodda-purchase-card-aside {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.75rem;
+  min-width: 9.5rem;
+}
+
+.kodda-purchase-card-price {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--kd-ink);
+  white-space: nowrap;
+}
+
+.kodda-purchase-card-cta {
+  white-space: nowrap;
+  padding: 0.55rem 1.1rem;
+  font-size: 0.88rem;
+}
+
+/* Detalle de orden — secciones internas */
+.kodda-order-detail-card {
+  padding: 0;
+}
+
+.kodda-order-section {
+  padding: 1.35rem 1.5rem;
+  border-bottom: 1px solid var(--kd-line);
+}
+
+.kodda-order-section:last-of-type {
+  border-bottom: none;
+}
+
+.kodda-order-section--summary .kodda-order-section-title {
+  margin: 0 0 1rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  font-family: var(--kd-display);
+  color: var(--kd-ink);
+}
+
+.kodda-order-meta-grid {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0;
+}
+
+.kodda-order-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.35rem 1rem;
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.kodda-order-meta-row dt {
+  margin: 0;
+  color: var(--kd-mist);
+  font-weight: 500;
+}
+
+.kodda-order-meta-row dd {
+  margin: 0;
+  color: var(--kd-ink);
+  font-weight: 600;
+  text-align: right;
+}
+
+.kodda-order-section .kodda-profile-edit-section-title {
+  margin: 0 0 1rem;
+}
+
+.kodda-order-invoice-cuit {
+  margin-bottom: 1rem;
+}
+
+.kodda-order-section .kodda-checkout-items {
+  margin: 0;
+  gap: 0;
+}
+
+.kodda-order-section .kodda-checkout-item {
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--kd-line);
+}
+
+.kodda-order-section .kodda-checkout-item:first-child {
+  padding-top: 0;
+}
+
+.kodda-order-section .kodda-checkout-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.kodda-order-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid var(--kd-line);
+  background: rgba(247, 244, 238, 0.35);
+}
+
+/* Banner: calificar desde mis compras (post-checkout) */
+.kodda-rating-hint {
+  display: flex;
+  gap: 1.15rem;
+  align-items: flex-start;
+  background: linear-gradient(
+    135deg,
+    rgba(15, 118, 110, 0.1) 0%,
+    rgba(20, 184, 166, 0.06) 55%,
+    rgba(255, 255, 255, 0) 100%
+  );
+}
+
+.kodda-rating-hint-icon {
+  flex-shrink: 0;
+  width: 2.75rem;
+  height: 2.75rem;
+  display: grid;
+  place-items: center;
+  font-size: 1.35rem;
+  border-radius: 12px;
+  background: rgba(15, 118, 110, 0.12);
+  border: 1px solid rgba(15, 118, 110, 0.22);
+  color: #ca8a04;
+}
+
+.kodda-rating-hint-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.kodda-rating-hint-title {
+  margin: 0 0 0.4rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  font-family: var(--kd-display);
+  color: var(--kd-ink);
+}
+
+.kodda-rating-hint-text {
+  margin: 0 0 1rem;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--kd-mist);
+  max-width: 40ch;
+}
+
+.kodda-rating-hint-cta {
+  display: inline-block;
+  padding: 0.6rem 1.15rem;
+  font-size: 0.9rem;
+}
+
+/* Bloque calificar vendedor (detalle) */
+.kodda-order-section--rating {
+  background: rgba(247, 244, 238, 0.4);
+}
+
+.kodda-order-section--rating .kodda-checkout-item {
+  align-items: center;
+  padding: 0.85rem 0;
+}
+
+.kodda-order-section--rating .kodda-checkout-item-name {
+  font-size: 1rem;
+}
+
+@media (max-width: 560px) {
+  .kodda-purchase-card {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .kodda-purchase-card-aside {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .kodda-rating-hint {
+    flex-direction: column;
+  }
+
+  .kodda-rating-hint-text {
+    max-width: none;
+  }
+
+  .kodda-rating-hint-cta {
+    width: 100%;
+    text-align: center;
+  }
+}

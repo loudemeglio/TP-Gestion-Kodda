@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from app.ratings.models import RatingKind, SellerRating, SellerReviewQueue
+from app.ratings.models import SellerRating, SellerReviewQueue
 
 
 class RatingRepository:
@@ -19,6 +19,15 @@ class RatingRepository:
         )
 
     @staticmethod
+    def list_rated_seller_ids_for_order(db: Session, order_id: int, buyer_id: int) -> list[int]:
+        rows = (
+            db.query(SellerRating.seller_id)
+            .filter(SellerRating.order_id == order_id, SellerRating.buyer_id == buyer_id)
+            .all()
+        )
+        return [row[0] for row in rows]
+
+    @staticmethod
     def create(db: Session, rating: SellerRating) -> SellerRating:
         db.add(rating)
         db.commit()
@@ -26,10 +35,10 @@ class RatingRepository:
         return rating
 
     @staticmethod
-    def count_negative_for_seller(db: Session, seller_id: int) -> int:
+    def count_scam_reports_for_seller(db: Session, seller_id: int) -> int:
         return (
             db.query(SellerRating)
-            .filter(SellerRating.seller_id == seller_id, SellerRating.kind == RatingKind.NEGATIVE)
+            .filter(SellerRating.seller_id == seller_id, SellerRating.is_scam_report.is_(True))
             .count()
         )
 
@@ -46,4 +55,3 @@ class RatingRepository:
     def enqueue_review(db: Session, row: SellerReviewQueue) -> None:
         db.add(row)
         db.commit()
-

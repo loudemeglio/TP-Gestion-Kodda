@@ -23,9 +23,11 @@ def rate_seller_for_order(
             order_id=order_id,
             buyer_id=current_user.id,
             seller_id=body.seller_id,
-            kind=body.kind,
-            score=body.score,
-            comment=body.comment,
+            stars=body.stars,
+            description=body.description,
+            matches_description=body.matches_description,
+            delivered_on_time=body.delivered_on_time,
+            is_scam_report=body.is_scam_report,
         )
         return SellerRatingDTO.model_validate(rating)
     except LookupError as e:
