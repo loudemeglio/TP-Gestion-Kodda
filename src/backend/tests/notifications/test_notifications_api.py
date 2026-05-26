@@ -46,21 +46,30 @@ def _checkout(client, buyer_headers):
     return r.json()
 
 
-def test_checkout_creates_seller_notification(api_client):
+def test_checkout_creates_seller_and_buyer_notifications(api_client):
     seller_h = _register_and_token(api_client, "notif_seller", "notif_seller@example.com")
     buyer_h = _register_and_token(api_client, "notif_buyer", "notif_buyer@example.com")
     product = _create_product(api_client, seller_h)
     api_client.post(f"/api/cart/items/{product['id']}", headers=buyer_h)
     order = _checkout(api_client, buyer_h)
 
+    # Vendedor recibe notificación de venta confirmada
     r = api_client.get("/api/notifications", headers=seller_h)
     assert r.status_code == 200
-    notifs = r.json()
-    assert len(notifs) >= 1
-    match = [n for n in notifs if n["order_id"] == order["id"]]
-    assert match
-    assert match[0]["is_read"] is False
-    assert "confirmada" in match[0]["title"].lower() or "confirmada" in match[0]["message"].lower()
+    seller_notifs = r.json()
+    seller_match = [n for n in seller_notifs if n["order_id"] == order["id"]]
+    assert seller_match
+    assert seller_match[0]["is_read"] is False
+    assert "confirmada" in seller_match[0]["title"].lower() or "confirmada" in seller_match[0]["message"].lower()
+
+    # Comprador también recibe notificación para calificar al vendedor
+    r2 = api_client.get("/api/notifications", headers=buyer_h)
+    assert r2.status_code == 200
+    buyer_notifs = r2.json()
+    buyer_match = [n for n in buyer_notifs if n["order_id"] == order["id"]]
+    assert buyer_match
+    assert buyer_match[0]["is_read"] is False
+    assert "compra" in buyer_match[0]["title"].lower()
 
 
 def test_mark_notification_read_and_rate_buyer(api_client):

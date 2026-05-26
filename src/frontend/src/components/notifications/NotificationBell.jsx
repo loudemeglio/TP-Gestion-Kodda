@@ -52,7 +52,10 @@ export default function NotificationBell() {
     }
     setOpen(false);
     if (notif.order_id) {
-      navigate(`/mis-ventas/${notif.order_id}`);
+      // El título del comprador contiene "Compra" (¡Compra realizada!),
+      // el del vendedor contiene "confirmada" (Compra confirmada).
+      const isBuyerNotif = notif.title.startsWith('¡Compra');
+      navigate(isBuyerNotif ? `/mis-compras/${notif.order_id}` : `/mis-ventas/${notif.order_id}`);
     }
   }
 
