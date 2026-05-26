@@ -5,7 +5,7 @@ import SellerRatingModal from './SellerRatingModal';
 
 const ORDER_STATUS_RATEABLE = 'confirmed';
 
-export default function SellerRatingSection({ order, onRated, embedded = false }) {
+export default function SellerRatingSection({ order, onRated }) {
   const [ratedIds, setRatedIds] = useState(() => new Set(order?.rated_seller_ids || []));
   const [modalSellerId, setModalSellerId] = useState(null);
   const [error, setError] = useState('');
@@ -49,11 +49,8 @@ export default function SellerRatingSection({ order, onRated, embedded = false }
     }
   }
 
-  const Wrapper = embedded ? 'div' : 'section';
-  const wrapperClass = embedded ? 'kodda-rating-section-inner' : 'kodda-order-section kodda-order-section--rating';
-
   return (
-    <Wrapper className={wrapperClass}>
+    <section className="kodda-checkout-success-section">
       <h2 className="kodda-profile-edit-section-title">Calificar vendedor</h2>
 
       {!canRate ? (
@@ -70,7 +67,7 @@ export default function SellerRatingSection({ order, onRated, embedded = false }
           No se encontró información del vendedor para esta compra.
         </p>
       ) : (
-        <ul className="kodda-checkout-items">
+        <ul className="kodda-checkout-items" style={{ listStyle: 'none', padding: 0 }}>
           {sellerIds.map((sellerId) => {
             const alreadyRated = ratedIds.has(sellerId);
             return (
@@ -86,7 +83,7 @@ export default function SellerRatingSection({ order, onRated, embedded = false }
                 {canRate && !alreadyRated ? (
                   <button
                     type="button"
-                    className="kodda-btn-primary kodda-purchase-card-cta"
+                    className="kodda-btn-primary"
                     disabled={submitting}
                     onClick={() => setModalSellerId(sellerId)}
                   >
@@ -112,6 +109,6 @@ export default function SellerRatingSection({ order, onRated, embedded = false }
           onSubmit={handleSubmit}
         />
       ) : null}
-    </Wrapper>
+    </section>
   );
 }

@@ -4,7 +4,6 @@ import { api } from '../../api/client';
 import { PAYMENT_METHOD_LABELS } from '../checkout/paymentMethods';
 import { KoddaLogo } from '../KoddaLogo';
 import '../../styles/checkout.css';
-import '../../styles/my-purchases.css';
 
 export default function MyOrders() {
   const [orders, setOrders] = useState([]);
@@ -43,46 +42,45 @@ export default function MyOrders() {
         </Link>
       </header>
 
-      <main className="kodda-profile-edit-layout kodda-purchases-layout">
+      <main className="kodda-profile-edit-layout">
         <header className="kodda-profile-edit-hero">
           <p className="kodda-profile-edit-eyebrow">Historial</p>
           <h1 className="kodda-profile-edit-title">Mis compras</h1>
           <p className="kodda-profile-edit-lead">
-            Revisá tus pedidos confirmados y calificá a los vendedores desde el detalle de cada
-            compra.
+            Revisá tus pedidos confirmados y calificá a los vendedores.
           </p>
         </header>
 
-        <div className="kodda-profile-edit-card kodda-purchases-card">
-          {loading ? <p className="kodda-auth-muted kodda-purchases-empty">Cargando compras…</p> : null}
-          {error ? <p className="kodda-auth-error kodda-purchases-empty">{error}</p> : null}
+        <div className="kodda-profile-edit-card">
+          {loading ? <p className="kodda-auth-muted">Cargando compras…</p> : null}
+          {error ? <p className="kodda-auth-error">{error}</p> : null}
 
           {!loading && !error && orders.length === 0 ? (
-            <p className="kodda-auth-muted kodda-purchases-empty">Todavía no tenés compras registradas.</p>
+            <p className="kodda-auth-muted">Todavía no tenés compras registradas.</p>
           ) : null}
 
           {!loading && !error && orders.length > 0 ? (
-            <ul className="kodda-purchases-list">
+            <ul className="kodda-checkout-items" style={{ listStyle: 'none', padding: 0 }}>
               {orders.map((o) => (
-                <li key={o.id} className="kodda-purchase-card">
-                  <div className="kodda-purchase-card-main">
-                    <h2 className="kodda-purchase-card-title">Orden #{o.id}</h2>
-                    <p className="kodda-purchase-card-meta">
-                      {new Date(o.created_at).toLocaleString('es-AR')}
+                <li key={o.id} className="kodda-checkout-item">
+                  <div>
+                    <p className="kodda-checkout-item-name">Orden #{o.id}</p>
+                    <p className="kodda-checkout-item-meta">
+                      {new Date(o.created_at).toLocaleString('es-AR')} · {o.item_count}{' '}
+                      producto{o.item_count !== 1 ? 's' : ''} · {o.status}
                     </p>
-                    <p className="kodda-purchase-card-meta">
-                      {o.item_count} producto{o.item_count !== 1 ? 's' : ''} ·{' '}
-                      <span className="kodda-purchase-card-status">{o.status}</span>
-                    </p>
-                    <p className="kodda-purchase-card-meta">
+                    <p className="kodda-checkout-item-meta">
                       {PAYMENT_METHOD_LABELS[o.payment_method] || o.payment_method}
                     </p>
                   </div>
-                  <div className="kodda-purchase-card-aside">
-                    <p className="kodda-purchase-card-price">${o.total.toLocaleString('es-AR')}</p>
+                  <div style={{ textAlign: 'right' }}>
+                    <p className="kodda-checkout-item-price">
+                      ${o.total.toLocaleString('es-AR')}
+                    </p>
                     <Link
                       to={`/mis-compras/${o.id}`}
-                      className="kodda-btn-primary kodda-purchase-card-cta"
+                      className="kodda-btn-primary"
+                      style={{ marginTop: '0.5rem', display: 'inline-block' }}
                     >
                       {o.status === 'confirmed' ? 'Ver y calificar' : 'Ver detalle'}
                     </Link>
@@ -93,8 +91,6 @@ export default function MyOrders() {
           ) : null}
         </div>
       </main>
-
-      <footer className="kodda-home-footer">Kodda — mis compras</footer>
     </div>
   );
 }

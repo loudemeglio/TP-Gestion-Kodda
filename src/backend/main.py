@@ -14,12 +14,16 @@ from app.cart.routes.cart import router as cart_router
 from app.orders.routes.orders import router as orders_router
 from app.payments.routes.payments import router as payments_router
 from app.ratings.routes.ratings import router as ratings_router
+from app.buyer_reviews.routes.buyer_reviews import router as buyer_reviews_router
+from app.notifications.routes.notifications import router as notifications_router
 import app.products.models  # noqa: F401 — registra metadata antes de create_all
 import app.cart.models  # noqa: F401 — registra metadata antes de create_all
 import app.users.models  # noqa: F401 — registra metadata antes de create_all
 import app.orders.models  # noqa: F401 — registra metadata antes de create_all
 import app.payments.models  # noqa: F401 — registra metadata antes de create_all
 import app.ratings.models  # noqa: F401 — registra metadata antes de create_all
+import app.buyer_reviews.models  # noqa: F401 — registra metadata antes de create_all
+import app.notifications.models  # noqa: F401 — registra metadata antes de create_all
 
 # Los routers importan modelos SQLAlchemy → metadata registrada antes de create_all
 Base.metadata.create_all(bind=engine)
@@ -60,6 +64,8 @@ app.include_router(cart_router)
 app.include_router(orders_router)
 app.include_router(payments_router)
 app.include_router(ratings_router)
+app.include_router(buyer_reviews_router)
+app.include_router(notifications_router)
 
 
 @app.get("/")

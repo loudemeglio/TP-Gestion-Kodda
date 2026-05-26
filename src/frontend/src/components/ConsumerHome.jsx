@@ -4,6 +4,7 @@ import { useCarrito } from '../context/CarritoContext';
 import { resolveMediaUrl } from '../utils/mediaUrl';
 import { buildCatalogQueryParams, hasActiveCatalogFilters } from '../utils/productFilters';
 import { KoddaLogo } from './KoddaLogo';
+import NotificationBell from './notifications/NotificationBell';
 import ProductFilters, { EMPTY_CATALOG_FILTERS } from './ProductFilters';
 import { api } from '../api/client';
 import { useCallback, useEffect, useState } from 'react';
@@ -90,9 +91,13 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
           <Link to="/publicar" className="kodda-btn-accent-outline">
             Vender prenda
           </Link>
+          <Link to="/mis-ventas" className="kodda-btn-ghost">
+            Mis ventas
+          </Link>
           <button type="button" className="kodda-btn-ghost" disabled title="Próximamente">
             Chat Kodda
           </button>
+          <NotificationBell />
           <Link to="/carrito" className="kodda-cart-icon-link" title="Mi carrito">
             🛒
             {cantidadCarrito > 0 && <span className="kodda-cart-badge">{cantidadCarrito}</span>}

@@ -82,6 +82,32 @@ class OrderSummaryDTO(BaseModel):
         from_attributes = True
 
 
+class SellerSaleSummaryDTO(BaseModel):
+    id: int
+    status: str
+    buyer_id: int
+    buyer_username: str
+    seller_total: float
+    created_at: datetime
+    item_count: int
+
+
+class SellerSaleDetailDTO(BaseModel):
+    id: int
+    status: str
+    buyer_id: int
+    buyer_username: str
+    seller_subtotal: float
+    seller_total: float
+    payment_method: str
+    created_at: datetime
+    items: list[OrderItemDTO]
+    buyer_rated: bool = Field(
+        default=False,
+        description="Si el vendedor ya calificó al comprador en esta orden",
+    )
+
+
 class CheckoutRequestDTO(BaseModel):
     payment_method: CheckoutPaymentMethod
     billing: Optional[BillingInfoUpsertDTO] = Field(

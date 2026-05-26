@@ -3,9 +3,18 @@ from sqlalchemy.orm import Session
 from app.cart.repositories.cart_repository import CartRepository
 from app.orders.models import Order, PaymentMethod
 from app.orders.repositories.order_repository import OrderRepository
-from app.orders.schemas import InvoiceDTO, OrderDetailDTO, OrderItemDTO, OrderSummaryDTO
+from app.buyer_reviews.services.buyer_review_service import BuyerReviewService
+from app.orders.schemas import (
+    InvoiceDTO,
+    OrderDetailDTO,
+    OrderItemDTO,
+    OrderSummaryDTO,
+    SellerSaleDetailDTO,
+    SellerSaleSummaryDTO,
+)
 from app.ratings.services.rating_service import RatingService
 from app.users.repositories.billing_repository import BillingRepository
+from app.users.repositories.user_repository import UserRepository
 from app.users.schemas import BillingInfoUpsertDTO
 from app.users.services.billing_service import BillingService
 
@@ -163,3 +172,65 @@ class CheckoutService:
             )
             for o in orders
         ]
+
+    @staticmethod
+    def _seller_items(order: Order, seller_id: int) -> list:
+        return [i for i in (order.items or []) if i.seller_id == seller_id]
+
+    @staticmethod
+    def list_my_sales(db: Session, seller_id: int, skip: int = 0, limit: int = 50) -> list[SellerSaleSummaryDTO]:
+        orders = OrderRepository.list_for_seller(db, seller_id, skip, limit)
+        result: list[SellerSaleSummaryDTO] = []
+        for order in orders:
+            items = CheckoutService._seller_items(order, seller_id)
+            buyer = UserRepository.get_by_id(db, order.user_id)
+            seller_total = round(sum(i.unit_price * i.quantity for i in items), 2)
+            result.append(
+                SellerSaleSummaryDTO(
+                    id=order.id,
+                    status=order.status.value,
+                    buyer_id=order.user_id,
+                    buyer_username=buyer.username if buyer else f"Usuario #{order.user_id}",
+                    seller_total=seller_total,
+                    created_at=order.created_at,
+                    item_count=sum(i.quantity for i in items),
+                )
+            )
+        return result
+
+    @staticmethod
+    def get_sale(db: Session, seller_id: int, order_id: int) -> SellerSaleDetailDTO:
+        order = OrderRepository.get_by_id_for_seller(db, order_id, seller_id)
+        if not order:
+            raise LookupError("Venta no encontrada.")
+
+        buyer = UserRepository.get_by_id(db, order.user_id)
+        items = [
+            OrderItemDTO(
+                id=item.id,
+                product_id=item.product_id,
+                product_name=item.product_name,
+                unit_price=item.unit_price,
+                quantity=item.quantity,
+                seller_id=item.seller_id,
+                line_total=round(item.unit_price * item.quantity, 2),
+            )
+            for item in order.items
+        ]
+        seller_subtotal = round(sum(i.line_total for i in items), 2)
+        payment = order.payment_method
+        payment_value = payment.value if hasattr(payment, "value") else str(payment)
+        buyer_rated = BuyerReviewService.buyer_already_rated(db, order_id, seller_id)
+
+        return SellerSaleDetailDTO(
+            id=order.id,
+            status=order.status.value,
+            buyer_id=order.user_id,
+            buyer_username=buyer.username if buyer else f"Usuario #{order.user_id}",
+            seller_subtotal=seller_subtotal,
+            seller_total=seller_subtotal,
+            payment_method=payment_value,
+            created_at=order.created_at,
+            items=items,
+            buyer_rated=buyer_rated,
+        )

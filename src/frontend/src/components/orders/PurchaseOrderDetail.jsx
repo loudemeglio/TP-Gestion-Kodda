@@ -5,10 +5,8 @@ import BillingView from '../billing/BillingView';
 import { formatTaxIdDisplay } from '../billing/billingUtils';
 import { PAYMENT_METHOD_LABELS } from '../checkout/paymentMethods';
 import { KoddaLogo } from '../KoddaLogo';
-import RatingHintBanner from '../ratings/RatingHintBanner';
 import SellerRatingSection from '../ratings/SellerRatingSection';
 import '../../styles/checkout.css';
-import '../../styles/my-purchases.css';
 
 export default function PurchaseOrderDetail({
   orderId: orderIdProp,
@@ -55,10 +53,6 @@ export default function PurchaseOrderDetail({
     });
   }
 
-  const layoutClass = showSuccessHero
-    ? 'kodda-profile-edit-layout kodda-order-detail-layout'
-    : 'kodda-profile-edit-layout kodda-order-detail-layout kodda-purchases-layout';
-
   return (
     <div className="kodda-home kodda-profile-edit-page">
       <header className="kodda-topbar">
@@ -72,9 +66,9 @@ export default function PurchaseOrderDetail({
         </Link>
       </header>
 
-      <main className={layoutClass}>
-        {loading ? <p className="kodda-auth-muted kodda-purchases-empty">Cargando…</p> : null}
-        {error ? <p className="kodda-auth-error kodda-purchases-empty">{error}</p> : null}
+      <main className="kodda-profile-edit-layout kodda-checkout-success-card">
+        {loading ? <p className="kodda-auth-muted">Cargando…</p> : null}
+        {error ? <p className="kodda-auth-error">{error}</p> : null}
 
         {order && !error ? (
           <>
@@ -92,40 +86,26 @@ export default function PurchaseOrderDetail({
                   <p className="kodda-profile-edit-eyebrow">Detalle de compra</p>
                   <h1 className="kodda-profile-edit-title">Orden #{order.id}</h1>
                   <p className="kodda-profile-edit-lead">
-                    Revisá los productos y calificá al vendedor cuando quieras.
+                    Estado: <strong>{order.status}</strong>
                   </p>
                 </>
               )}
             </header>
 
-            <div className="kodda-profile-edit-card kodda-order-detail-card">
-              <section className="kodda-order-section kodda-order-section--summary">
-                <h2 className="kodda-order-section-title">Orden #{order.id}</h2>
-                <dl className="kodda-order-meta-grid">
-                  <div className="kodda-order-meta-row">
-                    <dt>Total</dt>
-                    <dd>${order.total.toLocaleString('es-AR')}</dd>
-                  </div>
-                  <div className="kodda-order-meta-row">
-                    <dt>Fecha</dt>
-                    <dd>{new Date(order.created_at).toLocaleString('es-AR')}</dd>
-                  </div>
-                  <div className="kodda-order-meta-row">
-                    <dt>Medio de pago</dt>
-                    <dd>
-                      {PAYMENT_METHOD_LABELS[order.payment_method] || order.payment_method}
-                    </dd>
-                  </div>
-                  <div className="kodda-order-meta-row">
-                    <dt>Estado</dt>
-                    <dd>{order.status}</dd>
-                  </div>
-                </dl>
-              </section>
+            <div className="kodda-profile-edit-card">
+              <p className="kodda-checkout-success-order">Orden #{order.id}</p>
+              <p className="kodda-auth-muted">
+                Total: ${order.total.toLocaleString('es-AR')} ·{' '}
+                {new Date(order.created_at).toLocaleString('es-AR')}
+              </p>
+              <p className="kodda-auth-muted">
+                Medio de pago:{' '}
+                {PAYMENT_METHOD_LABELS[order.payment_method] || order.payment_method}
+              </p>
 
-              <section className="kodda-order-section">
+              <section className="kodda-checkout-success-section">
                 <h2 className="kodda-profile-edit-section-title">Productos</h2>
-                <ul className="kodda-checkout-items">
+                <ul className="kodda-checkout-items" style={{ listStyle: 'none', padding: 0 }}>
                   {order.items.map((item) => (
                     <li key={item.id} className="kodda-checkout-item">
                       <div>
@@ -141,16 +121,22 @@ export default function PurchaseOrderDetail({
               </section>
 
               {showSuccessHero ? (
-                <RatingHintBanner orderId={order.id} />
+                <section className="kodda-checkout-success-section">
+                  <p className="kodda-auth-muted">
+                    Podés calificar al vendedor cuando quieras desde{' '}
+                    <Link to={`/mis-compras/${order.id}`} className="kodda-auth-link">
+                      Mis compras → Ver detalle de esta orden
+                    </Link>
+                    .
+                  </p>
+                </section>
               ) : (
-                <div className="kodda-order-section kodda-order-section--rating">
-                  <SellerRatingSection order={order} onRated={handleRated} embedded />
-                </div>
+                <SellerRatingSection order={order} onRated={handleRated} />
               )}
 
-              <section className="kodda-order-section">
+              <section className="kodda-checkout-success-section">
                 <h2 className="kodda-profile-edit-section-title">Factura</h2>
-                <p className="kodda-purchase-card-meta kodda-order-invoice-cuit">
+                <p className="kodda-auth-muted" style={{ marginBottom: '0.75rem' }}>
                   CUIT/CUIL: {formatTaxIdDisplay(order.invoice.tax_id)}
                 </p>
                 <BillingView
@@ -161,7 +147,7 @@ export default function PurchaseOrderDetail({
                 />
               </section>
 
-              <footer className="kodda-order-footer">
+              <footer className="kodda-profile-edit-footer">
                 {showSuccessHero ? (
                   <>
                     <Link to="/" className="kodda-btn-primary">

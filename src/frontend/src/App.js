@@ -21,7 +21,10 @@ import Cart from './components/Cart';
 import Checkout from './components/Checkout';
 import CheckoutSuccess from './components/CheckoutSuccess';
 import MyOrders from './components/orders/MyOrders';
+import MySales from './components/orders/MySales';
 import PurchaseOrderDetail from './components/orders/PurchaseOrderDetail';
+import SaleOrderDetail from './components/orders/SaleOrderDetail';
+import BuyerPublicProfile from './components/profile/BuyerPublicProfile';
 import PayPage from './components/PayPage';
 
 function PrivateRoute({ children }) {
@@ -139,6 +142,30 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <MyOrders />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/mis-ventas"
+        element={
+          <PrivateRoute>
+            <MySales />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/mis-ventas/:orderId"
+        element={
+          <PrivateRoute>
+            <SaleOrderDetail />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/compradores/:buyerId"
+        element={
+          <PrivateRoute>
+            <BuyerPublicProfile />
           </PrivateRoute>
         }
       />

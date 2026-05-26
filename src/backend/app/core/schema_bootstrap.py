@@ -237,3 +237,47 @@ def apply_schema_patches(engine: Engine) -> None:
             )
         )
         conn.execute(text("ALTER TABLE seller_ratings ALTER COLUMN kind DROP NOT NULL"))
+
+        conn.execute(
+            text(
+                """
+                CREATE TABLE IF NOT EXISTS buyer_reviews (
+                    id SERIAL PRIMARY KEY,
+                    order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+                    seller_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    buyer_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    stars INTEGER NOT NULL,
+                    comment TEXT NOT NULL,
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                    CONSTRAINT uq_buyer_review_per_order_seller UNIQUE (order_id, seller_id)
+                )
+                """
+            )
+        )
+        conn.execute(
+            text(
+                "CREATE INDEX IF NOT EXISTS ix_buyer_reviews_buyer_id "
+                "ON buyer_reviews (buyer_id)"
+            )
+        )
+        conn.execute(
+            text(
+                """
+                CREATE TABLE IF NOT EXISTS notifications (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    title VARCHAR(200) NOT NULL,
+                    message TEXT NOT NULL,
+                    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+                    order_id INTEGER REFERENCES orders(id) ON DELETE CASCADE,
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                )
+                """
+            )
+        )
+        conn.execute(
+            text(
+                "CREATE INDEX IF NOT EXISTS ix_notifications_user_id "
+                "ON notifications (user_id)"
+            )
+        )
