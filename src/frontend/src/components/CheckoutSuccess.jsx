@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { api } from '../api/client';
 import BillingView from './billing/BillingView';
@@ -13,6 +13,17 @@ export default function CheckoutSuccess() {
   const [order, setOrder] = useState(location.state?.order ?? null);
   const [loading, setLoading] = useState(!location.state?.order);
   const [error, setError] = useState('');
+  const [ratingError, setRatingError] = useState('');
+  const [ratingOk, setRatingOk] = useState('');
+  const [ratingSubmitting, setRatingSubmitting] = useState(false);
+
+  const sellerIds = useMemo(() => {
+    const ids = new Set();
+    (order?.items || []).forEach((i) => {
+      if (i.seller_id) ids.add(i.seller_id);
+    });
+    return Array.from(ids);
+  }, [order]);
 
   useEffect(() => {
     if (order) return undefined;
@@ -33,6 +44,26 @@ export default function CheckoutSuccess() {
       cancelled = true;
     };
   }, [order, orderId]);
+
+  async function sendRating({ sellerId, kind, score }) {
+    if (!order?.id) return;
+    setRatingError('');
+    setRatingOk('');
+    setRatingSubmitting(true);
+    try {
+      await api.post(`/api/ratings/orders/${order.id}`, {
+        seller_id: sellerId,
+        kind,
+        score,
+        comment: kind === 'negative' ? 'Reporte por posible estafa.' : null,
+      });
+      setRatingOk('Gracias. Tu calificación fue registrada.');
+    } catch (err) {
+      setRatingError(err.response?.data?.detail || 'No se pudo registrar la calificación.');
+    } finally {
+      setRatingSubmitting(false);
+    }
+  }
 
   return (
     <div className="kodda-home kodda-profile-edit-page">
@@ -87,6 +118,58 @@ export default function CheckoutSuccess() {
                     </li>
                   ))}
                 </ul>
+              </section>
+
+              <section className="kodda-checkout-success-section">
+                <h2 className="kodda-profile-edit-section-title">Calificar vendedor</h2>
+
+                {ratingError ? <p className="kodda-auth-error">{ratingError}</p> : null}
+                {ratingOk ? <p className="kodda-auth-muted">{ratingOk}</p> : null}
+
+                {sellerIds.length === 0 ? (
+                  <p className="kodda-auth-muted">
+                    No se encontró información del vendedor para esta compra.
+                  </p>
+                ) : (
+                  <ul className="kodda-checkout-items" style={{ listStyle: 'none', padding: 0 }}>
+                    {sellerIds.map((sellerId) => (
+                      <li key={sellerId} className="kodda-checkout-item">
+                        <div>
+                          <p className="kodda-checkout-item-name">Vendedor #{sellerId}</p>
+                          <p className="kodda-checkout-item-meta">
+                            Podés calificar o reportar si hubo una estafa.
+                          </p>
+                        </div>
+                        <div
+                          style={{
+                            display: 'flex',
+                            gap: '0.5rem',
+                            flexWrap: 'wrap',
+                            justifyContent: 'flex-end',
+                          }}
+                        >
+                          <button
+                            type="button"
+                            className="kodda-btn-ghost"
+                            disabled={ratingSubmitting}
+                            onClick={() => sendRating({ sellerId, kind: 'positive', score: 5 })}
+                          >
+                            👍 Positivo
+                          </button>
+                          <button
+                            type="button"
+                            className="kodda-btn-primary"
+                            disabled={ratingSubmitting}
+                            onClick={() => sendRating({ sellerId, kind: 'negative', score: 1 })}
+                            title="Reportar vendedor"
+                          >
+                            Reportar
+                          </button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </section>
 
               <section className="kodda-checkout-success-section">
