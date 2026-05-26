@@ -6,22 +6,13 @@ export default function CheckoutSuccess() {
   const location = useLocation();
 
   return (
-    <PurchaseOrderDetail
-      orderId={orderId}
-      initialOrder={location.state?.order ?? null}
-      showSuccessHero
-    />
-    <div className="kodda-home kodda-profile-edit-page">
-      <header className="kodda-topbar">
-        <KoddaLogo compact />
-        <div className="kodda-topbar-spacer" />
-        <nav className="kodda-nav-actions" aria-label="Navegación">
-          <Link to="/" className="kodda-btn-ghost">
-            Inicio
-          </Link>
-        </nav>
-      </header>
-
+    <>
+      <PurchaseOrderDetail
+        orderId={orderId}
+        initialOrder={location.state?.order ?? null}
+        showSuccessHero
+      />
+      <div className="kodda-home kodda-profile-edit-page">
       <main className="kodda-profile-edit-layout kodda-checkout-success-card">
         {loading ? (
           <p className="kodda-auth-muted">Cargando confirmación…</p>
@@ -95,5 +86,6 @@ export default function CheckoutSuccess() {
 
       <footer className="kodda-home-footer">Kodda — compra confirmada</footer>
     </div>
+    </>
   );
 }

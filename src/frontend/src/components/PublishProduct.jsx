@@ -198,16 +198,6 @@ export default function PublishProduct() {
 
   return (
     <div className="kodda-home">
-      <header className="kodda-topbar">
-        <KoddaLogo compact />
-        <div className="kodda-topbar-spacer" />
-        <nav className="kodda-nav-actions" aria-label="Navegación">
-          <Link to="/" className="kodda-btn-ghost">
-            ← Inicio
-          </Link>
-        </nav>
-      </header>
-
       <div className="kodda-auth-root" style={{ minHeight: 'auto', flex: 1 }}>
       <aside className="kodda-auth-brand" aria-hidden="false">
         <div className="kodda-auth-brand-inner">
