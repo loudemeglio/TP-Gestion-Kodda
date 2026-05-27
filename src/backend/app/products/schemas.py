@@ -29,6 +29,7 @@ class ProductDTO(BaseModel):
     main_image_url: Optional[str]
     is_paused: bool
     seller_id: int
+    seller_username: Optional[str] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
 

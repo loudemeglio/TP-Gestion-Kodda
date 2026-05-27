@@ -156,11 +156,21 @@
 .kodda-checkout-success-order {
   font-size: 1.25rem;
   font-weight: 700;
-  margin: 0 0 1rem;
+  margin: 0 0 1.5rem;
 }
 
 .kodda-checkout-success-section {
-  margin-top: 1.25rem;
+  margin-top: 1.75rem;
+  padding: 0;
+}
+
+.kodda-checkout-success-section:first-child {
+  margin-top: 0;
+}
+
+/* Mejora de espaciado para párrafos muted en tarjetas de órdenes */
+.kodda-profile-edit-card > .kodda-auth-muted {
+  margin: 0 0 1.25rem;
 }
 
 .kodda-checkout-panel--payment {

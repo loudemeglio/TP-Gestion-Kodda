@@ -4,6 +4,7 @@ import { useCarrito } from '../context/CarritoContext';
 import { resolveMediaUrl } from '../utils/mediaUrl';
 import { buildCatalogQueryParams, hasActiveCatalogFilters } from '../utils/productFilters';
 import { KoddaLogo } from './KoddaLogo';
+import NotificationBell from './notifications/NotificationBell';
 import ProductFilters, { EMPTY_CATALOG_FILTERS } from './ProductFilters';
 import { api } from '../api/client';
 import { useCallback, useEffect, useState } from 'react';
@@ -103,6 +104,7 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
           <button type="button" className="kodda-btn-ghost" disabled title="Próximamente">
             Chat Kodda
           </button>
+          <NotificationBell />
           <Link to="/carrito" className="kodda-cart-icon-link" title="Mi carrito">
             🛒
             {cantidadCarrito > 0 && <span className="kodda-cart-badge">{cantidadCarrito}</span>}
@@ -180,6 +182,16 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
                 </div>
                 <div className="kodda-card-body">
                   <h3>{producto.name}</h3>
+                  <p className="kodda-card-meta" style={{ marginTop: '0.15rem', marginBottom: '0.4rem' }}>
+                    Publicada por{' '}
+                    <Link
+                      to={`/vendedores/${producto.seller_id}`}
+                      className="kodda-auth-link"
+                      title="Ver reputación del vendedor"
+                    >
+                      {producto.seller_username || `#${producto.seller_id}`}
+                    </Link>
+                  </p>
                   <p className="kodda-card-meta">{producto.category}</p>
                   <p className="kodda-card-meta">Talle: {producto.size || '—'}</p>
                   <div className="kodda-price">${producto.price.toLocaleString('es-AR')}</div>

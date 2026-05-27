@@ -32,15 +32,7 @@ export default function AdminHome() {
             </div>
           </Link>
 
-          <div className="kodda-admin-task-card kodda-admin-task-card--muted">
-            <div className="kodda-admin-task-card-visual kodda-admin-task-card-visual--muted" aria-hidden="true">
-              <span className="kodda-admin-task-card-emoji">✦</span>
-            </div>
-            <div className="kodda-admin-task-card-body">
-              <h3>Próximas herramientas</h3>
-              <p>Acá sumaremos más responsabilidades de admin (reportes, moderación de publicaciones, etc.).</p>
-            </div>
-          </div>
+
         </div>
       </section>
 

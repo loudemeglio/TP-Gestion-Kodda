@@ -10,6 +10,7 @@ import Home from './components/Home';
 import Login from './components/Login';
 import ResetPassword from './components/ResetPassword';
 import UserList from './components/UserList';
+import AdminModerationPanel from './components/admin/AdminModerationPanel';
 import VerifyEmail from './components/VerifyEmail';
 import PublishProduct from './components/PublishProduct';
 import ProfileEdit from './components/ProfileEdit';
@@ -20,6 +21,13 @@ import BillingInfo from './components/BillingInfo';
 import Cart from './components/Cart';
 import Checkout from './components/Checkout';
 import CheckoutSuccess from './components/CheckoutSuccess';
+import MyOrders from './components/orders/MyOrders';
+import MySales from './components/orders/MySales';
+import PurchaseOrderDetail from './components/orders/PurchaseOrderDetail';
+import SaleOrderDetail from './components/orders/SaleOrderDetail';
+import BuyerPublicProfile from './components/profile/BuyerPublicProfile';
+import SellerPublicProfile from './components/profile/SellerPublicProfile';
+import BuyerOwnReputationProfile from './components/profile/BuyerOwnReputationProfile';
 import PayPage from './components/PayPage';
 
 function PrivateRoute({ children }) {
@@ -133,6 +141,62 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/mis-compras"
+        element={
+          <PrivateRoute>
+            <MyOrders />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/mis-ventas"
+        element={
+          <PrivateRoute>
+            <MySales />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/mis-ventas/:orderId"
+        element={
+          <PrivateRoute>
+            <SaleOrderDetail />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/compradores/:buyerId"
+        element={
+          <PrivateRoute>
+            <BuyerPublicProfile />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/vendedores/:sellerId"
+        element={
+          <PrivateRoute>
+            <SellerPublicProfile />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/mi-reputacion-comprador"
+        element={
+          <PrivateRoute>
+            <BuyerOwnReputationProfile />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/mis-compras/:orderId"
+        element={
+          <PrivateRoute>
+            <PurchaseOrderDetail showSuccessHero={false} />
+          </PrivateRoute>
+        }
+      />
+      <Route
         path="/admin"
         element={
           <PrivateRoute>
@@ -144,6 +208,12 @@ function AppRoutes() {
       >
         <Route index element={<AdminHome />} />
         <Route path="users" element={<UserList />} />
+        <Route
+          path="moderation"
+          element={
+            <AdminModerationPanel />
+          }
+        />
       </Route>
       <Route
         path="/users"

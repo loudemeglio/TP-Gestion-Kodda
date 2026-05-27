@@ -36,6 +36,13 @@ def apply_schema_patches(engine: Engine) -> None:
         conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS shoe_size VARCHAR(20)"))
         conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS top_size VARCHAR(20)"))
         conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS bottom_size VARCHAR(20)"))
+        conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_flagged BOOLEAN DEFAULT FALSE"))
+        conn.execute(
+            text("ALTER TABLE users ADD COLUMN IF NOT EXISTS scam_report_count INTEGER DEFAULT 0")
+        )
+        conn.execute(
+            text("ALTER TABLE users ADD COLUMN IF NOT EXISTS needs_review BOOLEAN DEFAULT FALSE")
+        )
 
         conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS is_paused BOOLEAN DEFAULT FALSE"))
         conn.execute(
@@ -155,5 +162,145 @@ def apply_schema_patches(engine: Engine) -> None:
             text(
                 "CREATE INDEX IF NOT EXISTS ix_payment_intents_user_id "
                 "ON payment_intents (user_id)"
+            )
+        )
+
+        conn.execute(
+            text(
+                """
+                DO $$ BEGIN
+                    CREATE TYPE ratingkind AS ENUM ('positive', 'negative');
+                EXCEPTION
+                    WHEN duplicate_object THEN NULL;
+                END $$;
+                """
+            )
+        )
+        conn.execute(
+            text(
+                """
+                CREATE TABLE IF NOT EXISTS seller_ratings (
+                    id SERIAL PRIMARY KEY,
+                    order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+                    buyer_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    seller_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    kind ratingkind NOT NULL,
+                    score INTEGER,
+                    comment TEXT,
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                    CONSTRAINT uq_seller_rating_per_order UNIQUE (order_id, buyer_id, seller_id)
+                )
+                """
+            )
+        )
+        conn.execute(
+            text(
+                "CREATE INDEX IF NOT EXISTS ix_seller_ratings_order_id "
+                "ON seller_ratings (order_id)"
+            )
+        )
+        conn.execute(
+            text(
+                "CREATE INDEX IF NOT EXISTS ix_seller_ratings_seller_id "
+                "ON seller_ratings (seller_id)"
+            )
+        )
+        conn.execute(
+            text(
+                """
+                CREATE TABLE IF NOT EXISTS seller_review_queue (
+                    id SERIAL PRIMARY KEY,
+                    seller_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    negative_count_snapshot INTEGER NOT NULL,
+                    reason VARCHAR(500) NOT NULL,
+                    resolved_at TIMESTAMP WITH TIME ZONE,
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                )
+                """
+            )
+        )
+        conn.execute(
+            text(
+                "CREATE INDEX IF NOT EXISTS ix_seller_review_queue_seller_id "
+                "ON seller_review_queue (seller_id)"
+            )
+        )
+
+        conn.execute(text("ALTER TABLE seller_ratings ADD COLUMN IF NOT EXISTS stars INTEGER"))
+        conn.execute(text("ALTER TABLE seller_ratings ADD COLUMN IF NOT EXISTS description TEXT"))
+        conn.execute(
+            text("ALTER TABLE seller_ratings ADD COLUMN IF NOT EXISTS matches_description BOOLEAN")
+        )
+        conn.execute(
+            text("ALTER TABLE seller_ratings ADD COLUMN IF NOT EXISTS delivered_on_time BOOLEAN")
+        )
+        conn.execute(
+            text(
+                "ALTER TABLE seller_ratings ADD COLUMN IF NOT EXISTS is_scam_report BOOLEAN DEFAULT FALSE"
+            )
+        )
+        conn.execute(text("ALTER TABLE seller_ratings ALTER COLUMN kind DROP NOT NULL"))
+
+        conn.execute(
+            text(
+                """
+                CREATE TABLE IF NOT EXISTS buyer_reviews (
+                    id SERIAL PRIMARY KEY,
+                    order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+                    seller_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    buyer_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    stars INTEGER NOT NULL,
+                    comment TEXT NOT NULL,
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                    CONSTRAINT uq_buyer_review_per_order_seller UNIQUE (order_id, seller_id)
+                )
+                """
+            )
+        )
+        conn.execute(
+            text(
+                "CREATE INDEX IF NOT EXISTS ix_buyer_reviews_buyer_id "
+                "ON buyer_reviews (buyer_id)"
+            )
+        )
+        conn.execute(
+            text(
+                """
+                CREATE TABLE IF NOT EXISTS notifications (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    title VARCHAR(200) NOT NULL,
+                    message TEXT NOT NULL,
+                    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+                    order_id INTEGER REFERENCES orders(id) ON DELETE CASCADE,
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                )
+                """
+            )
+        )
+        conn.execute(
+            text(
+                "CREATE INDEX IF NOT EXISTS ix_notifications_user_id "
+                "ON notifications (user_id)"
+            )
+        )
+
+        conn.execute(
+            text(
+                """
+                CREATE TABLE IF NOT EXISTS system_settings (
+                    key VARCHAR(100) PRIMARY KEY,
+                    value INTEGER NOT NULL
+                )
+                """
+            )
+        )
+        conn.execute(
+            text(
+                """
+                INSERT INTO system_settings (key, value)
+                VALUES ('max_scam_reports', 1)
+                ON CONFLICT (key) DO NOTHING
+                """
             )
         )

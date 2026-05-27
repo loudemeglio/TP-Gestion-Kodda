@@ -82,6 +82,12 @@ export default function ProfileView() {
           <Link to="/" className="kodda-btn-ghost">
             Inicio
           </Link>
+          <Link to="/mis-compras" className="kodda-btn-ghost">
+            Mis compras
+          </Link>
+          <Link to="/mis-ventas" className="kodda-btn-ghost">
+            Mis ventas
+          </Link>
           <Link to="/perfil/editar" className="kodda-btn-accent-outline">
             Editar
           </Link>
@@ -191,6 +197,78 @@ export default function ProfileView() {
               </section>
 
               <div className="kodda-profile-view-nav">
+                <Link
+                  to="/mis-compras"
+                  className="kodda-profile-view-nav-item"
+                  style={{ textDecoration: 'none', color: 'inherit' }}
+                >
+                  <span className="kodda-profile-view-nav-icon" aria-hidden="true">
+                    🛍️
+                  </span>
+                  <span className="kodda-profile-view-nav-text">
+                    <span className="kodda-profile-view-nav-title">Mis compras</span>
+                    <span className="kodda-profile-view-nav-desc">
+                      Historial de pedidos y calificación de vendedores
+                    </span>
+                  </span>
+                  <span className="kodda-profile-view-nav-chevron" aria-hidden="true">
+                    ›
+                  </span>
+                </Link>
+                <Link
+                  to="/mis-ventas"
+                  className="kodda-profile-view-nav-item"
+                  style={{ textDecoration: 'none', color: 'inherit' }}
+                >
+                  <span className="kodda-profile-view-nav-icon" aria-hidden="true">
+                    💰
+                  </span>
+                  <span className="kodda-profile-view-nav-text">
+                    <span className="kodda-profile-view-nav-title">Mis ventas</span>
+                    <span className="kodda-profile-view-nav-desc">
+                      Historial de ventas y calificación de compradores
+                    </span>
+                  </span>
+                  <span className="kodda-profile-view-nav-chevron" aria-hidden="true">
+                    ›
+                  </span>
+                </Link>
+                <Link
+                  to={`/vendedores/${user?.id}`}
+                  className="kodda-profile-view-nav-item"
+                  style={{ textDecoration: 'none', color: 'inherit' }}
+                >
+                  <span className="kodda-profile-view-nav-icon" aria-hidden="true">
+                    ⭐
+                  </span>
+                  <span className="kodda-profile-view-nav-text">
+                    <span className="kodda-profile-view-nav-title">Mi reputación como vendedor</span>
+                    <span className="kodda-profile-view-nav-desc">
+                      Historial de calificaciones y reseñas de tus compradores
+                    </span>
+                  </span>
+                  <span className="kodda-profile-view-nav-chevron" aria-hidden="true">
+                    ›
+                  </span>
+                </Link>
+                <Link
+                  to="/mi-reputacion-comprador"
+                  className="kodda-profile-view-nav-item"
+                  style={{ textDecoration: 'none', color: 'inherit' }}
+                >
+                  <span className="kodda-profile-view-nav-icon" aria-hidden="true">
+                    🛒
+                  </span>
+                  <span className="kodda-profile-view-nav-text">
+                    <span className="kodda-profile-view-nav-title">Mi reputación como comprador</span>
+                    <span className="kodda-profile-view-nav-desc">
+                      Reseñas que los vendedores dejaron sobre tus compras
+                    </span>
+                  </span>
+                  <span className="kodda-profile-view-nav-chevron" aria-hidden="true">
+                    ›
+                  </span>
+                </Link>
                 <Link
                   to="/mis-publicaciones"
                   className="kodda-profile-view-nav-item"
