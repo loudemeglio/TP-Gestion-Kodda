@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -33,3 +34,33 @@ class SellerRatingDTO(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+# ── Reputación pública del vendedor ──────────────────────────────────────────
+
+class SellerRatingPublicDTO(BaseModel):
+    """Vista pública de una calificación individual al vendedor."""
+
+    id: int
+    stars: int
+    description: str
+    matches_description: Optional[bool] = None
+    delivered_on_time: Optional[bool] = None
+    created_at: datetime
+    buyer_username: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+class SellerReputationDTO(BaseModel):
+    """Respuesta del endpoint GET /api/ratings/sellers/{seller_id}/reputation."""
+
+    seller_id: int
+    username: str
+    reputation_score: Optional[float] = None   # puntaje consolidado 1-5 con bonos
+    average_stars: Optional[float] = None       # promedio puro de estrellas
+    review_count: int
+    accuracy_rate: Optional[float] = None       # % de reviews con matches_description=True
+    shipping_rate: Optional[float] = None       # % de reviews con delivered_on_time=True
+    reviews: list[SellerRatingPublicDTO] = Field(default_factory=list)

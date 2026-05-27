@@ -1,12 +1,20 @@
 from sqlalchemy.orm import Session
 
 from app.products.filters import ProductCatalogFilters
+from app.products.models import Product
 from app.products.repositories.product_repository import ProductRepository
 from app.products.schemas import ProductCreateDTO, ProductDTO
 
 
 class ProductService:
     """Service para la lógica de negocio de productos."""
+
+    @staticmethod
+    def _to_dto(product: Product) -> ProductDTO:
+        """Construye ProductDTO incluyendo seller_username desde la relación ORM."""
+        dto = ProductDTO.model_validate(product)
+        seller_username = product.seller.username if product.seller else None
+        return dto.model_copy(update={"seller_username": seller_username})
 
     @staticmethod
     def create_product(db: Session, product_data: ProductCreateDTO, seller_id: int) -> ProductDTO:
@@ -18,19 +26,19 @@ class ProductService:
             raise ValueError("El stock no puede ser negativo")
 
         db_product = ProductRepository.create(db, product_data, seller_id)
-        return ProductDTO.from_orm(db_product)
+        return ProductService._to_dto(db_product)
 
     @staticmethod
     def get_user_products(db: Session, seller_id: int, skip: int = 0, limit: int = 100) -> list[ProductDTO]:
         """Obtener todos los productos del usuario actual."""
         products = ProductRepository.get_by_seller(db, seller_id, skip, limit)
-        return [ProductDTO.from_orm(product) for product in products]
+        return [ProductService._to_dto(product) for product in products]
 
     @staticmethod
     def get_all_active_products(db: Session, skip: int = 0, limit: int = 100) -> list[ProductDTO]:
         """Obtener todos los productos activos (no pausados) del catálogo."""
         products = ProductRepository.get_all_active(db, skip, limit)
-        return [ProductDTO.from_orm(product) for product in products]
+        return [ProductService._to_dto(product) for product in products]
 
     @staticmethod
     def get_all_active_products_except_user(
@@ -44,7 +52,7 @@ class ProductService:
         products = ProductRepository.get_all_active_except_user(
             db, user_id, skip, limit, filters=filters
         )
-        return [ProductDTO.from_orm(product) for product in products]
+        return [ProductService._to_dto(product) for product in products]
 
     @staticmethod
     def update_product(db: Session, product_id: int, product_data: ProductCreateDTO, seller_id: int) -> ProductDTO:
@@ -58,8 +66,8 @@ class ProductService:
         db_product = ProductRepository.update(db, product_id, product_data, seller_id)
         if not db_product:
             raise ValueError("Producto no encontrado o no tienes permisos para editarlo")
-        
-        return ProductDTO.from_orm(db_product)
+
+        return ProductService._to_dto(db_product)
 
     @staticmethod
     def delete_product(db: Session, product_id: int, seller_id: int) -> bool:
@@ -75,7 +83,7 @@ class ProductService:
         db_product = ProductRepository.pause(db, product_id, seller_id)
         if not db_product:
             raise ValueError("Producto no encontrado o no tienes permisos para pausarlo")
-        return ProductDTO.from_orm(db_product)
+        return ProductService._to_dto(db_product)
 
     @staticmethod
     def resume_product(db: Session, product_id: int, seller_id: int) -> ProductDTO:
@@ -83,4 +91,4 @@ class ProductService:
         db_product = ProductRepository.resume(db, product_id, seller_id)
         if not db_product:
             raise ValueError("Producto no encontrado o no tienes permisos para reanudarlo")
-        return ProductDTO.from_orm(db_product)
+        return ProductService._to_dto(db_product)
