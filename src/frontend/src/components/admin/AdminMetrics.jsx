@@ -13,6 +13,63 @@ const paymentLabels = {
   tarjeta_credito: 'Tarjeta de credito',
   tarjeta_debito: 'Tarjeta de debito',
 };
+// Cambia a true para previsualizar la pantalla con datos mock.
+// Cambia a false para volver a usar datos reales desde la API.
+const USE_MOCK_METRICS = false;
+
+const mockMetrics = {
+  date: new Date().toISOString().slice(0, 10),
+  total_sales: 842350,
+  order_count: 18,
+  items_sold: 43,
+  average_ticket: 46797,
+  payment_methods: [
+    { label: 'mercado_pago', value: 438900 },
+    { label: 'tarjeta_credito', value: 261450 },
+    { label: 'tarjeta_debito', value: 96000 },
+    { label: 'transferencia', value: 46000 },
+  ],
+  sales_by_hour: [
+    { label: '00:00', value: 0 },
+    { label: '01:00', value: 0 },
+    { label: '02:00', value: 0 },
+    { label: '03:00', value: 0 },
+    { label: '04:00', value: 0 },
+    { label: '05:00', value: 0 },
+    { label: '06:00', value: 12500 },
+    { label: '07:00', value: 22400 },
+    { label: '08:00', value: 38900 },
+    { label: '09:00', value: 74600 },
+    { label: '10:00', value: 113200 },
+    { label: '11:00', value: 68200 },
+    { label: '12:00', value: 91200 },
+    { label: '13:00', value: 128500 },
+    { label: '14:00', value: 58400 },
+    { label: '15:00', value: 44600 },
+    { label: '16:00', value: 86200 },
+    { label: '17:00', value: 62400 },
+    { label: '18:00', value: 39800 },
+    { label: '19:00', value: 0 },
+    { label: '20:00', value: 0 },
+    { label: '21:00', value: 0 },
+    { label: '22:00', value: 0 },
+    { label: '23:00', value: 0 },
+  ],
+  top_products: [
+    { product_name: 'Campera denim vintage', units: 9, total: 171000 },
+    { product_name: 'Zapatillas urbanas blancas', units: 7, total: 224000 },
+    { product_name: 'Vestido midi estampado', units: 6, total: 132000 },
+    { product_name: 'Jean mom fit celeste', units: 5, total: 97500 },
+    { product_name: 'Buzo oversize verde', units: 4, total: 86000 },
+  ],
+  recent_sales: [
+    { id: 1087, buyer: 'micaela', total: 74200, payment_method: 'mercado_pago', created_at: new Date().toISOString() },
+    { id: 1086, buyer: 'tomasr', total: 38900, payment_method: 'tarjeta_debito', created_at: new Date(Date.now() - 22 * 60 * 1000).toISOString() },
+    { id: 1085, buyer: 'luli.market', total: 128500, payment_method: 'tarjeta_credito', created_at: new Date(Date.now() - 54 * 60 * 1000).toISOString() },
+    { id: 1084, buyer: 'nacho', total: 46000, payment_method: 'transferencia', created_at: new Date(Date.now() - 96 * 60 * 1000).toISOString() },
+    { id: 1083, buyer: 'sofiav', total: 92100, payment_method: 'mercado_pago', created_at: new Date(Date.now() - 130 * 60 * 1000).toISOString() },
+  ],
+};
 
 function formatCurrency(value) {
   return currency.format(Number(value || 0));
@@ -51,6 +108,11 @@ export default function AdminMetrics() {
     async function loadMetrics() {
       setLoading(true);
       setError('');
+      if (USE_MOCK_METRICS) {
+        setMetrics(mockMetrics);
+        setLoading(false);
+        return;
+      }
       try {
         const { data } = await api.get('/api/admin/metrics/today');
         if (active) setMetrics(data);
@@ -210,3 +272,5 @@ export default function AdminMetrics() {
     </div>
   );
 }
+
+
