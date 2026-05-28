@@ -7,11 +7,11 @@ export default function AdminHome() {
   return (
     <div className="kodda-admin-page kodda-admin-page--narrow">
       <header className="kodda-admin-page-head">
-        <h1 className="kodda-admin-page-title">Panel de administración</h1>
+        <h1 className="kodda-admin-page-title">Panel de administracion</h1>
         <p className="kodda-admin-page-lead">
-          Hola, <strong>{user?.username || 'admin'}</strong>. Desde acá accedés a las tareas operativas de la
-          plataforma. El inicio con recomendaciones y catálogo es un prototipo de usuario: podés abrirlo cuando quieras
-          desde <Link to="/explorador">Vista explorador</Link> o el menú lateral.
+          Hola, <strong>{user?.username || 'admin'}</strong>. Desde aca accedes a las tareas operativas de la
+          plataforma. El inicio con recomendaciones y catalogo es un prototipo de usuario: podes abrirlo cuando quieras
+          desde <Link to="/explorador">Vista explorador</Link> o el menu lateral.
         </p>
       </header>
 
@@ -22,23 +22,32 @@ export default function AdminHome() {
         <div className="kodda-admin-dashboard-grid">
           <Link to="/admin/users" className="kodda-admin-task-card kodda-admin-task-card--primary">
             <div className="kodda-admin-task-card-visual" aria-hidden="true">
-              <span className="kodda-admin-task-card-emoji">👥</span>
+              <span className="kodda-admin-task-card-emoji">US</span>
             </div>
             <div className="kodda-admin-task-card-body">
               <h3>Usuarios</h3>
-              <p>Listá cuentas registradas, revisá roles y estado de cada una, y bloqueá o desbloqueá el acceso cuando
+              <p>Lista cuentas registradas, revisa roles y estado de cada una, y bloquea o desbloquea el acceso cuando
                 haga falta.</p>
               <span className="kodda-admin-task-card-cta">Abrir listado</span>
             </div>
           </Link>
 
-
+          <Link to="/admin/metrics" className="kodda-admin-task-card kodda-admin-task-card--primary">
+            <div className="kodda-admin-task-card-visual kodda-admin-task-card-visual--metrics" aria-hidden="true">
+              <span className="kodda-admin-task-card-emoji">MT</span>
+            </div>
+            <div className="kodda-admin-task-card-body">
+              <h3>Metricas</h3>
+              <p>Visualiza ventas del dia, ticket promedio, productos destacados y actividad reciente de la plataforma.</p>
+              <span className="kodda-admin-task-card-cta">Ver metricas</span>
+            </div>
+          </Link>
         </div>
       </section>
 
       <section className="kodda-admin-session-card" aria-labelledby="kodda-admin-session-title">
         <h2 id="kodda-admin-session-title" className="kodda-admin-session-title">
-          Tu sesión
+          Tu sesion
         </h2>
         <dl className="kodda-admin-session-dl">
           <div>

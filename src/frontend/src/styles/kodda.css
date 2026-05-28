@@ -2423,3 +2423,280 @@ a.kodda-user-chip:hover {
   color: var(--kd-warm-soft, #c45);
   margin-bottom: 0.35rem;
 }
+
+/* ----- Métricas de administración ----- */
+.kodda-admin-task-card-visual--metrics {
+  background: linear-gradient(160deg, #7c2d12 0%, #c2410c 55%, #ea580c 100%) !important;
+}
+
+.kodda-metrics-page {
+  max-width: 1040px;
+}
+
+.kodda-metrics-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.kodda-metrics-date {
+  flex: 0 0 auto;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid rgba(15, 118, 110, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--kd-accent);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.kodda-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+@media (min-width: 680px) {
+  .kodda-metrics-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.kodda-metric-card,
+.kodda-metrics-panel {
+  border: 1px solid var(--kd-line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: var(--kd-shadow-sm);
+}
+
+.kodda-metric-card {
+  min-height: 126px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.kodda-metric-card-label,
+.kodda-metric-card-note {
+  color: var(--kd-mist);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.kodda-metric-card-label {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.kodda-metric-card strong {
+  margin-top: 0.55rem;
+  color: var(--kd-ink);
+  font-size: clamp(1.35rem, 3vw, 1.8rem);
+  line-height: 1.05;
+}
+
+.kodda-metrics-panels {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  margin-top: 1.25rem;
+}
+
+@media (min-width: 900px) {
+  .kodda-metrics-panels {
+    grid-template-columns: minmax(0, 0.9fr) minmax(280px, 0.55fr);
+  }
+
+  .kodda-metrics-panel--wide {
+    grid-column: span 1;
+  }
+}
+
+.kodda-metrics-panel {
+  padding: 1rem;
+  min-width: 0;
+}
+
+.kodda-metrics-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.kodda-metrics-panel-head h2 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--kd-ink-soft);
+}
+
+.kodda-metrics-panel-head span {
+  color: var(--kd-mist);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.kodda-hour-chart {
+  height: 230px;
+  display: grid;
+  grid-template-columns: repeat(24, minmax(12px, 1fr));
+  align-items: end;
+  gap: 0.3rem;
+  padding: 0.75rem 0.15rem 0;
+  border-top: 1px solid var(--kd-line);
+}
+
+.kodda-hour-bar {
+  height: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.kodda-hour-bar-fill {
+  width: 100%;
+  max-width: 18px;
+  min-height: 0;
+  border-radius: 6px 6px 2px 2px;
+  background: linear-gradient(180deg, #14b8a6 0%, #0f766e 100%);
+  box-shadow: 0 8px 18px rgba(15, 118, 110, 0.16);
+}
+
+.kodda-hour-label {
+  width: 100%;
+  color: var(--kd-mist);
+  font-size: 0.62rem;
+  text-align: center;
+}
+
+.kodda-payment-chart,
+.kodda-top-products {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.kodda-payment-row {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.kodda-payment-row > div,
+.kodda-top-product {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.kodda-payment-row span,
+.kodda-top-product span {
+  color: var(--kd-mist);
+  font-size: 0.86rem;
+}
+
+.kodda-payment-row strong,
+.kodda-top-product b {
+  color: var(--kd-ink-soft);
+  font-size: 0.9rem;
+}
+
+.kodda-payment-track {
+  display: block;
+  width: 100%;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: var(--kd-paper-deep);
+  overflow: hidden;
+}
+
+.kodda-payment-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #c2410c, #ea580c);
+}
+
+.kodda-top-product {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--kd-line);
+}
+
+.kodda-top-product:last-child {
+  border-bottom: none;
+}
+
+.kodda-top-product div {
+  min-width: 0;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.kodda-top-product strong {
+  overflow-wrap: anywhere;
+  color: var(--kd-ink);
+  font-size: 0.94rem;
+}
+
+.kodda-metrics-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.kodda-metrics-table {
+  width: 100%;
+  min-width: 620px;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.kodda-metrics-table th,
+.kodda-metrics-table td {
+  padding: 0.7rem 0.55rem;
+  border-bottom: 1px solid var(--kd-line);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.kodda-metrics-table th {
+  color: var(--kd-mist);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.kodda-metrics-table td:last-child,
+.kodda-metrics-table th:last-child {
+  text-align: right;
+}
+
+.kodda-metrics-empty {
+  margin: 0;
+  padding: 1.25rem;
+  border-radius: 8px;
+  background: var(--kd-paper);
+  color: var(--kd-mist);
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 560px) {
+  .kodda-metrics-head {
+    flex-direction: column;
+  }
+
+  .kodda-hour-chart {
+    gap: 0.18rem;
+  }
+
+  .kodda-hour-label {
+    font-size: 0.55rem;
+  }
+}
