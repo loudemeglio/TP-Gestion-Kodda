@@ -11,14 +11,14 @@ export default function AdminLayout() {
     <div className="kodda-admin-root">
       <header className="kodda-admin-topbar">
         <div className="kodda-admin-brand">
-          <Link to="/admin" className="kodda-admin-logo-link" title="Ir al panel de administración">
+          <Link to="/admin" className="kodda-admin-logo-link" title="Ir al panel de administracion">
             <KoddaLogo compact />
           </Link>
-          <span className="kodda-admin-badge">Administración</span>
+          <span className="kodda-admin-badge">Administracion</span>
         </div>
-        <p className="kodda-admin-topbar-tagline">Gestioná la plataforma por fuera de la experiencia de compra/venta.</p>
+        <p className="kodda-admin-topbar-tagline">Gestiona la plataforma por fuera de la experiencia de compra/venta.</p>
         <div className="kodda-admin-topbar-spacer" />
-        <nav className="kodda-admin-topnav" aria-label="Sesión">
+        <nav className="kodda-admin-topnav" aria-label="Sesion">
           <NotificationBell />
           <div className="kodda-user-chip kodda-user-chip--admin">
             <span className="kodda-avatar" aria-hidden="true">
@@ -40,7 +40,7 @@ export default function AdminLayout() {
       </header>
 
       <div className="kodda-admin-shell">
-        <aside className="kodda-admin-sidenav" aria-label="Secciones de administración">
+        <aside className="kodda-admin-sidenav" aria-label="Secciones de administracion">
           <p className="kodda-admin-nav-eyebrow">Responsabilidades</p>
           <NavLink
             to="/admin"
@@ -50,7 +50,7 @@ export default function AdminLayout() {
             }
           >
             <span className="kodda-admin-navlink-icon" aria-hidden="true">
-              ◎
+              PA
             </span>
             Panel
           </NavLink>
@@ -61,7 +61,7 @@ export default function AdminLayout() {
             }
           >
             <span className="kodda-admin-navlink-icon" aria-hidden="true">
-              👥
+              US
             </span>
             Usuarios
           </NavLink>
@@ -72,9 +72,20 @@ export default function AdminLayout() {
             }
           >
             <span className="kodda-admin-navlink-icon" aria-hidden="true">
-              ⚑
+              MO
             </span>
-            Moderación
+            Moderacion
+          </NavLink>
+          <NavLink
+            to="/admin/metrics"
+            className={({ isActive }) =>
+              `kodda-admin-navlink${isActive ? ' kodda-admin-navlink--active' : ''}`
+            }
+          >
+            <span className="kodda-admin-navlink-icon" aria-hidden="true">
+              MT
+            </span>
+            Metricas
           </NavLink>
 
           <p className="kodda-admin-nav-eyebrow kodda-admin-nav-eyebrow--spaced">Prototipo</p>
@@ -85,7 +96,7 @@ export default function AdminLayout() {
             }
           >
             <span className="kodda-admin-navlink-icon" aria-hidden="true">
-              🏠
+              EX
             </span>
             Vista explorador
           </NavLink>
@@ -96,7 +107,7 @@ export default function AdminLayout() {
         </div>
       </div>
 
-      <footer className="kodda-admin-footer">Kodda · panel de administración</footer>
+      <footer className="kodda-admin-footer">Kodda - panel de administracion</footer>
     </div>
   );
 }

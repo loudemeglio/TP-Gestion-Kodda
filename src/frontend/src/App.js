@@ -11,6 +11,7 @@ import Login from './components/Login';
 import ResetPassword from './components/ResetPassword';
 import UserList from './components/UserList';
 import AdminModerationPanel from './components/admin/AdminModerationPanel';
+import AdminMetrics from './components/admin/AdminMetrics';
 import VerifyEmail from './components/VerifyEmail';
 import PublishProduct from './components/PublishProduct';
 import ProfileEdit from './components/ProfileEdit';
@@ -208,6 +209,7 @@ function AppRoutes() {
       >
         <Route index element={<AdminHome />} />
         <Route path="users" element={<UserList />} />
+        <Route path="metrics" element={<AdminMetrics />} />
         <Route
           path="moderation"
           element={
@@ -239,3 +241,4 @@ export default function App() {
     </BrowserRouter>
   );
 }
+
