@@ -14,6 +14,7 @@ from app.users.schemas import (
     UserDTO,
     UserProfileDTO,
     UserProfileUpdateDTO,
+    UserRole,
     UserUpdateDTO,
 )
 from app.users.services.auth_service import AuthService
@@ -289,3 +290,39 @@ def update_user_status(
     db.commit()
     db.refresh(db_user)
     return db_user
+
+
+@router.patch("/{user_id}/role", response_model=UserDTO)
+def change_user_role(
+    user_id: int,
+    new_role: UserRole = Body(..., embed=True),
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    """Cambiar el rol de un usuario (solo para administradores)"""
+    db_user = UserRepository.get_by_id(db, user_id)
+    if not db_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Usuario no encontrado"
+        )
+
+    if user_id == admin.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No podés cambiar tu propio rol",
+        )
+
+    try:
+        updated_user = UserService.change_user_role(db, user_id, new_role)
+        return updated_user
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error al cambiar el rol del usuario",
+        )

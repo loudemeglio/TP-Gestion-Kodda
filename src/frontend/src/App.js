@@ -11,6 +11,7 @@ import Login from './components/Login';
 import ResetPassword from './components/ResetPassword';
 import UserList from './components/UserList';
 import AdminModerationPanel from './components/admin/AdminModerationPanel';
+import AdminRolesPanel from './components/admin/AdminRolesPanel';
 import AdminMetrics from './components/admin/AdminMetrics';
 import VerifyEmail from './components/VerifyEmail';
 import PublishProduct from './components/PublishProduct';
@@ -216,6 +217,7 @@ function AppRoutes() {
             <AdminModerationPanel />
           }
         />
+        <Route path="roles" element={<AdminRolesPanel />} />
       </Route>
       <Route
         path="/users"

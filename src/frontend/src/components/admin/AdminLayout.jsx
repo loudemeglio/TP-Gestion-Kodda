@@ -87,6 +87,17 @@ export default function AdminLayout() {
             </span>
             Metricas
           </NavLink>
+          <NavLink
+            to="/admin/roles"
+            className={({ isActive }) =>
+              `kodda-admin-navlink${isActive ? ' kodda-admin-navlink--active' : ''}`
+            }
+          >
+            <span className="kodda-admin-navlink-icon" aria-hidden="true">
+              RO
+            </span>
+            Gestión de roles
+          </NavLink>
 
           <p className="kodda-admin-nav-eyebrow kodda-admin-nav-eyebrow--spaced">Prototipo</p>
           <NavLink

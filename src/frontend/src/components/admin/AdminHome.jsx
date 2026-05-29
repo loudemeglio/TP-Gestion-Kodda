@@ -42,6 +42,17 @@ export default function AdminHome() {
               <span className="kodda-admin-task-card-cta">Ver metricas</span>
             </div>
           </Link>
+
+          <Link to="/admin/roles" className="kodda-admin-task-card kodda-admin-task-card--primary">
+            <div className="kodda-admin-task-card-visual" aria-hidden="true">
+              <span className="kodda-admin-task-card-emoji">RO</span>
+            </div>
+            <div className="kodda-admin-task-card-body">
+              <h3>Gestión de roles</h3>
+              <p>Visualiza la lista de usuarios y cambia sus roles entre USER y ADMIN según sea necesario.</p>
+              <span className="kodda-admin-task-card-cta">Administrar roles</span>
+            </div>
+          </Link>
         </div>
       </section>
 
