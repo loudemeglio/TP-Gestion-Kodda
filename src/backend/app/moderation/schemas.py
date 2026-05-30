@@ -14,3 +14,15 @@ class FlaggedUserDTO(BaseModel):
 class AdminSettingsDTO(BaseModel):
     max_scam_reports: int
 
+
+class BadFeedbackProductDTO(BaseModel):
+    product_id: int
+    product_name: str
+    seller_id: int
+    seller_username: str
+    category: str
+    price: float
+    is_paused: bool
+    bad_rating_count: int
+    average_stars: float
+
