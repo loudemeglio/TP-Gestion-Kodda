@@ -3,6 +3,9 @@ from sqlalchemy.orm import Session
 from app.notifications.models import Notification
 from app.notifications.repositories.notification_repository import NotificationRepository
 from app.orders.models import Order, OrderStatus
+from app.products.models import Product
+from app.products.repositories.product_repository import ProductRepository
+from app.system_settings.repositories.system_setting_repository import SystemSettingRepository
 
 
 class NotificationService:
@@ -52,6 +55,30 @@ class NotificationService:
                 order_id=order.id,
             ),
         )
+
+        # Alerta de stock mínimo si algún producto vendido queda por debajo del umbral
+        min_stock = SystemSettingRepository.get_int(db, "min_stock_alert", default=0)
+        if min_stock is None:
+            min_stock = 0
+
+        for item in (order.items or []):
+            if item.product_id is None:
+                continue
+                product = ProductRepository.get_by_id(db, item.product_id)
+                if product.seller_id is not None:
+                    NotificationRepository.create(
+                        db,
+                        Notification(
+                            user_id=product.seller_id,
+                            title="Reponer stock",
+                            message=(
+                                f"El stock de la prenda '{product.name}' ({product.size}) "
+                                f"ha alcanzado el límite mínimo. Stock disponible: {product.stock}."
+                            ),
+                            is_read=False,
+                            order_id=order.id,
+                        ),
+                    )
 
         db.commit()
 
