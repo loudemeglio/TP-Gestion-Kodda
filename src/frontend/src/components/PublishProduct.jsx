@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { KoddaLogo } from './KoddaLogo';
 import { api } from '../api/client';
-
-const CATEGORIES = ['Camperas', 'Remeras', 'Pantalones', 'Vestidos', 'Calzado', 'Accesorios', 'Otros'];
+import { findCategoryIdByName, useActiveCatalog } from '../hooks/useActiveCatalog';
 
 const GEMINI_API_KEY = process.env.REACT_APP_GEMINI_API_KEY;
 const GEMINI_URL = GEMINI_API_KEY
@@ -25,13 +24,15 @@ function fileToBase64(file) {
 
 export default function PublishProduct() {
   const navigate = useNavigate();
+  const { brands, categories, loading: catalogLoading, error: catalogError } = useActiveCatalog();
 
   // Form fields
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [stock, setStock] = useState('');
-  const [category, setCategory] = useState('');
+  const [brandId, setBrandId] = useState('');
+  const [categoryId, setCategoryId] = useState('');
   const [size, setSize] = useState('');
   const [mainImageUrl, setMainImageUrl] = useState('');
 
@@ -52,6 +53,7 @@ export default function PublishProduct() {
       const base64 = await fileToBase64(iaFile);
       const mimeType = iaFile.type || 'image/jpeg';
 
+      const categoryNames = categories.map((c) => c.name).join(', ');
       const body = {
         contents: [
           {
@@ -63,7 +65,7 @@ export default function PublishProduct() {
                 },
               },
               {
-                text: 'Analizá esta prenda de ropa y respondé en JSON con estas claves: name (nombre del producto, ej: \'Campera de cuero negra\'), description (descripción breve en español, máx 120 caracteres), category (una sola categoría de: Camperas, Remeras, Pantalones, Vestidos, Calzado, Accesorios, Otros). Solo el JSON, sin texto extra.',
+                text: `Analizá esta prenda de ropa y respondé en JSON con estas claves: name (nombre del producto, ej: 'Campera de cuero negra'), description (descripción breve en español, máx 120 caracteres), category (una sola categoría de: ${categoryNames}). Solo el JSON, sin texto extra.`,
               },
             ],
           },
@@ -93,8 +95,9 @@ export default function PublishProduct() {
 
       if (parsed.name) setName(parsed.name);
       if (parsed.description) setDescription(parsed.description);
-      if (parsed.category && CATEGORIES.includes(parsed.category)) {
-        setCategory(parsed.category);
+      if (parsed.category) {
+        const matchedId = findCategoryIdByName(categories, parsed.category);
+        if (matchedId) setCategoryId(matchedId);
       }
     } catch (err) {
       console.error('Error IA:', err);
@@ -110,7 +113,8 @@ export default function PublishProduct() {
     if (!description.trim()) missing.push('Descripción');
     if (!price) missing.push('Precio');
     if (stock === '' || stock === null || stock === undefined) missing.push('Stock');
-    if (!category) missing.push('Categoría');
+    if (!brandId) missing.push('Marca');
+    if (!categoryId) missing.push('Categoría');
     if (!size.trim()) missing.push('Talle');
 
     if (missing.length > 0) {
@@ -145,7 +149,8 @@ export default function PublishProduct() {
       description: description.trim(),
       price: Number(price),
       stock: Number(stock),
-      category,
+      brand_id: Number(brandId),
+      category_id: Number(categoryId),
       size: size.trim(),
     };
 
@@ -178,7 +183,8 @@ export default function PublishProduct() {
               if (d.loc.includes('stock')) return 'Stock inválido (no puede ser negativo).';
               if (d.loc.includes('name')) return 'Nombre es obligatorio.';
               if (d.loc.includes('description')) return 'Descripción es obligatoria.';
-              if (d.loc.includes('category')) return 'Categoría es obligatoria.';
+              if (d.loc.includes('brand_id')) return 'Marca inválida o no disponible.';
+              if (d.loc.includes('category_id')) return 'Categoría inválida o no disponible.';
               if (d.loc.includes('size')) return 'Talle es obligatorio.';
               return d.msg;
             }
@@ -223,6 +229,8 @@ export default function PublishProduct() {
         <div className="kodda-auth-card">
           <h1>Publicar prenda</h1>
           <p className="kodda-auth-sub">Completá los datos de tu producto o dejá que la IA te ayude.</p>
+
+          {catalogError ? <p className="kodda-auth-error">{catalogError}</p> : null}
 
           <form onSubmit={handleSubmit}>
             {error ? <p className="kodda-auth-error">{error}</p> : null}
@@ -308,17 +316,40 @@ export default function PublishProduct() {
             </label>
 
             <label className="kodda-field">
+              <span>Marca</span>
+              <select
+                className="kodda-input"
+                value={brandId}
+                onChange={(e) => setBrandId(e.target.value)}
+                required
+                disabled={catalogLoading || brands.length === 0}
+              >
+                <option value="">
+                  {catalogLoading ? 'Cargando marcas…' : 'Seleccioná una marca'}
+                </option>
+                {brands.map((brand) => (
+                  <option key={brand.id} value={brand.id}>
+                    {brand.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="kodda-field">
               <span>Categoría</span>
               <select
                 className="kodda-input"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
+                value={categoryId}
+                onChange={(e) => setCategoryId(e.target.value)}
                 required
+                disabled={catalogLoading || categories.length === 0}
               >
-                <option value="">Seleccioná una categoría</option>
-                {CATEGORIES.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
+                <option value="">
+                  {catalogLoading ? 'Cargando categorías…' : 'Seleccioná una categoría'}
+                </option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
                   </option>
                 ))}
               </select>

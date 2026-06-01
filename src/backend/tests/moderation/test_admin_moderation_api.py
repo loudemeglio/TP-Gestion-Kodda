@@ -1,10 +1,4 @@
-from sqlalchemy.orm import Session
-
-from app.core.database import SessionLocal
-from app.users.models import User, UserRole
-
-from tests.conftest import post_login
-
+from tests.conftest import build_product_payload, promote_to_admin, register_user_headers
 
 VALID_BILLING = {
     "legal_name": "Juan Pérez",
@@ -15,37 +9,20 @@ VALID_BILLING = {
 
 
 def _register_and_token_admin(client, username: str, email: str, password: str = "secret12"):
-    payload = {"username": username, "email": email, "password": password}
-    assert client.post("/api/users/", json=payload).status_code == 201
-    r = post_login(client, username, password)
-    assert r.status_code == 200
-    return {"Authorization": f"Bearer {r.json()['access_token']}"}
+    return register_user_headers(client, username, email, password)
 
 
 def _promote_to_admin(username: str) -> None:
-    db: Session = SessionLocal()
-    try:
-        u = db.query(User).filter(User.username == username).first()
-        assert u is not None
-        u.role = UserRole.ADMIN
-        db.commit()
-    finally:
-        db.close()
+    promote_to_admin(username)
 
 
 def _create_product(client, seller_headers, **overrides):
-    body = {
-        "name": "Remera test",
-        "description": "Descripción",
-        "price": 5000,
-        "stock": 5,
-        "category": "Remeras",
-        "size": "M",
-        "main_image_url": None,
-    }
-    body.update(overrides)
+    suffix = __import__("uuid").uuid4().hex[:8]
+    admin_h = register_user_headers(client, f"adm_{suffix}", f"adm_{suffix}@example.com")
+    promote_to_admin(f"adm_{suffix}")
+    body = build_product_payload(client, seller_headers, admin_h, **overrides)
     r = client.post("/api/catalog/products", json=body, headers=seller_headers)
-    assert r.status_code == 201
+    assert r.status_code == 201, r.text
     return r.json()
 
 

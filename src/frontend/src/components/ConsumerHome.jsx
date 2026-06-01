@@ -6,6 +6,7 @@ import { buildCatalogQueryParams, hasActiveCatalogFilters } from '../utils/produ
 import { KoddaLogo } from './KoddaLogo';
 import NotificationBell from './notifications/NotificationBell';
 import ProductFilters, { EMPTY_CATALOG_FILTERS } from './ProductFilters';
+import { useActiveCatalog } from '../hooks/useActiveCatalog';
 import { api } from '../api/client';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -28,6 +29,7 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
   const avatarSrc = resolveMediaUrl(user?.profile_image_url, avatarVersion || undefined);
   const showAdminPreviewBar = allowAdminPreview && user?.role === 'admin';
   const cantidadCarrito = obtenerCantidadTotal();
+  const { categories: activeCategories } = useActiveCatalog();
 
   const cargarProductos = useCallback(async (filters) => {
     try {
@@ -144,6 +146,7 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
           onApply={handleApplyFilters}
           onClear={handleClearFilters}
           loading={loading}
+          categoryOptions={activeCategories}
         />
 
         <div className="kodda-section-title">

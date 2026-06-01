@@ -11,7 +11,8 @@ class ProductCreateDTO(BaseModel):
     description: str = Field(..., min_length=1, max_length=2000, description="Descripción del producto")
     price: float = Field(..., gt=0, description="Precio del producto (debe ser > 0)")
     stock: int = Field(..., ge=0, description="Stock inicial (debe ser >= 0)")
-    category: str = Field(..., min_length=1, max_length=100, description="Categoría del producto")
+    brand_id: int = Field(..., gt=0, description="ID de marca activa del catálogo maestro")
+    category_id: int = Field(..., gt=0, description="ID de categoría activa del catálogo maestro")
     size: str = Field(..., min_length=1, max_length=20, description="Talle de la prenda")
     main_image_url: Optional[str] = Field(None, max_length=2000, description="URL de la imagen principal")
 
@@ -24,7 +25,10 @@ class ProductDTO(BaseModel):
     description: str
     price: float
     stock: int
+    brand: Optional[str] = None
+    brand_id: Optional[int] = None
     category: str
+    category_id: Optional[int] = None
     size: str
     main_image_url: Optional[str]
     is_paused: bool

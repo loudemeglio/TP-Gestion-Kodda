@@ -304,3 +304,83 @@ def apply_schema_patches(engine: Engine) -> None:
                 """
             )
         )
+
+        conn.execute(
+            text(
+                """
+                CREATE TABLE IF NOT EXISTS brands (
+                    id SERIAL PRIMARY KEY,
+                    name VARCHAR(120) NOT NULL,
+                    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                )
+                """
+            )
+        )
+        conn.execute(
+            text(
+                """
+                CREATE TABLE IF NOT EXISTS categories (
+                    id SERIAL PRIMARY KEY,
+                    name VARCHAR(120) NOT NULL,
+                    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                )
+                """
+            )
+        )
+        conn.execute(
+            text(
+                "CREATE UNIQUE INDEX IF NOT EXISTS uq_brands_name_lower "
+                "ON brands (LOWER(name))"
+            )
+        )
+        conn.execute(
+            text(
+                "CREATE UNIQUE INDEX IF NOT EXISTS uq_categories_name_lower "
+                "ON categories (LOWER(name))"
+            )
+        )
+
+        conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS brand VARCHAR(120)"))
+        conn.execute(
+            text(
+                "ALTER TABLE products ADD COLUMN IF NOT EXISTS brand_id INTEGER "
+                "REFERENCES brands(id) ON DELETE SET NULL"
+            )
+        )
+        conn.execute(
+            text(
+                "ALTER TABLE products ADD COLUMN IF NOT EXISTS category_id INTEGER "
+                "REFERENCES categories(id) ON DELETE SET NULL"
+            )
+        )
+        conn.execute(
+            text("CREATE INDEX IF NOT EXISTS ix_products_brand_id ON products (brand_id)")
+        )
+        conn.execute(
+            text("CREATE INDEX IF NOT EXISTS ix_products_category_id ON products (category_id)")
+        )
+
+        default_categories = (
+            "Camperas",
+            "Remeras",
+            "Pantalones",
+            "Vestidos",
+            "Calzado",
+            "Accesorios",
+            "Otros",
+        )
+        for category_name in default_categories:
+            conn.execute(
+                text(
+                    """
+                    INSERT INTO categories (name, is_active)
+                    SELECT :name, TRUE
+                    WHERE NOT EXISTS (
+                        SELECT 1 FROM categories WHERE LOWER(name) = LOWER(:name)
+                    )
+                    """
+                ),
+                {"name": category_name},
+            )

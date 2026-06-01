@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import re
+import uuid
 
 import pytest
 from sqlalchemy import text
@@ -59,9 +60,98 @@ def _truncate_user_tables(api_client):
     """Estado limpio por test (FK: hijos se truncan en cascada desde users)."""
     from app.core.database import engine
 
+    default_categories = (
+        "Camperas",
+        "Remeras",
+        "Pantalones",
+        "Vestidos",
+        "Calzado",
+        "Accesorios",
+        "Otros",
+    )
     with engine.begin() as conn:
         conn.execute(text("TRUNCATE TABLE users RESTART IDENTITY CASCADE"))
+        conn.execute(text("TRUNCATE TABLE brands RESTART IDENTITY CASCADE"))
+        conn.execute(text("TRUNCATE TABLE categories RESTART IDENTITY CASCADE"))
+        for category_name in default_categories:
+            conn.execute(
+                text("INSERT INTO categories (name, is_active) VALUES (:name, TRUE)"),
+                {"name": category_name},
+            )
+
+        conn.execute(
+            text(
+                """
+                INSERT INTO system_settings (key, value)
+                VALUES ('max_scam_reports', 1)
+                ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value
+                """
+            )
+        )
     yield
+
+
+def promote_to_admin(username: str) -> None:
+    from app.core.database import SessionLocal
+    from app.users.models import User, UserRole
+
+    db = SessionLocal()
+    try:
+        user = db.query(User).filter(User.username == username).first()
+        assert user is not None, f"usuario {username!r} no encontrado"
+        user.role = UserRole.ADMIN
+        db.commit()
+    finally:
+        db.close()
+
+
+def register_user_headers(client, username: str, email: str, password: str = "secret12") -> dict:
+    payload = {"username": username, "email": email, "password": password}
+    assert client.post("/api/users/", json=payload).status_code == 201
+    r = post_login(client, username, password)
+    assert r.status_code == 200
+    return {"Authorization": f"Bearer {r.json()['access_token']}"}
+
+
+def create_test_brand(client, admin_headers: dict, name: str = "Nike") -> int:
+    r = client.post("/api/admin/catalog/brands", json={"name": name}, headers=admin_headers)
+    assert r.status_code == 201, r.text
+    return r.json()["id"]
+
+
+def get_active_category_id(client, user_headers: dict, name: str = "Remeras") -> int:
+    r = client.get("/api/catalog/categories/active", headers=user_headers)
+    assert r.status_code == 200, r.text
+    for item in r.json():
+        if item["name"] == name:
+            return item["id"]
+    assert r.json(), "no hay categorías activas en el catálogo de prueba"
+    return r.json()[0]["id"]
+
+
+def build_product_payload(
+    client,
+    seller_headers: dict,
+    admin_headers: dict,
+    *,
+    brand_name: str | None = None,
+    category_name: str = "Remeras",
+    **overrides,
+) -> dict:
+    if brand_name is None:
+        brand_name = f"Brand-{uuid.uuid4().hex[:8]}"
+    body = {
+        "name": "Producto test",
+        "description": "Descripción de prueba",
+        "price": 15000,
+        "stock": 2,
+        "brand_id": create_test_brand(client, admin_headers, brand_name),
+        "category_id": get_active_category_id(client, seller_headers, category_name),
+        "size": "M",
+        "main_image_url": None,
+    }
+    body.update(overrides)
+    return body
 
 
 @pytest.fixture
