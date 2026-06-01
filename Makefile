@@ -17,7 +17,7 @@ help:
 	@echo "  make setup-env  - Copia .env.example -> .env si no existen"
 	@echo "  make test       - Entorno local: Postgres + API (:8000) + React (:3000). No ejecuta pytest."
 	@echo "  make pytest     - Pytest en BD kodda_test (no vacía mydatabase). make db-purge solo si querés borrar todo."
-	@echo "  make db-up      - Solo Postgres (docker compose, puerto 5432)"
+	@echo "  make db-up      - Solo Postgres (docker compose, puerto host 5433 -> contenedor 5432)"
 	@echo "  make db-down    - Detiene contenedores (los datos en volumen persisten)"
 	@echo "  make db-purge   - Para Postgres y ELIMINA el volumen (BD vacía la próxima vez; usalo solo a propósito)"
 	@echo "  make db-test-create - Crea la base kodda_test si no existe (para pytest)"
@@ -56,11 +56,11 @@ db-test-create: db-up wait-db
 		echo "Base kodda_test ya existe."; \
 	else \
 		docker compose -f $(COMPOSE) exec -T db psql -U user -d postgres -c "CREATE DATABASE kodda_test;"; \
-		echo "Creada base kodda_test (pytest). Opcional en .env: PYTEST_DATABASE_URL=postgresql://user:password@localhost:5432/kodda_test"; \
+		echo "Creada base kodda_test (pytest). Opcional en .env: PYTEST_DATABASE_URL=postgresql://user:password@localhost:5433/kodda_test"; \
 	fi
 
 wait-db:
-	@echo "Esperando a Postgres (user@localhost:5432/mydatabase)..."
+	@echo "Esperando a Postgres (user@localhost:5433/mydatabase)..."
 	@until docker compose -f $(COMPOSE) exec -T db pg_isready -U user -d mydatabase >/dev/null 2>&1; do sleep 1; done
 	@echo "Postgres listo."
 
@@ -83,7 +83,7 @@ test: setup-env db-up wait-db
 pytest: $(UVICORN) setup-env db-up wait-db db-test-create
 	@cd $(BACKEND) && \
 	if [ -f .env ]; then set -a && . ./.env && set +a; fi && \
-	DEFAULT_PYTEST_DB_URL="postgresql://user:password@localhost:5432/kodda_test" && \
+	DEFAULT_PYTEST_DB_URL="postgresql://user:password@localhost:5433/kodda_test" && \
 	export DATABASE_URL="$${PYTEST_DATABASE_URL:-$$DEFAULT_PYTEST_DB_URL}" && \
 	export MAIL_SUPPRESS=true && \
 	.venv/bin/pytest -v

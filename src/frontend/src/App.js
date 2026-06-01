@@ -11,9 +11,12 @@ import Login from './components/Login';
 import ResetPassword from './components/ResetPassword';
 import UserList from './components/UserList';
 import AdminModerationPanel from './components/admin/AdminModerationPanel';
+import AdminCatalogPanel from './components/admin/AdminCatalogPanel';
+import AdminRolesPanel from './components/admin/AdminRolesPanel';
 import AdminMetrics from './components/admin/AdminMetrics';
 import VerifyEmail from './components/VerifyEmail';
 import PublishProduct from './components/PublishProduct';
+import ProductDetail from './components/ProductDetail';
 import ProfileEdit from './components/ProfileEdit';
 import ProfileView from './components/ProfileView';
 import RegisterForm from './components/RegisterForm';
@@ -82,6 +85,14 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <ConsumerHome allowAdminPreview />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/productos/:productId"
+        element={
+          <PrivateRoute>
+            <ProductDetail />
           </PrivateRoute>
         }
       />
@@ -216,6 +227,8 @@ function AppRoutes() {
             <AdminModerationPanel />
           }
         />
+        <Route path="roles" element={<AdminRolesPanel />} />
+        <Route path="catalog" element={<AdminCatalogPanel />} />
       </Route>
       <Route
         path="/users"

@@ -22,13 +22,22 @@ class ProductCatalogFilters(BaseModel):
     price_min: Optional[float] = Field(None, ge=0, description="Precio mínimo (inclusive)")
     price_max: Optional[float] = Field(None, ge=0, description="Precio máximo (inclusive)")
     category: Optional[str] = Field(None, max_length=100, description="Categoría exacta")
+    brand: Optional[str] = Field(None, max_length=120, description="Marca exacta")
     size: Optional[str] = Field(None, max_length=20, description="Coincidencia parcial en el talle")
 
     def is_active(self) -> bool:
         """True si al menos un filtro tiene valor."""
         return any(
             v is not None and (v != "" if isinstance(v, str) else True)
-            for v in (self.name, self.description, self.price_min, self.price_max, self.category, self.size)
+            for v in (
+                self.name,
+                self.description,
+                self.price_min,
+                self.price_max,
+                self.category,
+                self.brand,
+                self.size,
+            )
         )
 
 
@@ -38,6 +47,7 @@ def get_product_catalog_filters(
     price_min: Optional[float] = Query(None, ge=0),
     price_max: Optional[float] = Query(None, ge=0),
     category: Optional[str] = Query(None, max_length=100),
+    brand: Optional[str] = Query(None, max_length=120),
     size: Optional[str] = Query(None, max_length=20),
 ) -> ProductCatalogFilters:
     """Parsea query params planos y valida el rango de precios (422 si es inválido)."""
@@ -52,6 +62,7 @@ def get_product_catalog_filters(
         price_min=price_min,
         price_max=price_max,
         category=category,
+        brand=brand,
         size=size,
     )
 
@@ -68,6 +79,8 @@ def apply_catalog_filters(query: SqlQuery, filters: ProductCatalogFilters) -> Sq
         query = query.filter(Product.price <= filters.price_max)
     if filters.category and filters.category.strip():
         query = query.filter(Product.category == filters.category.strip())
+    if filters.brand and filters.brand.strip():
+        query = query.filter(Product.brand == filters.brand.strip())
     if filters.size and filters.size.strip():
         query = query.filter(Product.size.ilike(f"%{filters.size.strip()}%"))
     return query

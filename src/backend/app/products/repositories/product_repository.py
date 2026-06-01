@@ -9,14 +9,24 @@ class ProductRepository:
     """Repository para operaciones con la tabla de productos."""
 
     @staticmethod
-    def create(db: Session, product_data: ProductCreateDTO, seller_id: int) -> Product:
+    def create(
+        db: Session,
+        product_data: ProductCreateDTO,
+        seller_id: int,
+        *,
+        brand_name: str,
+        category_name: str,
+    ) -> Product:
         """Crear un nuevo producto."""
         db_product = Product(
             name=product_data.name,
             description=product_data.description,
             price=product_data.price,
             stock=product_data.stock,
-            category=product_data.category,
+            brand=brand_name,
+            brand_id=product_data.brand_id,
+            category=category_name,
+            category_id=product_data.category_id,
             size=product_data.size,
             main_image_url=product_data.main_image_url,
             seller_id=seller_id,
@@ -30,6 +40,20 @@ class ProductRepository:
     def get_by_id(db: Session, product_id: int) -> Product:
         """Obtener producto por ID."""
         return db.query(Product).filter(Product.id == product_id).first()
+
+    @staticmethod
+    def get_active_by_id_except_user(db: Session, product_id: int, user_id: int) -> Product | None:
+        """Obtener un producto activo por ID excluyendo publicaciones del usuario actual."""
+        return (
+            db.query(Product)
+            .options(joinedload(Product.seller))
+            .filter(
+                Product.id == product_id,
+                Product.is_paused == False,
+                Product.seller_id != user_id,
+            )
+            .first()
+        )
 
     @staticmethod
     def get_all(db: Session, skip: int = 0, limit: int = 100):
@@ -75,7 +99,15 @@ class ProductRepository:
         return db.query(Product).filter(Product.seller_id == seller_id).offset(skip).limit(limit).all()
 
     @staticmethod
-    def update(db: Session, product_id: int, product_data: ProductCreateDTO, seller_id: int) -> Product:
+    def update(
+        db: Session,
+        product_id: int,
+        product_data: ProductCreateDTO,
+        seller_id: int,
+        *,
+        brand_name: str,
+        category_name: str,
+    ) -> Product:
         """Actualizar un producto. Solo el dueño puede actualizar."""
         product = db.query(Product).filter(
             Product.id == product_id,
@@ -89,7 +121,10 @@ class ProductRepository:
         product.description = product_data.description
         product.price = product_data.price
         product.stock = product_data.stock
-        product.category = product_data.category
+        product.brand = brand_name
+        product.brand_id = product_data.brand_id
+        product.category = category_name
+        product.category_id = product_data.category_id
         product.size = product_data.size
         if product_data.main_image_url:
             product.main_image_url = product_data.main_image_url

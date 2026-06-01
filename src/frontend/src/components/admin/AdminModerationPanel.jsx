@@ -14,6 +14,12 @@ export default function AdminModerationPanel() {
   const [saving, setSaving] = useState(false);
   const [resolvingId, setResolvingId] = useState(null);
 
+  const [minBadRatings, setMinBadRatings] = useState(1);
+  const [maxStars, setMaxStars] = useState(2);
+  const [badFeedbackProducts, setBadFeedbackProducts] = useState([]);
+  const [badFeedbackLoading, setBadFeedbackLoading] = useState(false);
+  const [badFeedbackError, setBadFeedbackError] = useState('');
+
   async function loadAll() {
     setError('');
     setSettingsLoading(true);
@@ -37,6 +43,25 @@ export default function AdminModerationPanel() {
   useEffect(() => {
     void loadAll();
   }, []);
+
+  useEffect(() => {
+    if (tab === 'bad-feedback') {
+      void loadBadFeedback();
+    }
+  }, [tab]);
+
+  async function loadBadFeedback() {
+    setBadFeedbackLoading(true);
+    setBadFeedbackError('');
+    try {
+      const res = await api.get(`/api/admin/products/bad-feedback?min_bad_ratings=${minBadRatings}&max_stars=${maxStars}`);
+      setBadFeedbackProducts(res.data);
+    } catch (err) {
+      setBadFeedbackError(err.response?.data?.detail || 'Error al cargar productos con mal feedback.');
+    } finally {
+      setBadFeedbackLoading(false);
+    }
+  }
 
   const canSave = useMemo(() => {
     const v = Number(settingsDraft);
@@ -98,6 +123,13 @@ export default function AdminModerationPanel() {
           onClick={() => setTab('flagged')}
         >
           Usuarios en revisión
+        </button>
+        <button
+          type="button"
+          className={tab === 'bad-feedback' ? 'kodda-btn-primary' : 'kodda-btn-ghost'}
+          onClick={() => setTab('bad-feedback')}
+        >
+          Publicaciones con mal feedback
         </button>
       </div>
 
@@ -178,6 +210,86 @@ export default function AdminModerationPanel() {
                     <tr>
                       <td colSpan={3} style={{ textAlign: 'center' }}>
                         <span className="kodda-auth-muted">No hay usuarios en revisión.</span>
+                      </td>
+                    </tr>
+                  ) : null}
+                </tbody>
+              </table>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
+
+      {tab === 'bad-feedback' ? (
+        <section className="kodda-admin-content">
+          <form 
+            style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', marginBottom: '1.5rem' }}
+            onSubmit={(e) => { e.preventDefault(); loadBadFeedback(); }}
+          >
+            <label className="kodda-field" style={{ margin: 0 }}>
+              <span style={{ fontSize: '0.85rem' }}>Umbral de estrellas (≤)</span>
+              <input
+                className="kodda-input"
+                type="number"
+                min={1}
+                max={5}
+                value={maxStars}
+                onChange={(e) => setMaxStars(e.target.value)}
+              />
+            </label>
+            <label className="kodda-field" style={{ margin: 0 }}>
+              <span style={{ fontSize: '0.85rem' }}>Cantidad mín. calificaciones negativas</span>
+              <input
+                className="kodda-input"
+                type="number"
+                min={1}
+                value={minBadRatings}
+                onChange={(e) => setMinBadRatings(e.target.value)}
+              />
+            </label>
+            <button type="submit" className="kodda-btn-primary" disabled={badFeedbackLoading}>
+              {badFeedbackLoading ? 'Buscando...' : 'Buscar'}
+            </button>
+          </form>
+
+          {badFeedbackError ? <p className="kodda-auth-error">{badFeedbackError}</p> : null}
+
+          {badFeedbackLoading ? <p className="kodda-auth-muted">Cargando publicaciones...</p> : null}
+
+          {!badFeedbackLoading && !badFeedbackError ? (
+            <div className="kodda-table-wrap">
+              <table className="kodda-table">
+                <thead>
+                  <tr>
+                    <th>Producto</th>
+                    <th>Vendedor</th>
+                    <th>Categoría</th>
+                    <th>Precio</th>
+                    <th>Estado</th>
+                    <th>Calificaciones negativas</th>
+                    <th>Promedio de estrellas</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {badFeedbackProducts.map((p) => (
+                    <tr key={p.product_id}>
+                      <td>{p.product_name}</td>
+                      <td>{p.seller_username}</td>
+                      <td>{p.category}</td>
+                      <td>${p.price.toFixed(2)}</td>
+                      <td>
+                        <span className={`kodda-badge ${p.is_paused ? 'kodda-badge-danger' : 'kodda-badge-success'}`}>
+                          {p.is_paused ? 'Pausado' : 'Activo'}
+                        </span>
+                      </td>
+                      <td style={{ textAlign: 'center' }}>{p.bad_rating_count}</td>
+                      <td style={{ textAlign: 'center' }}>{p.average_stars.toFixed(1)}</td>
+                    </tr>
+                  ))}
+                  {badFeedbackProducts.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} style={{ textAlign: 'center' }}>
+                        <span className="kodda-auth-muted">No se encontraron publicaciones con esos filtros.</span>
                       </td>
                     </tr>
                   ) : null}

@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 
+from app.catalog.services.catalog_service import CatalogAdminService
 from app.products.filters import ProductCatalogFilters
 from app.products.models import Product
 from app.products.repositories.product_repository import ProductRepository
@@ -17,6 +18,12 @@ class ProductService:
         return dto.model_copy(update={"seller_username": seller_username})
 
     @staticmethod
+    def _validate_catalog_refs(db: Session, product_data: ProductCreateDTO) -> tuple[str, str]:
+        brand = CatalogAdminService.resolve_active_brand(db, product_data.brand_id)
+        category = CatalogAdminService.resolve_active_category(db, product_data.category_id)
+        return brand.name, category.name
+
+    @staticmethod
     def create_product(db: Session, product_data: ProductCreateDTO, seller_id: int) -> ProductDTO:
         """Crear un nuevo producto con validaciones de negocio."""
         if product_data.price <= 0:
@@ -25,7 +32,10 @@ class ProductService:
         if product_data.stock < 0:
             raise ValueError("El stock no puede ser negativo")
 
-        db_product = ProductRepository.create(db, product_data, seller_id)
+        brand_name, category_name = ProductService._validate_catalog_refs(db, product_data)
+        db_product = ProductRepository.create(
+            db, product_data, seller_id, brand_name=brand_name, category_name=category_name
+        )
         return ProductService._to_dto(db_product)
 
     @staticmethod
@@ -55,6 +65,18 @@ class ProductService:
         return [ProductService._to_dto(product) for product in products]
 
     @staticmethod
+    def get_active_product_detail_for_catalog(
+        db: Session,
+        product_id: int,
+        current_user_id: int,
+    ) -> ProductDTO:
+        """Detalle de producto activo del catálogo para un comprador autenticado."""
+        product = ProductRepository.get_active_by_id_except_user(db, product_id, current_user_id)
+        if not product:
+            raise ValueError("Producto no encontrado o no disponible en el catálogo")
+        return ProductService._to_dto(product)
+
+    @staticmethod
     def update_product(db: Session, product_id: int, product_data: ProductCreateDTO, seller_id: int) -> ProductDTO:
         """Actualizar un producto. Solo el dueño puede actualizar."""
         if product_data.price <= 0:
@@ -63,7 +85,15 @@ class ProductService:
         if product_data.stock < 0:
             raise ValueError("El stock no puede ser negativo")
 
-        db_product = ProductRepository.update(db, product_id, product_data, seller_id)
+        brand_name, category_name = ProductService._validate_catalog_refs(db, product_data)
+        db_product = ProductRepository.update(
+            db,
+            product_id,
+            product_data,
+            seller_id,
+            brand_name=brand_name,
+            category_name=category_name,
+        )
         if not db_product:
             raise ValueError("Producto no encontrado o no tienes permisos para editarlo")
 
