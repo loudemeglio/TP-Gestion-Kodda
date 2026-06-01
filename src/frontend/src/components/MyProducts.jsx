@@ -2,9 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client';
 import { KoddaLogo } from './KoddaLogo';
+import { findBrandIdByName, findCategoryIdByName, useActiveCatalog } from '../hooks/useActiveCatalog';
 import '../styles/my-products.css';
-
-const CATEGORIES = ['Camperas', 'Remeras', 'Pantalones', 'Vestidos', 'Calzado', 'Accesorios', 'Otros'];
 
 // Modal de confirmación
 function ConfirmModal({ title, message, onConfirm, onCancel, isLoading, isDanger = false }) {
@@ -41,7 +40,7 @@ function ConfirmModal({ title, message, onConfirm, onCancel, isLoading, isDanger
   );
 }
 
-function ProductCard({ product, onEdit, onEditCancel, isEditing, editData, onEditChange, onSave, isSaving, onDelete, onTogglePause }) {
+function ProductCard({ product, brands, categories, onEdit, onEditCancel, isEditing, editData, onEditChange, onSave, isSaving, onDelete, onTogglePause }) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isPauseToggling, setIsPauseToggling] = useState(false);
@@ -135,17 +134,34 @@ function ProductCard({ product, onEdit, onEditCancel, isEditing, editData, onEdi
           </label>
 
           <label className="kodda-field">
+            <span>Marca</span>
+            <select
+              className="kodda-input"
+              value={editData.brand_id || ''}
+              onChange={(e) => onEditChange('brand_id', e.target.value)}
+              required
+            >
+              <option value="">Seleccioná una marca</option>
+              {brands.map((brand) => (
+                <option key={brand.id} value={String(brand.id)}>
+                  {brand.name}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="kodda-field">
             <span>Categoría</span>
             <select
               className="kodda-input"
-              value={editData.category}
-              onChange={(e) => onEditChange('category', e.target.value)}
+              value={editData.category_id || ''}
+              onChange={(e) => onEditChange('category_id', e.target.value)}
               required
             >
               <option value="">Seleccioná una categoría</option>
-              {CATEGORIES.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
+              {categories.map((cat) => (
+                <option key={cat.id} value={String(cat.id)}>
+                  {cat.name}
                 </option>
               ))}
             </select>
@@ -218,7 +234,10 @@ function ProductCard({ product, onEdit, onEditCancel, isEditing, editData, onEdi
         <div className="kodda-product-card-content">
           <div className="kodda-product-card-header">
             <h3>{product.name}</h3>
-            <span className="kodda-product-badge">{product.category}</span>
+            <div className="kodda-product-badges">
+              {product.brand ? <span className="kodda-product-badge">{product.brand}</span> : null}
+              <span className="kodda-product-badge">{product.category}</span>
+            </div>
           </div>
 
           <p className="kodda-product-description">{product.description}</p>
@@ -288,6 +307,7 @@ function ProductCard({ product, onEdit, onEditCancel, isEditing, editData, onEdi
 }
 
 export default function MyProducts() {
+  const { brands, categories, loading: catalogLoading, error: catalogError } = useActiveCatalog();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -330,7 +350,12 @@ export default function MyProducts() {
       description: product.description,
       price: product.price,
       stock: product.stock,
-      category: product.category,
+      brand_id: product.brand_id
+        ? String(product.brand_id)
+        : findBrandIdByName(brands, product.brand),
+      category_id: product.category_id
+        ? String(product.category_id)
+        : findCategoryIdByName(categories, product.category),
       size: product.size || '',
       main_image_url: product.main_image_url || '',
     });
@@ -372,7 +397,11 @@ export default function MyProducts() {
       setSaveError('El stock no puede ser negativo.');
       return;
     }
-    if (!editData.category) {
+    if (!editData.brand_id) {
+      setSaveError('La marca es obligatoria.');
+      return;
+    }
+    if (!editData.category_id) {
       setSaveError('La categoría es obligatoria.');
       return;
     }
@@ -388,7 +417,8 @@ export default function MyProducts() {
         description: editData.description.trim(),
         price: priceNum,
         stock: stockNum,
-        category: editData.category,
+        brand_id: Number(editData.brand_id),
+        category_id: Number(editData.category_id),
         size: editData.size.trim(),
         main_image_url: editData.main_image_url?.trim() || null,
       };
@@ -478,7 +508,9 @@ export default function MyProducts() {
           <p className="kodda-auth-error">{error}</p>
         ) : null}
 
-        {loading ? (
+        {catalogError ? <p className="kodda-auth-error">{catalogError}</p> : null}
+
+        {loading || catalogLoading ? (
           <p className="kodda-auth-muted">Cargando tus publicaciones…</p>
         ) : products.length === 0 ? (
           <div className="kodda-my-products-empty">
@@ -493,6 +525,8 @@ export default function MyProducts() {
               <ProductCard
                 key={product.id}
                 product={product}
+                brands={brands}
+                categories={categories}
                 onEdit={handleEdit}
                 onEditCancel={handleEditCancel}
                 isEditing={editingId === product.id}

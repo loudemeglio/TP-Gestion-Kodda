@@ -2424,7 +2424,7 @@ a.kodda-user-chip:hover {
   margin-bottom: 0.35rem;
 }
 
-/* ----- Métricas de administración ----- */
+/* ----- Mï¿½tricas de administraciï¿½n ----- */
 .kodda-admin-task-card-visual--metrics {
   background: linear-gradient(160deg, #7c2d12 0%, #c2410c 55%, #ea580c 100%) !important;
 }
@@ -2687,16 +2687,139 @@ a.kodda-user-chip:hover {
   font-size: 0.9rem;
 }
 
-@media (max-width: 560px) {
-  .kodda-metrics-head {
-    flex-direction: column;
-  }
 
-  .kodda-hour-chart {
-    gap: 0.18rem;
-  }
+/* ----- Catï¿½logo maestro (admin) ----- */
+.kodda-admin-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
 
-  .kodda-hour-label {
-    font-size: 0.55rem;
-  }
+.kodda-admin-tab {
+  border: 1px solid rgba(15, 118, 110, 0.22);
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--kd-ink-soft);
+  border-radius: 999px;
+  padding: 0.45rem 0.95rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.kodda-admin-tab--active {
+  background: var(--kd-accent);
+  border-color: var(--kd-accent);
+  color: #fff;
+}
+
+.kodda-admin-catalog-section {
+  margin-top: 0.5rem;
+}
+
+.kodda-admin-catalog-add {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.kodda-admin-catalog-add-field {
+  flex: 1;
+  min-width: 220px;
+  margin-bottom: 0;
+}
+
+.kodda-admin-catalog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.kodda-btn-small {
+  padding: 0.35rem 0.65rem;
+  font-size: 0.78rem;
+}
+
+.kodda-catalog-status {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: rgba(120, 120, 120, 0.12);
+  color: var(--kd-mist);
+}
+
+.kodda-catalog-status--active {
+  background: rgba(4, 120, 87, 0.12);
+  color: var(--kd-success);
+}
+
+.kodda-admin-flash {
+  margin-bottom: 1rem;
+}
+
+.kodda-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.kodda-toggle input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.kodda-toggle-track {
+  width: 2.4rem;
+  height: 1.35rem;
+  border-radius: 999px;
+  background: rgba(120, 120, 120, 0.35);
+  transition: background 0.2s;
+  position: relative;
+}
+
+.kodda-toggle-track::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s;
+}
+
+.kodda-toggle input:checked + .kodda-toggle-track {
+  background: var(--kd-accent);
+}
+
+.kodda-toggle input:checked + .kodda-toggle-track::after {
+  transform: translateX(1.05rem);
+}
+
+.kodda-toggle input:disabled + .kodda-toggle-track {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.kodda-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

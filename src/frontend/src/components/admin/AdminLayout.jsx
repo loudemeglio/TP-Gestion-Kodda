@@ -88,6 +88,17 @@ export default function AdminLayout() {
             Metricas
           </NavLink>
           <NavLink
+            to="/admin/catalog"
+            className={({ isActive }) =>
+              `kodda-admin-navlink${isActive ? ' kodda-admin-navlink--active' : ''}`
+            }
+          >
+            <span className="kodda-admin-navlink-icon" aria-hidden="true">
+              CT
+            </span>
+            Catálogo maestro
+          </NavLink>
+          <NavLink
             to="/admin/roles"
             className={({ isActive }) =>
               `kodda-admin-navlink${isActive ? ' kodda-admin-navlink--active' : ''}`
