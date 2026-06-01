@@ -17,8 +17,11 @@ from app.ratings.routes.ratings import router as ratings_router
 from app.buyer_reviews.routes.buyer_reviews import router as buyer_reviews_router
 from app.notifications.routes.notifications import router as notifications_router
 from app.moderation.routes.admin_moderation import router as admin_moderation_router
+from app.catalog.routes.admin_catalog import router as admin_catalog_router
+from app.catalog.routes.public_catalog import router as public_catalog_router
 from app.metrics.routes import router as metrics_router
 import app.products.models  # noqa: F401 — registra metadata antes de create_all
+import app.catalog.models  # noqa: F401 — registra metadata antes de create_all
 import app.cart.models  # noqa: F401 — registra metadata antes de create_all
 import app.users.models  # noqa: F401 — registra metadata antes de create_all
 import app.orders.models  # noqa: F401 — registra metadata antes de create_all
@@ -70,6 +73,8 @@ app.include_router(ratings_router)
 app.include_router(buyer_reviews_router)
 app.include_router(notifications_router)
 app.include_router(admin_moderation_router)
+app.include_router(admin_catalog_router)
+app.include_router(public_catalog_router)
 app.include_router(metrics_router)
 
 

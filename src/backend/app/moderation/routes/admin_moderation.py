@@ -1,8 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import func, case
 
 from app.core.database import get_db
-from app.moderation.schemas import AdminSettingsDTO, FlaggedUserDTO
+from app.moderation.schemas import AdminSettingsDTO, FlaggedUserDTO, BadFeedbackProductDTO
+from app.products.models import Product
+from app.orders.models import OrderItem
+from app.ratings.models import SellerRating
 from app.system_settings.repositories.system_setting_repository import SystemSettingRepository
 from app.users.deps.auth import require_admin
 from app.users.models import User
@@ -87,6 +91,67 @@ def resolve_flag(
         )
     except LookupError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
+@router.get("/products/bad-feedback", response_model=list[BadFeedbackProductDTO])
+def list_bad_feedback_products(
+    min_bad_ratings: int = 1,
+    max_stars: int = 2,
+    _: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    try:
+        bad_rating_case = case(
+            (SellerRating.stars <= max_stars, 1),
+            else_=0
+        )
+
+        query = (
+            db.query(
+                Product.id.label("product_id"),
+                Product.name.label("product_name"),
+                Product.seller_id.label("seller_id"),
+                User.username.label("seller_username"),
+                Product.category.label("category"),
+                Product.price.label("price"),
+                Product.is_paused.label("is_paused"),
+                func.sum(bad_rating_case).label("bad_rating_count"),
+                func.avg(SellerRating.stars).label("average_stars")
+            )
+            .join(User, Product.seller_id == User.id)
+            .join(OrderItem, Product.id == OrderItem.product_id)
+            .join(SellerRating, (OrderItem.order_id == SellerRating.order_id) & (OrderItem.seller_id == SellerRating.seller_id))
+            .group_by(
+                Product.id,
+                Product.name,
+                Product.seller_id,
+                User.username,
+                Product.category,
+                Product.price,
+                Product.is_paused
+            )
+            .having(func.sum(bad_rating_case) >= min_bad_ratings)
+            .order_by(func.sum(bad_rating_case).desc())
+        )
+
+        results = query.all()
+
+        return [
+            BadFeedbackProductDTO(
+                product_id=r.product_id,
+                product_name=r.product_name,
+                seller_id=r.seller_id,
+                seller_username=r.seller_username,
+                category=r.category,
+                price=r.price,
+                is_paused=r.is_paused,
+                bad_rating_count=int(r.bad_rating_count) if r.bad_rating_count else 0,
+                average_stars=float(r.average_stars) if r.average_stars else 0.0,
+            )
+            for r in results
+        ]
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 

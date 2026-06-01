@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCarrito } from '../context/CarritoContext';
 import { resolveMediaUrl } from '../utils/mediaUrl';
@@ -6,6 +6,7 @@ import { buildCatalogQueryParams, hasActiveCatalogFilters } from '../utils/produ
 import { KoddaLogo } from './KoddaLogo';
 import NotificationBell from './notifications/NotificationBell';
 import ProductFilters, { EMPTY_CATALOG_FILTERS } from './ProductFilters';
+import { useActiveCatalog } from '../hooks/useActiveCatalog';
 import { api } from '../api/client';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -16,6 +17,7 @@ import { useCallback, useEffect, useState } from 'react';
  * @param {{ allowAdminPreview?: boolean }} props — si es true y el usuario es admin, muestra aviso y acceso al panel.
  */
 export default function ConsumerHome({ allowAdminPreview = false }) {
+  const navigate = useNavigate();
   const { user, logout, avatarVersion } = useAuth();
   const { agregarAlCarrito, obtenerCantidadTotal } = useCarrito();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -28,6 +30,7 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
   const avatarSrc = resolveMediaUrl(user?.profile_image_url, avatarVersion || undefined);
   const showAdminPreviewBar = allowAdminPreview && user?.role === 'admin';
   const cantidadCarrito = obtenerCantidadTotal();
+  const { categories: activeCategories, brands: activeBrands } = useActiveCatalog();
 
   const cargarProductos = useCallback(async (filters) => {
     try {
@@ -144,6 +147,8 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
           onApply={handleApplyFilters}
           onClear={handleClearFilters}
           loading={loading}
+          categoryOptions={activeCategories}
+          brandOptions={activeBrands}
         />
 
         <div className="kodda-section-title">
@@ -174,11 +179,26 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
             {productos.map((producto) => {
               const imageSrc = resolveMediaUrl(producto.main_image_url);
               return (
-              <article key={producto.id} className="kodda-card-product" role="listitem">
+              <article
+                key={producto.id}
+                className="kodda-card-product kodda-card-product--clickable"
+                role="button"
+                tabIndex={0}
+                onClick={() => navigate(`/productos/${producto.id}`)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    navigate(`/productos/${producto.id}`);
+                  }
+                }}
+                aria-label={`Ver detalle de ${producto.name}`}
+              >
                 <div className="kodda-card-visual">
                   {imageSrc ? (
                     <img src={imageSrc} alt={producto.name} />
-                  ) : null}
+                  ) : (
+                    <div className="kodda-product-detail-image-placeholder">📷 Sin imagen</div>
+                  )}
                 </div>
                 <div className="kodda-card-body">
                   <h3>{producto.name}</h3>
@@ -188,11 +208,15 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
                       to={`/vendedores/${producto.seller_id}`}
                       className="kodda-auth-link"
                       title="Ver reputación del vendedor"
+                      onClick={(e) => e.stopPropagation()}
                     >
                       {producto.seller_username || `#${producto.seller_id}`}
                     </Link>
                   </p>
-                  <p className="kodda-card-meta">{producto.category}</p>
+                  <div className="kodda-card-flags">
+                    {producto.brand ? <span className="kodda-card-flag">{producto.brand}</span> : null}
+                    <span className="kodda-card-flag">{producto.category}</span>
+                  </div>
                   <p className="kodda-card-meta">Talle: {producto.size || '—'}</p>
                   <div className="kodda-price">${producto.price.toLocaleString('es-AR')}</div>
                   <p className="kodda-card-meta" style={{ marginTop: '0.35rem' }}>
@@ -201,7 +225,10 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
                   <button
                     type="button"
                     className="kodda-btn-add-to-cart"
-                    onClick={() => agregarAlCarrito(producto)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      agregarAlCarrito(producto);
+                    }}
                     disabled={producto.stock === 0}
                     title={producto.stock === 0 ? 'Sin stock disponible' : 'Agregar al carrito'}
                   >

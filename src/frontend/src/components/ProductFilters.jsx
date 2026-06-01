@@ -1,58 +1,69 @@
-import { useState } from 'react';
-import { CATEGORIES } from '../constants/categories';
+import { useMemo, useState } from 'react';
 import { EMPTY_CATALOG_FILTERS } from '../utils/productFilters';
 
-/**
- * Definición de campos de filtro. Para extender el panel, agregar entradas acá
- * y el query param correspondiente en utils/productFilters.js + backend filters.py.
- */
-export const CATALOG_FILTER_FIELDS = [
-  {
-    key: 'name',
-    type: 'text',
-    label: 'Nombre',
-    placeholder: 'Ej: campera jean',
-    autoComplete: 'off',
-  },
-  {
-    key: 'description',
-    type: 'text',
-    label: 'Descripción',
-    placeholder: 'Palabras que aparezcan en la descripción',
-    autoComplete: 'off',
-  },
-  {
-    key: 'size',
-    type: 'text',
-    label: 'Talle',
-    placeholder: 'Ej: M, L, 42',
-    autoComplete: 'off',
-  },
-  {
-    key: 'price_min',
-    type: 'number',
-    label: 'Precio desde ($)',
-    placeholder: '0',
-    min: 0,
-    step: 100,
-    group: 'price',
-  },
-  {
-    key: 'price_max',
-    type: 'number',
-    label: 'Precio hasta ($)',
-    placeholder: 'Sin tope',
-    min: 0,
-    step: 100,
-    group: 'price',
-  },
-  {
-    key: 'category',
-    type: 'select',
-    label: 'Categoría',
-    options: [{ value: '', label: 'Todas las categorías' }, ...CATEGORIES.map((c) => ({ value: c, label: c }))],
-  },
-];
+function buildFilterFields(categoryOptions, brandOptions) {
+  return [
+    {
+      key: 'name',
+      type: 'text',
+      label: 'Nombre',
+      placeholder: 'Ej: campera jean',
+      autoComplete: 'off',
+    },
+    {
+      key: 'description',
+      type: 'text',
+      label: 'Descripción',
+      placeholder: 'Palabras que aparezcan en la descripción',
+      autoComplete: 'off',
+    },
+    {
+      key: 'size',
+      type: 'text',
+      label: 'Talle',
+      placeholder: 'Ej: M, L, 42',
+      autoComplete: 'off',
+    },
+    {
+      key: 'price_min',
+      type: 'number',
+      label: 'Precio desde ($)',
+      placeholder: '0',
+      min: 0,
+      step: 100,
+      group: 'price',
+    },
+    {
+      key: 'price_max',
+      type: 'number',
+      label: 'Precio hasta ($)',
+      placeholder: 'Sin tope',
+      min: 0,
+      step: 100,
+      group: 'price',
+    },
+    {
+      key: 'category',
+      type: 'select',
+      label: 'Categoría',
+      options: [
+        { value: '', label: 'Todas las categorías' },
+        ...categoryOptions.map((c) => ({ value: c.name, label: c.name })),
+      ],
+    },
+    {
+      key: 'brand',
+      type: 'select',
+      label: 'Marca',
+      options: [
+        { value: '', label: 'Todas las marcas' },
+        ...brandOptions.map((b) => ({ value: b.name, label: b.name })),
+      ],
+    },
+  ];
+}
+
+export { EMPTY_CATALOG_FILTERS };
 
 /**
  * @param {{
@@ -61,18 +72,32 @@ export const CATALOG_FILTER_FIELDS = [
  *   onApply: () => void,
  *   onClear: () => void,
  *   loading?: boolean,
+ *   categoryOptions?: Array<{ id: number, name: string }>,
+ *   brandOptions?: Array<{ id: number, name: string }>,
  * }} props
  */
-export default function ProductFilters({ values, onChange, onApply, onClear, loading = false }) {
+export default function ProductFilters({
+  values,
+  onChange,
+  onApply,
+  onClear,
+  loading = false,
+  categoryOptions = [],
+  brandOptions = [],
+}) {
   const [open, setOpen] = useState(false);
+  const filterFields = useMemo(
+    () => buildFilterFields(categoryOptions, brandOptions),
+    [categoryOptions, brandOptions]
+  );
 
   const handleField = (key, value) => {
     onChange({ ...values, [key]: value });
   };
 
-  const textFields = CATALOG_FILTER_FIELDS.filter((f) => f.type === 'text');
-  const priceFields = CATALOG_FILTER_FIELDS.filter((f) => f.group === 'price');
-  const selectFields = CATALOG_FILTER_FIELDS.filter((f) => f.type === 'select');
+  const textFields = filterFields.filter((f) => f.type === 'text');
+  const priceFields = filterFields.filter((f) => f.group === 'price');
+  const selectFields = filterFields.filter((f) => f.type === 'select');
 
   const handleToggle = () => {
     if (open) {
@@ -178,5 +203,3 @@ export default function ProductFilters({ values, onChange, onApply, onClear, loa
     </section>
   );
 }
-
-export { EMPTY_CATALOG_FILTERS };
