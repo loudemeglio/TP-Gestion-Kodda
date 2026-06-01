@@ -11,6 +11,7 @@ export const EMPTY_CATALOG_FILTERS = {
   price_min: '',
   price_max: '',
   category: '',
+  brand: '',
   size: '',
 };
 
@@ -36,6 +37,9 @@ export function buildCatalogQueryParams(filters, { limit = 100 } = {}) {
   if (filters.category) {
     params.set('category', filters.category);
   }
+  if (filters.brand) {
+    params.set('brand', filters.brand);
+  }
   if (filters.size?.trim()) {
     params.set('size', filters.size.trim());
   }
@@ -50,6 +54,7 @@ export function hasActiveCatalogFilters(filters) {
     parsePrice(filters.price_min) !== null ||
     parsePrice(filters.price_max) !== null ||
     Boolean(filters.category) ||
+    Boolean(filters.brand) ||
     Boolean(filters.size?.trim())
   );
 }

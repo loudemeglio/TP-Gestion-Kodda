@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { EMPTY_CATALOG_FILTERS } from '../utils/productFilters';
 
-function buildFilterFields(categoryOptions) {
+function buildFilterFields(categoryOptions, brandOptions) {
   return [
     {
       key: 'name',
@@ -51,6 +51,15 @@ function buildFilterFields(categoryOptions) {
         ...categoryOptions.map((c) => ({ value: c.name, label: c.name })),
       ],
     },
+    {
+      key: 'brand',
+      type: 'select',
+      label: 'Marca',
+      options: [
+        { value: '', label: 'Todas las marcas' },
+        ...brandOptions.map((b) => ({ value: b.name, label: b.name })),
+      ],
+    },
   ];
 }
 
@@ -64,6 +73,7 @@ export { EMPTY_CATALOG_FILTERS };
  *   onClear: () => void,
  *   loading?: boolean,
  *   categoryOptions?: Array<{ id: number, name: string }>,
+ *   brandOptions?: Array<{ id: number, name: string }>,
  * }} props
  */
 export default function ProductFilters({
@@ -73,9 +83,13 @@ export default function ProductFilters({
   onClear,
   loading = false,
   categoryOptions = [],
+  brandOptions = [],
 }) {
   const [open, setOpen] = useState(false);
-  const filterFields = useMemo(() => buildFilterFields(categoryOptions), [categoryOptions]);
+  const filterFields = useMemo(
+    () => buildFilterFields(categoryOptions, brandOptions),
+    [categoryOptions, brandOptions]
+  );
 
   const handleField = (key, value) => {
     onChange({ ...values, [key]: value });

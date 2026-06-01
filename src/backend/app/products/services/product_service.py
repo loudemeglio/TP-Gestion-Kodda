@@ -65,6 +65,18 @@ class ProductService:
         return [ProductService._to_dto(product) for product in products]
 
     @staticmethod
+    def get_active_product_detail_for_catalog(
+        db: Session,
+        product_id: int,
+        current_user_id: int,
+    ) -> ProductDTO:
+        """Detalle de producto activo del catálogo para un comprador autenticado."""
+        product = ProductRepository.get_active_by_id_except_user(db, product_id, current_user_id)
+        if not product:
+            raise ValueError("Producto no encontrado o no disponible en el catálogo")
+        return ProductService._to_dto(product)
+
+    @staticmethod
     def update_product(db: Session, product_id: int, product_data: ProductCreateDTO, seller_id: int) -> ProductDTO:
         """Actualizar un producto. Solo el dueño puede actualizar."""
         if product_data.price <= 0:

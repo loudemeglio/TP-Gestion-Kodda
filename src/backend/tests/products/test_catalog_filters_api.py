@@ -119,6 +119,95 @@ def test_catalog_filter_by_price_range_and_category(api_client):
 
 
 @pytest.mark.postgres
+def test_catalog_filter_by_brand_and_category_combined(api_client):
+    admin_h = _admin_headers(api_client, "admin_filter_brand", "admin_filter_brand@example.com")
+    seller_h = register_user_headers(api_client, "seller_brand", "seller_brand@example.com")
+    buyer_h = register_user_headers(api_client, "buyer_brand", "buyer_brand@example.com")
+
+    _create_product(
+        api_client,
+        seller_h,
+        admin_h,
+        name="Campera Nike",
+        category_name="Camperas",
+        brand_name="Nike",
+    )
+    _create_product(
+        api_client,
+        seller_h,
+        admin_h,
+        name="Campera Adidas",
+        category_name="Camperas",
+        brand_name="Adidas",
+    )
+    _create_product(
+        api_client,
+        seller_h,
+        admin_h,
+        name="Remera Nike",
+        category_name="Remeras",
+        brand_name="Puma",
+    )
+
+    r = api_client.get(
+        "/api/catalog/products",
+        params={"category": "Camperas", "brand": "Nike"},
+        headers=buyer_h,
+    )
+    assert r.status_code == 200
+    rows = r.json()
+    assert len(rows) == 1
+    assert rows[0]["name"] == "Campera Nike"
+    assert rows[0]["brand"] == "Nike"
+
+
+@pytest.mark.postgres
+def test_catalog_product_detail_includes_seller_and_stock(api_client):
+    admin_h = _admin_headers(api_client, "admin_filter_detail", "admin_filter_detail@example.com")
+    seller_h = register_user_headers(api_client, "seller_detail", "seller_detail@example.com")
+    buyer_h = register_user_headers(api_client, "buyer_detail", "buyer_detail@example.com")
+
+    created = _create_product(
+        api_client,
+        seller_h,
+        admin_h,
+        name="Campera detalle",
+        description="Campera de prueba para pantalla de detalle",
+        category_name="Camperas",
+        brand_name="Nike",
+        stock=0,
+    )
+
+    r = api_client.get(f"/api/catalog/products/{created['id']}", headers=buyer_h)
+    assert r.status_code == 200
+    detail = r.json()
+    assert detail["name"] == "Campera detalle"
+    assert detail["description"]
+    assert detail["price"] > 0
+    assert detail["stock"] == 0
+    assert detail["seller_id"] == created["seller_id"]
+    assert detail["seller_username"] == "seller_detail"
+    assert detail["brand"] == "Nike"
+
+
+@pytest.mark.postgres
+def test_catalog_product_detail_hidden_for_own_product(api_client):
+    admin_h = _admin_headers(api_client, "admin_filter_self", "admin_filter_self@example.com")
+    seller_h = register_user_headers(api_client, "seller_self", "seller_self@example.com")
+
+    created = _create_product(
+        api_client,
+        seller_h,
+        admin_h,
+        name="No ver mi propio detalle de catálogo",
+        category_name="Camperas",
+    )
+
+    r = api_client.get(f"/api/catalog/products/{created['id']}", headers=seller_h)
+    assert r.status_code == 404
+
+
+@pytest.mark.postgres
 def test_catalog_excludes_own_products_with_filters(api_client):
     admin_h = _admin_headers(api_client, "admin_filter_solo", "admin_filter_solo@example.com")
     user_h = register_user_headers(api_client, "solo_user", "solo_user@example.com")

@@ -47,7 +47,7 @@ def get_all_products(
     """
     Catálogo público: productos activos de otros usuarios.
 
-    Filtros opcionales (query): name, description, price_min, price_max, category, size.
+    Filtros opcionales (query): name, description, price_min, price_max, category, brand, size.
     """
     try:
         return ProductService.get_all_active_products_except_user(
@@ -62,6 +62,31 @@ def get_all_products(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error al obtener productos",
+        )
+
+
+@router.get("/products/{product_id}", response_model=ProductDTO)
+def get_product_detail(
+    product_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Detalle de producto activo del catálogo.
+
+    Solo expone publicaciones activas de otros usuarios.
+    """
+    try:
+        return ProductService.get_active_product_detail_for_catalog(db, product_id, current_user.id)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e),
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error al obtener el detalle del producto",
         )
 
 

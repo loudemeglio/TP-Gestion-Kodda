@@ -42,6 +42,20 @@ class ProductRepository:
         return db.query(Product).filter(Product.id == product_id).first()
 
     @staticmethod
+    def get_active_by_id_except_user(db: Session, product_id: int, user_id: int) -> Product | None:
+        """Obtener un producto activo por ID excluyendo publicaciones del usuario actual."""
+        return (
+            db.query(Product)
+            .options(joinedload(Product.seller))
+            .filter(
+                Product.id == product_id,
+                Product.is_paused == False,
+                Product.seller_id != user_id,
+            )
+            .first()
+        )
+
+    @staticmethod
     def get_all(db: Session, skip: int = 0, limit: int = 100):
         """Obtener todos los productos con paginación."""
         return db.query(Product).offset(skip).limit(limit).all()
