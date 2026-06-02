@@ -20,6 +20,7 @@ from app.moderation.routes.admin_moderation import router as admin_moderation_ro
 from app.catalog.routes.admin_catalog import router as admin_catalog_router
 from app.catalog.routes.public_catalog import router as public_catalog_router
 from app.metrics.routes import router as metrics_router
+from app.seller_analytics.routes import router as seller_stats_router
 import app.products.models  # noqa: F401 — registra metadata antes de create_all
 import app.catalog.models  # noqa: F401 — registra metadata antes de create_all
 import app.cart.models  # noqa: F401 — registra metadata antes de create_all
@@ -76,6 +77,7 @@ app.include_router(admin_moderation_router)
 app.include_router(admin_catalog_router)
 app.include_router(public_catalog_router)
 app.include_router(metrics_router)
+app.include_router(seller_stats_router)
 
 
 @app.get("/")

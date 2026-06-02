@@ -33,5 +33,10 @@ export function formatApiError(err, fallback = 'Ocurrió un error.') {
     return messages.length > 0 ? messages.join(' ') : fallback;
   }
 
+  if (typeof detail === 'object') {
+    const message = formatValidationItem(detail);
+    return message || fallback;
+  }
+
   return fallback;
 }

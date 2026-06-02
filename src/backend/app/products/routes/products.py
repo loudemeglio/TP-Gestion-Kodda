@@ -65,6 +65,27 @@ def get_all_products(
         )
 
 
+@router.get("/products/my", response_model=list[ProductDTO])
+def get_my_products(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    skip: int = 0,
+    limit: int = 100,
+):
+    """
+    Obtener todos los productos publicados por el usuario actual.
+
+    Debe declararse antes de /products/{product_id} para que "my" no se interprete como id.
+    """
+    try:
+        return ProductService.get_user_products(db, current_user.id, skip, limit)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error al obtener tus productos",
+        )
+
+
 @router.get("/products/{product_id}", response_model=ProductDTO)
 def get_product_detail(
     product_id: int,
@@ -87,27 +108,6 @@ def get_product_detail(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error al obtener el detalle del producto",
-        )
-
-
-@router.get("/products/my", response_model=list[ProductDTO])
-def get_my_products(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-    skip: int = 0,
-    limit: int = 100,
-):
-    """
-    Obtener todos los productos publicados por el usuario actual.
-    
-    Requiere usuario autenticado (JWT).
-    """
-    try:
-        return ProductService.get_user_products(db, current_user.id, skip, limit)
-    except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error al obtener tus productos",
         )
 
 

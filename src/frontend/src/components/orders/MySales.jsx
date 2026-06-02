@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../../api/client';
-import { KoddaLogo } from '../KoddaLogo';
-import NotificationBell from '../notifications/NotificationBell';
+import { formatApiError } from '../../utils/apiError';
 
 export default function MySales() {
   const [sales, setSales] = useState([]);
@@ -15,7 +14,7 @@ export default function MySales() {
         const { data } = await api.get('/api/orders/sales/me');
         setSales(data);
       } catch (err) {
-        setError(err.response?.data?.detail || 'No se pudieron cargar las ventas.');
+        setError(formatApiError(err, 'No se pudieron cargar las ventas.'));
       } finally {
         setLoading(false);
       }
@@ -23,42 +22,35 @@ export default function MySales() {
   }, []);
 
   return (
-    <div className="kodda-home kodda-profile-edit-page">
-      <header className="kodda-topbar">
-        <KoddaLogo compact />
-        <div className="kodda-topbar-spacer" />
-        <NotificationBell />
-        <Link to="/" className="kodda-btn-ghost">
-          Inicio
-        </Link>
-      </header>
+    <div className="kodda-my-sales-panel">
+      {loading ? <p className="kodda-my-sales-status">Cargando ventas…</p> : null}
+      {error ? <p className="kodda-auth-error">{error}</p> : null}
 
-      <main className="kodda-profile-edit-layout">
-        <header className="kodda-profile-edit-hero">
-          <h1 className="kodda-profile-edit-title">Mis ventas</h1>
-          <p className="kodda-profile-edit-lead">Órdenes confirmadas donde vendiste productos.</p>
-        </header>
+      {!loading && !error && sales.length === 0 ? (
+        <p className="kodda-my-sales-status">
+          Todavía no tenés ventas confirmadas. Cuando vendas algo, aparecerá acá y en{' '}
+          <Link to="/mis-ventas/estadisticas" className="kodda-auth-link">
+            Estadísticas
+          </Link>
+          .
+        </p>
+      ) : null}
 
-        {loading ? <p className="kodda-auth-muted">Cargando…</p> : null}
-        {error ? <p className="kodda-auth-error">{error}</p> : null}
-
-        {!loading && !error && sales.length === 0 ? (
-          <p className="kodda-auth-muted">Todavía no tenés ventas confirmadas.</p>
-        ) : null}
-
-        <ul className="kodda-checkout-items" style={{ listStyle: 'none', padding: 0 }}>
+      {!loading && !error && sales.length > 0 ? (
+        <ul className="kodda-my-sales-list">
           {sales.map((s) => (
-            <li key={s.id} className="kodda-checkout-item">
-              <div>
-                <p className="kodda-checkout-item-name">
+            <li key={s.id} className="kodda-my-sales-row">
+              <div className="kodda-my-sales-row-main">
+                <p className="kodda-my-sales-row-title">
                   Venta #{s.id} · {s.buyer_username}
                 </p>
-                <p className="kodda-checkout-item-meta">
-                  {new Date(s.created_at).toLocaleString('es-AR')} · {s.item_count} ítem(s)
+                <p className="kodda-my-sales-row-meta">
+                  {new Date(s.created_at).toLocaleString('es-AR')} · {s.item_count}{' '}
+                  {s.item_count === 1 ? 'ítem' : 'ítems'}
                 </p>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
-                <span className="kodda-checkout-item-price">
+              <div className="kodda-my-sales-row-actions">
+                <span className="kodda-my-sales-row-amount">
                   ${s.seller_total.toLocaleString('es-AR')}
                 </span>
                 <Link to={`/mis-ventas/${s.id}`} className="kodda-btn-ghost kodda-btn-sm">
@@ -68,7 +60,7 @@ export default function MySales() {
             </li>
           ))}
         </ul>
-      </main>
+      ) : null}
     </div>
   );
 }
