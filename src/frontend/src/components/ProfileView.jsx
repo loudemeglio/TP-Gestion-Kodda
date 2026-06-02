@@ -226,7 +226,7 @@ export default function ProfileView() {
                   <span className="kodda-profile-view-nav-text">
                     <span className="kodda-profile-view-nav-title">Mis ventas</span>
                     <span className="kodda-profile-view-nav-desc">
-                      Historial de ventas y calificación de compradores
+                      Historial de ventas, estadísticas por período y calificación de compradores
                     </span>
                   </span>
                   <span className="kodda-profile-view-nav-chevron" aria-hidden="true">

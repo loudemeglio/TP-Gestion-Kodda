@@ -27,6 +27,8 @@ import Checkout from './components/Checkout';
 import CheckoutSuccess from './components/CheckoutSuccess';
 import MyOrders from './components/orders/MyOrders';
 import MySales from './components/orders/MySales';
+import MySalesLayout from './components/orders/MySalesLayout';
+import SellerSalesStats from './components/orders/SellerSalesStats';
 import PurchaseOrderDetail from './components/orders/PurchaseOrderDetail';
 import SaleOrderDetail from './components/orders/SaleOrderDetail';
 import BuyerPublicProfile from './components/profile/BuyerPublicProfile';
@@ -164,18 +166,14 @@ function AppRoutes() {
         path="/mis-ventas"
         element={
           <PrivateRoute>
-            <MySales />
+            <MySalesLayout />
           </PrivateRoute>
         }
-      />
-      <Route
-        path="/mis-ventas/:orderId"
-        element={
-          <PrivateRoute>
-            <SaleOrderDetail />
-          </PrivateRoute>
-        }
-      />
+      >
+        <Route index element={<MySales />} />
+        <Route path="estadisticas" element={<SellerSalesStats />} />
+        <Route path=":orderId" element={<SaleOrderDetail />} />
+      </Route>
       <Route
         path="/compradores/:buyerId"
         element={
