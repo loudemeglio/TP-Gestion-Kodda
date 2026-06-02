@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../api/client';
+import { formatApiError } from '../utils/apiError';
 
 /**
  * Carga marcas y categorías activas del catálogo maestro (para formularios de vendedor).
@@ -21,7 +22,7 @@ export function useActiveCatalog() {
       setBrands(brandsData);
       setCategories(categoriesData);
     } catch (err) {
-      setError(err.response?.data?.detail || 'No se pudo cargar el catálogo.');
+      setError(formatApiError(err, 'No se pudo cargar el catálogo.'));
       setBrands([]);
       setCategories([]);
     } finally {

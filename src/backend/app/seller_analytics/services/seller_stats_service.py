@@ -1,6 +1,6 @@
 import csv
 import io
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, time, timedelta, timezone
 
 from sqlalchemy.orm import Session
 
@@ -22,7 +22,7 @@ class SellerStatsService:
         from_date: date | None,
         to_date: date | None,
     ) -> tuple[datetime, datetime, date, date]:
-        today = datetime.now().date()
+        today = datetime.now(timezone.utc).date()
         end_day = to_date or today
         start_day = from_date or (end_day - timedelta(days=SellerStatsService.DEFAULT_RANGE_DAYS))
 
@@ -31,16 +31,15 @@ class SellerStatsService:
         if (end_day - start_day).days > SellerStatsService.MAX_RANGE_DAYS:
             raise ValueError(f"El rango no puede superar {SellerStatsService.MAX_RANGE_DAYS} días.")
 
-        start = datetime.combine(start_day, time.min)
-        end = datetime.combine(end_day + timedelta(days=1), time.min)
+        # Límites en UTC (created_at se persiste con timezone en PostgreSQL).
+        start = datetime.combine(start_day, time.min, tzinfo=timezone.utc)
+        end = datetime.combine(end_day + timedelta(days=1), time.min, tzinfo=timezone.utc)
         return start, end, start_day, end_day
 
     @staticmethod
     def _build_sales_over_time(
         db: Session,
         seller_id: int,
-        start: datetime,
-        end: datetime,
         start_day: date,
         end_day: date,
     ) -> list[MetricPointDTO]:
@@ -50,7 +49,7 @@ class SellerStatsService:
             daily[current] = 0.0
             current += timedelta(days=1)
 
-        for bucket, total in SellerStatsRepository.sales_by_day(db, seller_id, start, end):
+        for bucket, total in SellerStatsRepository.sales_by_day(db, seller_id, start_day, end_day):
             if bucket in daily:
                 daily[bucket] = total
 
@@ -88,15 +87,15 @@ class SellerStatsService:
         from_date: date | None,
         to_date: date | None,
     ) -> SellerStatsSummaryDTO:
-        start, end, start_day, end_day = SellerStatsService._parse_date_range(from_date, to_date)
+        _start, _end, start_day, end_day = SellerStatsService._parse_date_range(from_date, to_date)
 
         total_revenue, order_count, units_sold = SellerStatsRepository.aggregate_totals(
-            db, seller_id, start, end
+            db, seller_id, start_day, end_day
         )
         average_ticket = round(total_revenue / order_count, 2) if order_count else 0.0
 
-        top_rows = SellerStatsRepository.top_products(db, seller_id, start, end)
-        category_rows = SellerStatsRepository.by_category(db, seller_id, start, end)
+        top_rows = SellerStatsRepository.top_products(db, seller_id, start_day, end_day)
+        category_rows = SellerStatsRepository.by_category(db, seller_id, start_day, end_day)
 
         return SellerStatsSummaryDTO(
             from_date=start_day.isoformat(),
@@ -106,7 +105,7 @@ class SellerStatsService:
             units_sold=units_sold,
             average_ticket=average_ticket,
             sales_over_time=SellerStatsService._build_sales_over_time(
-                db, seller_id, start, end, start_day, end_day
+                db, seller_id, start_day, end_day
             ),
             top_products=[
                 TopProductMetricDTO(product_name=name, units=units, total=total)
@@ -126,9 +125,9 @@ class SellerStatsService:
         skip: int = 0,
         limit: int = 50,
     ) -> SellerLineItemsPageDTO:
-        start, end, start_day, end_day = SellerStatsService._parse_date_range(from_date, to_date)
-        total = SellerStatsRepository.count_line_items(db, seller_id, start, end)
-        rows = SellerStatsRepository.list_line_items(db, seller_id, start, end, skip, limit)
+        _start, _end, start_day, end_day = SellerStatsService._parse_date_range(from_date, to_date)
+        total = SellerStatsRepository.count_line_items(db, seller_id, start_day, end_day)
+        rows = SellerStatsRepository.list_line_items(db, seller_id, start_day, end_day, skip, limit)
         items = [
             SellerStatsService._row_to_dto(item, sold_at, buyer, category, size)
             for item, sold_at, buyer, category, size in rows
@@ -147,12 +146,12 @@ class SellerStatsService:
         from_date: date | None,
         to_date: date | None,
     ) -> tuple[str, str]:
-        start, end, start_day, end_day = SellerStatsService._parse_date_range(from_date, to_date)
+        _start, _end, start_day, end_day = SellerStatsService._parse_date_range(from_date, to_date)
         rows = SellerStatsRepository.list_line_items(
             db,
             seller_id,
-            start,
-            end,
+            start_day,
+            end_day,
             skip=0,
             limit=SellerStatsRepository.EXPORT_MAX_ROWS,
         )

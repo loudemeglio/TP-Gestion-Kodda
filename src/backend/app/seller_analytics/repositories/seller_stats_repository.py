@@ -16,7 +16,15 @@ class SellerStatsRepository:
         return OrderItem.unit_price * OrderItem.quantity
 
     @staticmethod
-    def aggregate_totals(db: Session, seller_id: int, start: datetime, end: datetime) -> tuple[float, int, int]:
+    def _order_in_date_range(start_day: date, end_day: date):
+        order_day = func.date(Order.created_at)
+        return order_day >= start_day, order_day <= end_day
+
+    @staticmethod
+    def aggregate_totals(
+        db: Session, seller_id: int, start_day: date, end_day: date
+    ) -> tuple[float, int, int]:
+        date_from, date_to = SellerStatsRepository._order_in_date_range(start_day, end_day)
         row = (
             db.query(
                 func.coalesce(func.sum(SellerStatsRepository._line_total_expr()), 0).label("revenue"),
@@ -26,8 +34,8 @@ class SellerStatsRepository:
             .join(Order, Order.id == OrderItem.order_id)
             .filter(
                 OrderItem.seller_id == seller_id,
-                Order.created_at >= start,
-                Order.created_at < end,
+                date_from,
+                date_to,
             )
             .one()
         )
@@ -38,7 +46,8 @@ class SellerStatsRepository:
         )
 
     @staticmethod
-    def sales_by_day(db: Session, seller_id: int, start: datetime, end: datetime) -> list[tuple[date, float]]:
+    def sales_by_day(db: Session, seller_id: int, start_day: date, end_day: date) -> list[tuple[date, float]]:
+        date_from, date_to = SellerStatsRepository._order_in_date_range(start_day, end_day)
         rows = (
             db.query(
                 func.date(Order.created_at).label("bucket"),
@@ -47,8 +56,8 @@ class SellerStatsRepository:
             .join(Order, Order.id == OrderItem.order_id)
             .filter(
                 OrderItem.seller_id == seller_id,
-                Order.created_at >= start,
-                Order.created_at < end,
+                date_from,
+                date_to,
             )
             .group_by(func.date(Order.created_at))
             .order_by(func.date(Order.created_at))
@@ -58,8 +67,9 @@ class SellerStatsRepository:
 
     @staticmethod
     def top_products(
-        db: Session, seller_id: int, start: datetime, end: datetime, limit: int = 5
+        db: Session, seller_id: int, start_day: date, end_day: date, limit: int = 5
     ) -> list[tuple[str, int, float]]:
+        date_from, date_to = SellerStatsRepository._order_in_date_range(start_day, end_day)
         rows = (
             db.query(
                 OrderItem.product_name,
@@ -69,8 +79,8 @@ class SellerStatsRepository:
             .join(Order, Order.id == OrderItem.order_id)
             .filter(
                 OrderItem.seller_id == seller_id,
-                Order.created_at >= start,
-                Order.created_at < end,
+                date_from,
+                date_to,
             )
             .group_by(OrderItem.product_name)
             .order_by(
@@ -86,7 +96,8 @@ class SellerStatsRepository:
         ]
 
     @staticmethod
-    def by_category(db: Session, seller_id: int, start: datetime, end: datetime) -> list[tuple[str, float]]:
+    def by_category(db: Session, seller_id: int, start_day: date, end_day: date) -> list[tuple[str, float]]:
+        date_from, date_to = SellerStatsRepository._order_in_date_range(start_day, end_day)
         category_label = func.coalesce(Product.category, "Sin categoría")
         rows = (
             db.query(
@@ -97,8 +108,8 @@ class SellerStatsRepository:
             .outerjoin(Product, Product.id == OrderItem.product_id)
             .filter(
                 OrderItem.seller_id == seller_id,
-                Order.created_at >= start,
-                Order.created_at < end,
+                date_from,
+                date_to,
             )
             .group_by(category_label)
             .order_by(func.sum(SellerStatsRepository._line_total_expr()).desc())
@@ -107,14 +118,15 @@ class SellerStatsRepository:
         return [(row.category, round(float(row.total or 0), 2)) for row in rows]
 
     @staticmethod
-    def count_line_items(db: Session, seller_id: int, start: datetime, end: datetime) -> int:
+    def count_line_items(db: Session, seller_id: int, start_day: date, end_day: date) -> int:
+        date_from, date_to = SellerStatsRepository._order_in_date_range(start_day, end_day)
         return (
             db.query(func.count(OrderItem.id))
             .join(Order, Order.id == OrderItem.order_id)
             .filter(
                 OrderItem.seller_id == seller_id,
-                Order.created_at >= start,
-                Order.created_at < end,
+                date_from,
+                date_to,
             )
             .scalar()
             or 0
@@ -124,11 +136,12 @@ class SellerStatsRepository:
     def list_line_items(
         db: Session,
         seller_id: int,
-        start: datetime,
-        end: datetime,
+        start_day: date,
+        end_day: date,
         skip: int = 0,
         limit: int = 50,
     ) -> list[tuple[OrderItem, datetime, str, str | None, str | None]]:
+        date_from, date_to = SellerStatsRepository._order_in_date_range(start_day, end_day)
         rows = (
             db.query(OrderItem, Order.created_at, User.username, Product.category, Product.size)
             .join(Order, Order.id == OrderItem.order_id)
@@ -136,8 +149,8 @@ class SellerStatsRepository:
             .outerjoin(Product, Product.id == OrderItem.product_id)
             .filter(
                 OrderItem.seller_id == seller_id,
-                Order.created_at >= start,
-                Order.created_at < end,
+                date_from,
+                date_to,
             )
             .order_by(Order.created_at.desc(), OrderItem.id.desc())
             .offset(skip)

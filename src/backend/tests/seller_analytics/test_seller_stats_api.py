@@ -1,6 +1,10 @@
 """Tests de estadísticas de ventas del vendedor."""
 
-from datetime import date, timedelta
+from datetime import datetime, timedelta, timezone
+
+
+def _utc_today_iso() -> str:
+    return datetime.now(timezone.utc).date().isoformat()
 
 from tests.conftest import build_product_payload, promote_to_admin, register_user_headers
 
@@ -55,7 +59,7 @@ def test_seller_stats_summary_after_sale(api_client):
     buyer_h = _register(api_client, "stats_buyer", "stats_buyer@example.com")
     _checkout(api_client, buyer_h, seller_h, price=10000, name="Remera Azul")
 
-    today = date.today().isoformat()
+    today = _utc_today_iso()
     r = api_client.get(
         "/api/seller/stats/summary",
         params={"from": today, "to": today},
@@ -76,7 +80,7 @@ def test_seller_stats_isolation_between_sellers(api_client):
     buyer_h = _register(api_client, "stats_buyer2", "stats_buyer2@example.com")
     _checkout(api_client, buyer_h, seller_a, price=5000)
 
-    today = date.today().isoformat()
+    today = _utc_today_iso()
     r = api_client.get(
         "/api/seller/stats/summary",
         params={"from": today, "to": today},
@@ -104,7 +108,7 @@ def test_seller_stats_multi_seller_order_only_counts_own_lines(api_client):
     )
     assert r.status_code == 201
 
-    today = date.today().isoformat()
+    today = _utc_today_iso()
     summary_a = api_client.get(
         "/api/seller/stats/summary",
         params={"from": today, "to": today},
@@ -127,8 +131,9 @@ def test_seller_stats_date_range_excludes_old_orders(api_client):
     buyer_h = _register(api_client, "stats_date_b", "stats_date_b@example.com")
     _checkout(api_client, buyer_h, seller_h, price=12000)
 
-    past_start = (date.today() - timedelta(days=10)).isoformat()
-    past_end = (date.today() - timedelta(days=5)).isoformat()
+    utc_today = datetime.now(timezone.utc).date()
+    past_start = (utc_today - timedelta(days=10)).isoformat()
+    past_end = (utc_today - timedelta(days=5)).isoformat()
     r = api_client.get(
         "/api/seller/stats/summary",
         params={"from": past_start, "to": past_end},
@@ -140,7 +145,7 @@ def test_seller_stats_date_range_excludes_old_orders(api_client):
 
 def test_seller_stats_empty_range_returns_zeros(api_client):
     seller_h = _register(api_client, "stats_empty", "stats_empty@example.com")
-    today = date.today().isoformat()
+    today = _utc_today_iso()
     r = api_client.get(
         "/api/seller/stats/summary",
         params={"from": today, "to": today},
@@ -158,7 +163,7 @@ def test_seller_stats_line_items(api_client):
     buyer_h = _register(api_client, "stats_li_b", "stats_li_b@example.com")
     _checkout(api_client, buyer_h, seller_h, price=9000, name="Jean")
 
-    today = date.today().isoformat()
+    today = _utc_today_iso()
     r = api_client.get(
         "/api/seller/stats/line-items",
         params={"from": today, "to": today},
@@ -177,7 +182,7 @@ def test_seller_stats_export_csv(api_client):
     buyer_h = _register(api_client, "stats_csv_b", "stats_csv_b@example.com")
     _checkout(api_client, buyer_h, seller_h, price=11000, name="Buzo")
 
-    today = date.today().isoformat()
+    today = _utc_today_iso()
     r = api_client.get(
         "/api/seller/stats/export",
         params={"from": today, "to": today},

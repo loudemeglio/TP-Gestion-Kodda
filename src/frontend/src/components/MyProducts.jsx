@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client';
+import { formatApiError } from '../utils/apiError';
 import { KoddaLogo } from './KoddaLogo';
 import { findBrandIdByName, findCategoryIdByName, useActiveCatalog } from '../hooks/useActiveCatalog';
 import '../styles/my-products.css';
@@ -336,8 +337,7 @@ export default function MyProducts() {
       const { data } = await api.get('/api/catalog/products/my');
       setProducts(data);
     } catch (err) {
-      const message = err.response?.data?.detail || 'No se pudieron cargar tus publicaciones.';
-      setError(message);
+      setError(formatApiError(err, 'No se pudieron cargar tus publicaciones.'));
     } finally {
       setLoading(false);
     }
@@ -437,8 +437,7 @@ export default function MyProducts() {
       setEditData({});
       setSuccessMessage('Publicación actualizada correctamente.');
     } catch (err) {
-      const detail = err.response?.data?.detail;
-      setSaveError(typeof detail === 'string' ? detail : 'Error al actualizar la publicación.');
+      setSaveError(formatApiError(err, 'Error al actualizar la publicación.'));
     } finally {
       setIsSaving(false);
     }
@@ -450,8 +449,7 @@ export default function MyProducts() {
       setProducts((prev) => prev.filter((p) => p.id !== productId));
       setSuccessMessage('Publicación eliminada correctamente.');
     } catch (err) {
-      const detail = err.response?.data?.detail;
-      const message = typeof detail === 'string' ? detail : 'Error al eliminar la publicación.';
+      const message = formatApiError(err, 'Error al eliminar la publicación.');
       setError(message);
       throw new Error(message);
     }
@@ -470,8 +468,7 @@ export default function MyProducts() {
         currentlyPaused ? 'Publicación reanudada.' : 'Publicación pausada.'
       );
     } catch (err) {
-      const detail = err.response?.data?.detail;
-      const message = typeof detail === 'string' ? detail : 'Error al cambiar el estado de la publicación.';
+      const message = formatApiError(err, 'Error al cambiar el estado de la publicación.');
       setError(message);
       throw new Error(message);
     }
