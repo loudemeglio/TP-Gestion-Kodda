@@ -41,6 +41,14 @@ export default function AdminLayout() {
 
       <div className="kodda-admin-shell">
         <aside className="kodda-admin-sidenav" aria-label="Secciones de administracion">
+          <span className="kodda-admin-sidenav-glow kodda-admin-sidenav-glow--top" aria-hidden="true" />
+          <span className="kodda-admin-sidenav-glow kodda-admin-sidenav-glow--bottom" aria-hidden="true" />
+          <div className="kodda-admin-sidenav-inner">
+          <header className="kodda-admin-sidenav-head">
+            <p className="kodda-admin-sidenav-title">Menú admin</p>
+            <p className="kodda-admin-sidenav-sub">Navegación del panel</p>
+          </header>
+          <nav className="kodda-admin-sidenav-nav">
           <p className="kodda-admin-nav-eyebrow">Responsabilidades</p>
           <NavLink
             to="/admin"
@@ -52,7 +60,10 @@ export default function AdminLayout() {
             <span className="kodda-admin-navlink-icon" aria-hidden="true">
               PA
             </span>
-            Panel
+            <span className="kodda-admin-navlink-copy">
+              <strong>Panel</strong>
+              <small>Resumen general</small>
+            </span>
           </NavLink>
           <NavLink
             to="/admin/users"
@@ -63,7 +74,10 @@ export default function AdminLayout() {
             <span className="kodda-admin-navlink-icon" aria-hidden="true">
               US
             </span>
-            Usuarios
+            <span className="kodda-admin-navlink-copy">
+              <strong>Usuarios</strong>
+              <small>Cuentas y perfiles</small>
+            </span>
           </NavLink>
           <NavLink
             to="/admin/moderation"
@@ -74,7 +88,10 @@ export default function AdminLayout() {
             <span className="kodda-admin-navlink-icon" aria-hidden="true">
               MO
             </span>
-            Moderacion
+            <span className="kodda-admin-navlink-copy">
+              <strong>Moderación</strong>
+              <small>Contenido y reportes</small>
+            </span>
           </NavLink>
           <NavLink
             to="/admin/metrics"
@@ -85,7 +102,10 @@ export default function AdminLayout() {
             <span className="kodda-admin-navlink-icon" aria-hidden="true">
               MT
             </span>
-            Metricas
+            <span className="kodda-admin-navlink-copy">
+              <strong>Métricas</strong>
+              <small>Ventas y rendimiento</small>
+            </span>
           </NavLink>
           <NavLink
             to="/admin/catalog"
@@ -96,7 +116,10 @@ export default function AdminLayout() {
             <span className="kodda-admin-navlink-icon" aria-hidden="true">
               CT
             </span>
-            Catálogo maestro
+            <span className="kodda-admin-navlink-copy">
+              <strong>Catálogo maestro</strong>
+              <small>Productos globales</small>
+            </span>
           </NavLink>
           <NavLink
             to="/admin/roles"
@@ -107,7 +130,10 @@ export default function AdminLayout() {
             <span className="kodda-admin-navlink-icon" aria-hidden="true">
               RO
             </span>
-            Gestión de roles
+            <span className="kodda-admin-navlink-copy">
+              <strong>Gestión de roles</strong>
+              <small>Permisos y acceso</small>
+            </span>
           </NavLink>
 
           <p className="kodda-admin-nav-eyebrow kodda-admin-nav-eyebrow--spaced">Prototipo</p>
@@ -120,8 +146,13 @@ export default function AdminLayout() {
             <span className="kodda-admin-navlink-icon" aria-hidden="true">
               EX
             </span>
-            Vista explorador
+            <span className="kodda-admin-navlink-copy">
+              <strong>Vista explorador</strong>
+              <small>Experiencia comprador</small>
+            </span>
           </NavLink>
+          </nav>
+          </div>
         </aside>
 
         <div className="kodda-admin-content">

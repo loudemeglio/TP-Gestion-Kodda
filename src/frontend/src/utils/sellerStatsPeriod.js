@@ -92,3 +92,51 @@ export function formatChartLabel(label) {
   }
   return '';
 }
+
+function startOfWeekIso(date) {
+  const d = new Date(date);
+  const weekday = d.getDay();
+  const diff = weekday === 0 ? -6 : 1 - weekday;
+  d.setDate(d.getDate() + diff);
+  return toIsoDate(d);
+}
+
+/** Agrupa ventas diarias por semana (solo visualización; mismos totales). */
+export function bucketChartPointsByWeek(points) {
+  if (!points?.length) {
+    return [];
+  }
+
+  const buckets = new Map();
+  for (const point of points) {
+    const day = parseChartDay(point.label);
+    if (!day) continue;
+    const weekKey = startOfWeekIso(day);
+    const current = buckets.get(weekKey) ?? { label: weekKey, value: 0 };
+    current.value += Number(point.value || 0);
+    buckets.set(weekKey, current);
+  }
+
+  return [...buckets.values()].sort((a, b) => a.label.localeCompare(b.label));
+}
+
+export function formatWeekChartLabel(weekStartIso) {
+  const start = parseChartDay(weekStartIso);
+  if (!start) return '';
+  const end = new Date(start);
+  end.setDate(end.getDate() + 6);
+  const startStr = new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'short' }).format(start);
+  const endStr = new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'short' }).format(end);
+  return `${startStr}–${endStr}`;
+}
+
+export function formatWeekChartTooltip(weekStartIso, valueFormatted) {
+  const start = parseChartDay(weekStartIso);
+  if (!start) return valueFormatted;
+  const end = new Date(start);
+  end.setDate(end.getDate() + 6);
+  const opts = { day: 'numeric', month: 'long' };
+  const startStr = new Intl.DateTimeFormat('es-AR', opts).format(start);
+  const endStr = new Intl.DateTimeFormat('es-AR', { ...opts, year: 'numeric' }).format(end);
+  return `Semana ${startStr} – ${endStr} · ${valueFormatted}`;
+}
