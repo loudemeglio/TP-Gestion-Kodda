@@ -35,7 +35,7 @@ export default function SaleOrderDetail() {
   }
 
   return (
-    <div className="kodda-my-sales-panel">
+    <div className="kodda-account-history-panel kodda-my-sales-panel">
       <Link to="/mis-ventas" className="kodda-my-sales-back">
         ← Volver al listado
       </Link>

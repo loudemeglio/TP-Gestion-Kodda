@@ -15,11 +15,11 @@ function formatStat(value, suffix = '') {
 }
 
 const MEASURE_STATS = [
-  { key: 'weight', label: 'Peso', suffix: ' kg', icon: '⚖️' },
-  { key: 'height', label: 'Altura', suffix: ' cm', icon: '📏' },
-  { key: 'shoe_size', label: 'Calzado', suffix: '', icon: '👟' },
-  { key: 'top_size', label: 'Superior', suffix: '', icon: '👕' },
-  { key: 'bottom_size', label: 'Inferior', suffix: '', icon: '👖' },
+  { key: 'weight', label: 'Peso', suffix: ' kg' },
+  { key: 'height', label: 'Altura', suffix: ' cm' },
+  { key: 'shoe_size', label: 'Calzado', suffix: '' },
+  { key: 'top_size', label: 'Superior', suffix: '' },
+  { key: 'bottom_size', label: 'Inferior', suffix: '' },
 ];
 
 export default function ProfileView() {
@@ -169,18 +169,12 @@ export default function ProfileView() {
                   <div className="kodda-profile-stat-grid">
                     {filledStats.map((stat) => (
                       <div key={stat.label} className="kodda-profile-stat">
-                        <span className="kodda-profile-stat-icon" aria-hidden="true">
-                          {stat.icon}
-                        </span>
                         <span className="kodda-profile-stat-label">{stat.label}</span>
                         <span className="kodda-profile-stat-value">{stat.value}</span>
                       </div>
                     ))}
                     {hasAddress ? (
                       <div className="kodda-profile-stat kodda-profile-stat--wide">
-                        <span className="kodda-profile-stat-icon" aria-hidden="true">
-                          📍
-                        </span>
                         <span className="kodda-profile-stat-label">Dirección</span>
                         <span className="kodda-profile-stat-value">{profile.address}</span>
                       </div>
@@ -238,9 +232,6 @@ export default function ProfileView() {
                   className="kodda-profile-view-nav-item"
                   style={{ textDecoration: 'none', color: 'inherit' }}
                 >
-                  <span className="kodda-profile-view-nav-icon" aria-hidden="true">
-                    ⭐
-                  </span>
                   <span className="kodda-profile-view-nav-text">
                     <span className="kodda-profile-view-nav-title">Mi reputación como vendedor</span>
                     <span className="kodda-profile-view-nav-desc">

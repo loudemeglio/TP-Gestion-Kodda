@@ -9,12 +9,12 @@ function salesTabClass({ isActive }) {
 export default function MySalesLayout() {
   const { pathname } = useLocation();
   const isStats = pathname.includes('/estadisticas');
-  const layoutClass = `kodda-profile-edit-layout kodda-my-sales-layout${
-    isStats ? ' kodda-my-sales-layout--wide' : ''
+  const layoutClass = `kodda-account-history-layout kodda-my-sales-layout${
+    isStats ? ' kodda-my-sales-layout--stats' : ''
   }`;
 
   return (
-    <div className="kodda-home kodda-profile-edit-page kodda-my-sales-page">
+    <div className="kodda-home kodda-account-history-page kodda-my-sales-page">
       <header className="kodda-topbar">
         <KoddaLogo compact />
         <div className="kodda-topbar-spacer" />
@@ -28,8 +28,12 @@ export default function MySalesLayout() {
       </header>
 
       <main className={layoutClass}>
-        <header className="kodda-my-sales-header">
-          <h1 className="kodda-my-sales-title">Mis ventas</h1>
+        <header className="kodda-account-history-hero kodda-my-sales-header">
+          <p className="kodda-account-history-eyebrow">Tu actividad como vendedor</p>
+          <h1 className="kodda-account-history-title">Mis ventas</h1>
+          <p className="kodda-account-history-lead">
+            Seguimiento de pedidos confirmados, montos cobrados y estadísticas de tu tienda.
+          </p>
           <nav className="kodda-my-sales-tabs" aria-label="Secciones de mis ventas">
             <NavLink to="/mis-ventas" end className={salesTabClass}>
               Listado

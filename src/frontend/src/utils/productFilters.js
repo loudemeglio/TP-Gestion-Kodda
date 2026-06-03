@@ -48,15 +48,49 @@ export function buildCatalogQueryParams(filters, { limit = 100 } = {}) {
 }
 
 export function hasActiveCatalogFilters(filters) {
-  return (
-    Boolean(filters.name?.trim()) ||
-    Boolean(filters.description?.trim()) ||
-    parsePrice(filters.price_min) !== null ||
-    parsePrice(filters.price_max) !== null ||
-    Boolean(filters.category) ||
-    Boolean(filters.brand) ||
-    Boolean(filters.size?.trim())
-  );
+  return getActiveFilterChips(filters).length > 0;
+}
+
+/** Etiquetas legibles de filtros activos para chips en la UI. */
+export function getActiveFilterChips(filters) {
+  const chips = [];
+
+  if (filters.name?.trim()) {
+    chips.push({ key: 'name', label: filters.name.trim() });
+  }
+  if (filters.description?.trim()) {
+    chips.push({ key: 'description', label: `Desc: ${filters.description.trim()}` });
+  }
+  if (filters.size?.trim()) {
+    chips.push({ key: 'size', label: `Talle ${filters.size.trim()}` });
+  }
+  if (filters.category) {
+    chips.push({ key: 'category', label: filters.category });
+  }
+  if (filters.brand) {
+    chips.push({ key: 'brand', label: filters.brand });
+  }
+  const min = parsePrice(filters.price_min);
+  const max = parsePrice(filters.price_max);
+  if (min !== null && max !== null) {
+    chips.push({ key: 'price', label: `$${min.toLocaleString('es-AR')} – $${max.toLocaleString('es-AR')}` });
+  } else if (min !== null) {
+    chips.push({ key: 'price_min', label: `Desde $${min.toLocaleString('es-AR')}` });
+  } else if (max !== null) {
+    chips.push({ key: 'price_max', label: `Hasta $${max.toLocaleString('es-AR')}` });
+  }
+
+  return chips;
+}
+
+export function clearCatalogFilter(filters, chipKey) {
+  if (chipKey === 'price') {
+    return { ...filters, price_min: '', price_max: '' };
+  }
+  if (chipKey in EMPTY_CATALOG_FILTERS) {
+    return { ...filters, [chipKey]: EMPTY_CATALOG_FILTERS[chipKey] };
+  }
+  return filters;
 }
 
 function parsePrice(value) {

@@ -2,7 +2,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCarrito } from '../context/CarritoContext';
 import { resolveMediaUrl } from '../utils/mediaUrl';
-import { buildCatalogQueryParams, hasActiveCatalogFilters } from '../utils/productFilters';
+import {
+  buildCatalogQueryParams,
+  clearCatalogFilter,
+  hasActiveCatalogFilters,
+} from '../utils/productFilters';
 import { KoddaLogo } from './KoddaLogo';
 import NotificationBell from './notifications/NotificationBell';
 import ProductFilters, { EMPTY_CATALOG_FILTERS } from './ProductFilters';
@@ -10,7 +14,22 @@ import { useActiveCatalog } from '../hooks/useActiveCatalog';
 import { api } from '../api/client';
 import { useCallback, useEffect, useState } from 'react';
 
-
+function CatalogSkeleton() {
+  return (
+    <div className="kodda-grid kodda-grid--skeleton" aria-hidden="true">
+      {Array.from({ length: 6 }).map((_, index) => (
+        <div key={index} className="kodda-card-skeleton">
+          <div className="kodda-card-skeleton-visual" />
+          <div className="kodda-card-skeleton-body">
+            <span />
+            <span />
+            <span />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 /**
  * Vista de inicio tipo usuario (feed prototipo + cuenta).
@@ -68,6 +87,22 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
     setAppliedFilters(EMPTY_CATALOG_FILTERS);
   };
 
+  const handleRemoveFilter = (chipKey) => {
+    const nextApplied = clearCatalogFilter(appliedFilters, chipKey);
+    const nextDraft = clearCatalogFilter(filterDraft, chipKey);
+    setAppliedFilters(nextApplied);
+    setFilterDraft(nextDraft);
+  };
+
+  const handleSearchSubmit = (event) => {
+    event.preventDefault();
+    handleApplyFilters();
+  };
+
+  const handleSearchChange = (value) => {
+    setFilterDraft((prev) => ({ ...prev, name: value }));
+  };
+
   return (
     <div className="kodda-home">
       {showAdminPreviewBar ? (
@@ -81,16 +116,30 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
 
       <header className="kodda-topbar">
         <KoddaLogo compact />
-        <div className="kodda-search" title="Próximamente: búsqueda en lenguaje natural">
-          <span aria-hidden="true">🔍</span>
-          <input type="search" placeholder='Probá: "ropa para boda de día en noviembre"' disabled />
-        </div>
+        <form className="kodda-search" onSubmit={handleSearchSubmit} role="search">
+          <span className="kodda-search-icon" aria-hidden="true">
+            🔍
+          </span>
+          <input
+            type="search"
+            value={filterDraft.name}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            placeholder="Buscar por nombre de prenda…"
+            aria-label="Buscar prendas por nombre"
+          />
+          {filterDraft.name ? (
+            <button type="submit" className="kodda-search-submit" aria-label="Buscar">
+              Ir
+            </button>
+          ) : null}
+        </form>
         <div className="kodda-topbar-spacer" />
-        
-        <button 
-          className="kodda-hamburger" 
+
+        <button
+          className="kodda-hamburger"
           onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="Toggle menu"
+          aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
+          aria-expanded={menuOpen}
         >
           {menuOpen ? '✕' : '☰'}
         </button>
@@ -136,17 +185,45 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
       </header>
 
       <main className="kodda-home-main">
-        <p className="kodda-hello">Hola, {user?.username || 'explorador'} 👋</p>
-        <p className="kodda-hello-sub">
-          Acá verás prendas publicadas por otros usuarios — priorizando lo que mejor te queda.
-        </p>
+        <section className="kodda-catalog-hero">
+          <div>
+            <p className="kodda-hello">Hola, {user?.username || 'explorador'}</p>
+            <p className="kodda-hello-sub">
+              Descubrí moda circular con fotos reales, filtros por talle y disponibilidad al instante.
+            </p>
+          </div>
+          <div className="kodda-catalog-hero-tags" aria-hidden="true">
+            <span>Segunda mano</span>
+            <span>Con stock en vivo</span>
+            <span>Envío seguro</span>
+          </div>
+        </section>
+
+        <form className="kodda-mobile-search" onSubmit={handleSearchSubmit} role="search">
+          <span className="kodda-search-icon" aria-hidden="true">
+            🔍
+          </span>
+          <input
+            type="search"
+            value={filterDraft.name}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            placeholder="Buscar campera, jean, vestido…"
+            aria-label="Buscar prendas"
+          />
+          <button type="submit" className="kodda-btn-accent-outline kodda-btn-sm">
+            Buscar
+          </button>
+        </form>
 
         <ProductFilters
           values={filterDraft}
+          appliedFilters={appliedFilters}
           onChange={setFilterDraft}
           onApply={handleApplyFilters}
           onClear={handleClearFilters}
+          onRemoveFilter={handleRemoveFilter}
           loading={loading}
+          resultCount={loading ? null : productos.length}
           categoryOptions={activeCategories}
           brandOptions={activeBrands}
         />
@@ -159,15 +236,13 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
         </div>
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
-            <p>Cargando prendas...</p>
-          </div>
+          <CatalogSkeleton />
         ) : error ? (
-          <div style={{ textAlign: 'center', padding: '2rem', color: '#c00' }}>
+          <div className="kodda-catalog-empty kodda-catalog-empty--error">
             <p>{error}</p>
           </div>
         ) : productos.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
+          <div className="kodda-catalog-empty">
             <p>
               {hasActiveCatalogFilters(appliedFilters)
                 ? 'No hay prendas que coincidan con los filtros'
@@ -179,64 +254,69 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
             {productos.map((producto) => {
               const imageSrc = resolveMediaUrl(producto.main_image_url);
               return (
-              <article
-                key={producto.id}
-                className="kodda-card-product kodda-card-product--clickable"
-                role="button"
-                tabIndex={0}
-                onClick={() => navigate(`/productos/${producto.id}`)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    navigate(`/productos/${producto.id}`);
-                  }
-                }}
-                aria-label={`Ver detalle de ${producto.name}`}
-              >
-                <div className="kodda-card-visual">
-                  {imageSrc ? (
-                    <img src={imageSrc} alt={producto.name} />
-                  ) : (
-                    <div className="kodda-product-detail-image-placeholder">📷 Sin imagen</div>
-                  )}
-                </div>
-                <div className="kodda-card-body">
-                  <h3>{producto.name}</h3>
-                  <p className="kodda-card-meta" style={{ marginTop: '0.15rem', marginBottom: '0.4rem' }}>
-                    Publicada por{' '}
-                    <Link
-                      to={`/vendedores/${producto.seller_id}`}
-                      className="kodda-auth-link"
-                      title="Ver reputación del vendedor"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {producto.seller_username || `#${producto.seller_id}`}
-                    </Link>
-                  </p>
-                  <div className="kodda-card-flags">
-                    {producto.brand ? <span className="kodda-card-flag">{producto.brand}</span> : null}
-                    <span className="kodda-card-flag">{producto.category}</span>
+                <article
+                  key={producto.id}
+                  className="kodda-card-product kodda-card-product--clickable"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => navigate(`/productos/${producto.id}`)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      navigate(`/productos/${producto.id}`);
+                    }
+                  }}
+                  aria-label={`Ver detalle de ${producto.name}`}
+                >
+                  <div className="kodda-card-visual">
+                    {imageSrc ? (
+                      <img src={imageSrc} alt={producto.name} loading="lazy" decoding="async" />
+                    ) : (
+                      <div className="kodda-product-detail-image-placeholder">Sin imagen</div>
+                    )}
+                    {producto.stock > 0 ? (
+                      <span className="kodda-card-stock-badge">Disponible</span>
+                    ) : (
+                      <span className="kodda-card-stock-badge kodda-card-stock-badge--out">Agotado</span>
+                    )}
                   </div>
-                  <p className="kodda-card-meta">Talle: {producto.size || '—'}</p>
-                  <div className="kodda-price">${producto.price.toLocaleString('es-AR')}</div>
-                  <p className="kodda-card-meta" style={{ marginTop: '0.35rem' }}>
-                    {producto.stock > 0 ? `Stock: ${producto.stock}` : 'Sin stock'}
-                  </p>
-                  <button
-                    type="button"
-                    className="kodda-btn-add-to-cart"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      agregarAlCarrito(producto);
-                    }}
-                    disabled={producto.stock === 0}
-                    title={producto.stock === 0 ? 'Sin stock disponible' : 'Agregar al carrito'}
-                  >
-                    {producto.stock === 0 ? 'Sin stock' : 'Agregar al carrito'}
-                  </button>
-                </div>
-              </article>
-            );
+                  <div className="kodda-card-body">
+                    <h3>{producto.name}</h3>
+                    <p className="kodda-card-meta" style={{ marginTop: '0.15rem', marginBottom: '0.4rem' }}>
+                      Publicada por{' '}
+                      <Link
+                        to={`/vendedores/${producto.seller_id}`}
+                        className="kodda-auth-link"
+                        title="Ver reputación del vendedor"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {producto.seller_username || `#${producto.seller_id}`}
+                      </Link>
+                    </p>
+                    <div className="kodda-card-flags">
+                      {producto.brand ? <span className="kodda-card-flag">{producto.brand}</span> : null}
+                      <span className="kodda-card-flag">{producto.category}</span>
+                      {producto.size ? <span className="kodda-card-flag kodda-card-flag--size">{producto.size}</span> : null}
+                    </div>
+                    <div className="kodda-price">${producto.price.toLocaleString('es-AR')}</div>
+                    <p className="kodda-card-meta" style={{ marginTop: '0.35rem' }}>
+                      {producto.stock > 0 ? `${producto.stock} en stock` : 'Sin stock'}
+                    </p>
+                    <button
+                      type="button"
+                      className="kodda-btn-add-to-cart"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        agregarAlCarrito(producto);
+                      }}
+                      disabled={producto.stock === 0}
+                      title={producto.stock === 0 ? 'Sin stock disponible' : 'Agregar al carrito'}
+                    >
+                      {producto.stock === 0 ? 'Sin stock' : 'Agregar al carrito'}
+                    </button>
+                  </div>
+                </article>
+              );
             })}
           </div>
         )}
@@ -265,6 +345,26 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
           </ul>
         </section>
       </main>
+
+      <nav className="kodda-mobile-bottom-nav" aria-label="Accesos rápidos">
+        <Link to="/" className="kodda-mobile-bottom-nav-item kodda-mobile-bottom-nav-item--active">
+          <span aria-hidden="true">🏠</span>
+          Inicio
+        </Link>
+        <Link to="/carrito" className="kodda-mobile-bottom-nav-item">
+          <span aria-hidden="true">🛒</span>
+          Carrito
+          {cantidadCarrito > 0 ? <span className="kodda-mobile-bottom-nav-badge">{cantidadCarrito}</span> : null}
+        </Link>
+        <Link to="/publicar" className="kodda-mobile-bottom-nav-item">
+          <span aria-hidden="true">➕</span>
+          Vender
+        </Link>
+        <Link to="/perfil" className="kodda-mobile-bottom-nav-item">
+          <span aria-hidden="true">👤</span>
+          Perfil
+        </Link>
+      </nav>
 
       <footer className="kodda-home-footer">Kodda — moda circular inteligente · Prototipo de producto</footer>
     </div>
