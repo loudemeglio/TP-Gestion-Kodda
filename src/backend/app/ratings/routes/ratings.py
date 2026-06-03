@@ -49,7 +49,7 @@ def get_seller_reputation(
     Perfil público de reputación de un vendedor.
 
     Devuelve puntaje consolidado, métricas de veracidad/envío y lista paginada de
-    calificaciones (sin reportes de estafa).
+    calificaciones (incluye reportes de estafa).
     """
     try:
         return SellerReputationService.get_seller_reputation(db, seller_id, skip=skip, limit=limit)

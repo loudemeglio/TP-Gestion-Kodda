@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { EMPTY_CATALOG_FILTERS } from '../utils/productFilters';
+import { EMPTY_CATALOG_FILTERS, getActiveFilterChips } from '../utils/productFilters';
 
 function buildFilterFields(categoryOptions, brandOptions) {
   return [
@@ -68,20 +68,26 @@ export { EMPTY_CATALOG_FILTERS };
 /**
  * @param {{
  *   values: typeof EMPTY_CATALOG_FILTERS,
+ *   appliedFilters?: typeof EMPTY_CATALOG_FILTERS,
  *   onChange: (next: typeof EMPTY_CATALOG_FILTERS) => void,
  *   onApply: () => void,
  *   onClear: () => void,
+ *   onRemoveFilter?: (chipKey: string) => void,
  *   loading?: boolean,
+ *   resultCount?: number | null,
  *   categoryOptions?: Array<{ id: number, name: string }>,
  *   brandOptions?: Array<{ id: number, name: string }>,
  * }} props
  */
 export default function ProductFilters({
   values,
+  appliedFilters,
   onChange,
   onApply,
   onClear,
+  onRemoveFilter,
   loading = false,
+  resultCount = null,
   categoryOptions = [],
   brandOptions = [],
 }) {
@@ -90,6 +96,8 @@ export default function ProductFilters({
     () => buildFilterFields(categoryOptions, brandOptions),
     [categoryOptions, brandOptions]
   );
+  const activeChips = getActiveFilterChips(appliedFilters ?? values);
+  const activeCount = activeChips.length;
 
   const handleField = (key, value) => {
     onChange({ ...values, [key]: value });
@@ -99,30 +107,56 @@ export default function ProductFilters({
   const priceFields = filterFields.filter((f) => f.group === 'price');
   const selectFields = filterFields.filter((f) => f.type === 'select');
 
-  const handleToggle = () => {
-    if (open) {
-      onClear();
-    }
-    setOpen(!open);
-  };
-
   return (
     <section className="kodda-filters" aria-label="Filtros del catálogo">
-      <button
-        type="button"
-        className="kodda-filters-toggle"
-        onClick={handleToggle}
-        aria-expanded={open}
-        aria-controls="kodda-filters-panel"
-      >
-        <span>Filtros</span>
-        <span
-          className={`kodda-filters-chevron${open ? ' kodda-filters-chevron--open' : ''}`}
-          aria-hidden="true"
+      <div className="kodda-filters-toolbar">
+        <button
+          type="button"
+          className={`kodda-filters-toggle${open ? ' kodda-filters-toggle--open' : ''}`}
+          onClick={() => setOpen(!open)}
+          aria-expanded={open}
+          aria-controls="kodda-filters-panel"
         >
-          ▼
-        </span>
-      </button>
+          <span>Filtrar prendas</span>
+          {activeCount > 0 ? (
+            <span className="kodda-filters-count" aria-label={`${activeCount} filtros activos`}>
+              {activeCount}
+            </span>
+          ) : null}
+          <span
+            className={`kodda-filters-chevron${open ? ' kodda-filters-chevron--open' : ''}`}
+            aria-hidden="true"
+          >
+            ▼
+          </span>
+        </button>
+
+        {resultCount !== null && !loading ? (
+          <span className="kodda-filters-results">
+            {resultCount} {resultCount === 1 ? 'prenda' : 'prendas'}
+          </span>
+        ) : null}
+      </div>
+
+      {activeChips.length > 0 ? (
+        <div className="kodda-filter-chips" aria-label="Filtros activos">
+          {activeChips.map((chip) => (
+            <button
+              key={chip.key}
+              type="button"
+              className="kodda-filter-chip"
+              onClick={() => onRemoveFilter?.(chip.key)}
+              title="Quitar filtro"
+            >
+              {chip.label}
+              <span aria-hidden="true">×</span>
+            </button>
+          ))}
+          <button type="button" className="kodda-filter-chip kodda-filter-chip--clear" onClick={onClear}>
+            Limpiar todo
+          </button>
+        </div>
+      ) : null}
 
       {open ? (
         <div id="kodda-filters-panel" className="kodda-filters-panel">
@@ -194,7 +228,7 @@ export default function ProductFilters({
             >
               {loading ? 'Buscando…' : 'Aplicar filtros'}
             </button>
-            <button type="button" className="kodda-btn-ghost" onClick={onClear} disabled={loading}>
+            <button type="button" className="kodda-btn-secondary" onClick={onClear} disabled={loading}>
               Limpiar
             </button>
           </div>

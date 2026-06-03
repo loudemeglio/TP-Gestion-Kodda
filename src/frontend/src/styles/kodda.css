@@ -455,10 +455,11 @@ body {
 }
 
 .kodda-search {
-  display: none;
-  flex: 1;
-  min-width: 180px;
-  max-width: 420px;
+  display: flex;
+  flex: 1 1 100%;
+  order: 3;
+  min-width: 0;
+  max-width: none;
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 0.85rem;
@@ -467,12 +468,22 @@ body {
   border-radius: 999px;
   color: var(--kd-mist);
   font-size: 0.9rem;
+  box-shadow: var(--kd-shadow-sm);
 }
 
 @media (min-width: 768px) {
   .kodda-search {
-    display: flex;
+    flex: 1;
+    order: 0;
+    min-width: 180px;
+    max-width: 420px;
   }
+}
+
+.kodda-search-icon {
+  flex: 0 0 auto;
+  font-size: 0.95rem;
+  line-height: 1;
 }
 
 .kodda-search input {
@@ -486,6 +497,56 @@ body {
 
 .kodda-search input:focus {
   outline: none;
+}
+
+.kodda-search-submit {
+  flex: 0 0 auto;
+  border: none;
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  background: rgba(15, 118, 110, 0.12);
+  color: var(--kd-accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.kodda-mobile-search {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 1rem;
+  padding: 0.55rem 0.75rem;
+  background: var(--kd-card);
+  border: 1px solid var(--kd-line);
+  border-radius: var(--kd-radius-sm);
+  box-shadow: var(--kd-shadow-sm);
+}
+
+@media (min-width: 768px) {
+  .kodda-mobile-search {
+    display: none;
+  }
+}
+
+.kodda-mobile-search input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  font: inherit;
+  color: var(--kd-ink);
+}
+
+.kodda-mobile-search input:focus {
+  outline: none;
+}
+
+@media (max-width: 767px) {
+  .kodda-topbar .kodda-search {
+    display: none;
+  }
 }
 
 .kodda-hamburger {
@@ -563,6 +624,30 @@ body {
   background: rgba(15, 20, 18, 0.04);
 }
 
+.kodda-btn-secondary {
+  padding: 0.65rem 16px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--kd-ink-soft);
+  background: transparent;
+  border: 1px solid var(--kd-line);
+  border-radius: var(--kd-radius-sm);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.kodda-btn-secondary:hover:not(:disabled) {
+  background: rgba(15, 20, 18, 0.04);
+  border-color: var(--kd-ink-soft);
+  color: var(--kd-ink);
+}
+
+.kodda-btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .kodda-btn-accent-outline {
   padding: 0.5rem 1rem;
   font-size: 0.88rem;
@@ -619,9 +704,57 @@ body {
 }
 
 .kodda-hello-sub {
-  margin: 0 0 2rem;
+  margin: 0;
   color: var(--kd-mist);
   font-size: 1rem;
+  max-width: 42rem;
+}
+
+.kodda-catalog-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  padding: 1.15rem 1.2rem;
+  border: 1px solid var(--kd-line);
+  border-radius: var(--kd-radius);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(247, 244, 238, 0.88)),
+    radial-gradient(circle at 100% 0%, rgba(20, 184, 166, 0.12), transparent 45%);
+  box-shadow: var(--kd-shadow-sm);
+}
+
+.kodda-catalog-hero-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.kodda-catalog-hero-tags span {
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(15, 118, 110, 0.08);
+  border: 1px solid rgba(15, 118, 110, 0.16);
+  color: var(--kd-accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.kodda-catalog-empty {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: var(--kd-mist);
+  border: 1px dashed var(--kd-line);
+  border-radius: var(--kd-radius-sm);
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.kodda-catalog-empty--error {
+  color: var(--kd-danger);
+  border-color: rgba(185, 28, 28, 0.25);
+  background: rgba(185, 28, 28, 0.04);
 }
 
 .kodda-section-title {
@@ -662,6 +795,70 @@ body {
   margin-bottom: 1.25rem;
 }
 
+.kodda-filters-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+}
+
+.kodda-filters-results {
+  color: var(--kd-mist);
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.kodda-filters-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background: var(--kd-accent);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.kodda-filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.75rem;
+}
+
+.kodda-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid rgba(15, 118, 110, 0.22);
+  border-radius: 999px;
+  background: rgba(15, 118, 110, 0.08);
+  color: var(--kd-accent);
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.kodda-filter-chip span {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.kodda-filter-chip--clear {
+  background: transparent;
+  color: var(--kd-mist);
+  border-color: var(--kd-line);
+}
+
+.kodda-filters-header {
+  display: none;
+}
+
 .kodda-filters-toggle {
   display: inline-flex;
   align-items: center;
@@ -676,12 +873,19 @@ body {
   border-radius: var(--kd-radius-sm);
   box-shadow: var(--kd-shadow-sm);
   cursor: pointer;
-  transition: border-color 0.15s, color 0.15s;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.kodda-filters-toggle--open {
+  border-color: rgba(15, 118, 110, 0.35);
+  color: var(--kd-accent);
+  background: rgba(20, 184, 166, 0.06);
 }
 
 .kodda-filters-toggle:hover {
   border-color: var(--kd-accent-mid);
   color: var(--kd-accent);
+  background: rgba(20, 184, 166, 0.04);
 }
 
 .kodda-filters-chevron {
@@ -703,6 +907,18 @@ body {
   border: 1px solid var(--kd-line);
   border-radius: var(--kd-radius);
   box-shadow: var(--kd-shadow-sm);
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .kodda-filters-grid {
@@ -727,6 +943,8 @@ body {
   font-size: 0.82rem;
   font-weight: 600;
   color: var(--kd-ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .kodda-filters-price-inputs {
@@ -783,10 +1001,77 @@ body {
 }
 
 .kodda-card-visual {
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 3 / 4;
   background: linear-gradient(145deg, var(--kd-paper-deep), #dfe8e6);
   position: relative;
   overflow: hidden;
+}
+
+.kodda-card-stock-badge {
+  position: absolute;
+  top: 0.65rem;
+  left: 0.65rem;
+  z-index: 2;
+  padding: 0.28rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--kd-success);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  box-shadow: var(--kd-shadow-sm);
+}
+
+.kodda-card-stock-badge--out {
+  color: var(--kd-danger);
+}
+
+.kodda-card-skeleton {
+  border-radius: var(--kd-radius);
+  overflow: hidden;
+  border: 1px solid var(--kd-line);
+  background: var(--kd-card);
+}
+
+.kodda-card-skeleton-visual {
+  aspect-ratio: 3 / 4;
+  background: linear-gradient(110deg, var(--kd-paper-deep) 8%, #f5f2ea 18%, var(--kd-paper-deep) 33%);
+  background-size: 200% 100%;
+  animation: kodda-shimmer 1.2s linear infinite;
+}
+
+.kodda-card-skeleton-body {
+  display: grid;
+  gap: 0.55rem;
+  padding: 1rem;
+}
+
+.kodda-card-skeleton-body span {
+  display: block;
+  height: 0.72rem;
+  border-radius: 999px;
+  background: linear-gradient(110deg, var(--kd-paper-deep) 8%, #f5f2ea 18%, var(--kd-paper-deep) 33%);
+  background-size: 200% 100%;
+  animation: kodda-shimmer 1.2s linear infinite;
+}
+
+.kodda-card-skeleton-body span:first-child {
+  width: 78%;
+}
+
+.kodda-card-skeleton-body span:nth-child(2) {
+  width: 52%;
+}
+
+.kodda-card-skeleton-body span:nth-child(3) {
+  width: 38%;
+}
+
+@keyframes kodda-shimmer {
+  to {
+    background-position-x: -200%;
+  }
 }
 
 .kodda-card-visual img {
@@ -2317,15 +2602,304 @@ a.kodda-user-chip:hover {
   border: 1px solid rgba(20, 184, 166, 0.26);
 }
 
+.kodda-card-flag--size {
+  background: rgba(194, 65, 12, 0.1);
+  border-color: rgba(194, 65, 12, 0.22);
+  color: var(--kd-warm);
+}
+
+.kodda-product-detail-page .kodda-home-main {
+  padding-bottom: 6.5rem;
+}
+
+.kodda-product-detail-main {
+  padding-bottom: 1rem;
+}
+
 .kodda-product-detail {
   display: grid;
-  grid-template-columns: minmax(240px, 0.85fr) minmax(0, 1.15fr);
-  gap: 1.25rem;
-  padding: 1rem;
+  grid-template-columns: minmax(280px, 1fr) minmax(0, 1.05fr);
+  gap: 1.5rem;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.kodda-product-detail-media {
+  position: sticky;
+  top: 5.5rem;
+  align-self: start;
+}
+
+.kodda-product-detail-eyebrow {
+  margin: 0 0 0.35rem;
+  color: var(--kd-accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.kodda-product-detail-specs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.65rem;
+  margin: 0.85rem 0 1rem;
+  padding: 0.85rem;
+  border: 1px solid var(--kd-line);
+  border-radius: var(--kd-radius-sm);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.kodda-product-detail-specs div {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.kodda-product-detail-specs span {
+  color: var(--kd-mist);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.kodda-product-detail-specs strong {
+  color: var(--kd-ink);
+  font-size: 0.92rem;
+}
+
+.kodda-product-detail-info {
+  padding: 1rem 1.1rem 1.25rem;
   border: 1px solid var(--kd-line);
   border-radius: var(--kd-radius);
   background: var(--kd-card);
   box-shadow: var(--kd-shadow-sm);
+}
+
+.kodda-product-detail-cta {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.kodda-image-viewer {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  border-radius: var(--kd-radius);
+  overflow: hidden;
+  cursor: zoom-in;
+  position: relative;
+  background: var(--kd-paper-deep);
+  aspect-ratio: 3 / 4;
+}
+
+.kodda-image-viewer-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.2s ease;
+  will-change: transform;
+}
+
+.kodda-image-viewer--zoom .kodda-image-viewer-img {
+  transform: scale(1.85);
+}
+
+.kodda-image-viewer-hint {
+  position: absolute;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  padding: 0.4rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(15, 20, 18, 0.62);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+}
+
+.kodda-image-viewer:hover .kodda-image-viewer-hint,
+.kodda-image-viewer:focus-visible .kodda-image-viewer-hint {
+  opacity: 1;
+}
+
+.kodda-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(15, 20, 18, 0.88);
+  backdrop-filter: blur(6px);
+}
+
+.kodda-lightbox-img {
+  max-width: min(96vw, 920px);
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: var(--kd-radius-sm);
+  box-shadow: var(--kd-shadow);
+}
+
+.kodda-lightbox-close {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.kodda-product-sticky-bar {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  .kodda-product-detail {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .kodda-product-detail-media {
+    position: static;
+  }
+
+  .kodda-product-detail-cta {
+    display: none;
+  }
+
+  .kodda-product-sticky-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.85rem;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: calc(3.65rem + env(safe-area-inset-bottom, 0px));
+    z-index: 25;
+    padding: 0.75rem 1rem;
+    background: rgba(247, 244, 238, 0.96);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--kd-line);
+    box-shadow: 0 -8px 24px rgba(15, 20, 18, 0.08);
+  }
+
+  .kodda-product-sticky-bar-copy {
+    min-width: 0;
+    display: grid;
+    gap: 0.1rem;
+  }
+
+  .kodda-product-sticky-bar-copy strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.88rem;
+    color: var(--kd-ink);
+  }
+
+  .kodda-product-sticky-bar-copy span {
+    color: var(--kd-accent);
+    font-size: 0.92rem;
+    font-weight: 700;
+  }
+
+  .kodda-product-sticky-bar .kodda-btn-add-to-cart {
+    flex: 0 0 auto;
+    min-width: 7.5rem;
+    margin: 0;
+  }
+}
+
+.kodda-mobile-bottom-nav {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .kodda-home {
+    padding-bottom: calc(4.25rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .kodda-mobile-bottom-nav {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 24;
+    padding: 0.35rem 0.5rem calc(0.45rem + env(safe-area-inset-bottom, 0px));
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid var(--kd-line);
+    box-shadow: 0 -6px 20px rgba(15, 20, 18, 0.06);
+  }
+
+  .kodda-mobile-bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem;
+    min-height: 44px;
+    padding: 0.35rem 0.25rem;
+    border-radius: 10px;
+    color: var(--kd-mist);
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-decoration: none;
+    position: relative;
+  }
+
+  .kodda-mobile-bottom-nav-item--active,
+  .kodda-mobile-bottom-nav-item:hover {
+    color: var(--kd-accent);
+    background: rgba(15, 118, 110, 0.08);
+  }
+
+  .kodda-mobile-bottom-nav-item span:first-child {
+    font-size: 1.05rem;
+  }
+
+  .kodda-mobile-bottom-nav-badge {
+    position: absolute;
+    top: 0.2rem;
+    right: 0.55rem;
+    min-width: 1rem;
+    height: 1rem;
+    padding: 0 0.2rem;
+    border-radius: 999px;
+    background: var(--kd-warm);
+    color: #fff;
+    font-size: 0.58rem;
+    font-weight: 800;
+    display: grid;
+    place-items: center;
+  }
+
+  .kodda-btn-add-to-cart {
+    min-height: 44px;
+  }
+
+  .kodda-grid {
+    gap: 0.85rem;
+  }
 }
 
 .kodda-product-detail-image,
@@ -2379,8 +2953,8 @@ a.kodda-user-chip:hover {
 }
 
 @media (max-width: 860px) {
-  .kodda-product-detail {
-    grid-template-columns: 1fr;
+  .kodda-product-detail-image-placeholder {
+    min-height: 320px;
   }
 }
 
@@ -2525,128 +3099,269 @@ a.kodda-user-chip:hover {
 }
 
 .kodda-metrics-page {
-  max-width: 1040px;
+  max-width: 1180px;
 }
 
-.kodda-metrics-head {
+.kodda-admin-metrics-hero {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 1.25rem;
+  margin-bottom: 1.35rem;
+  padding: 1.35rem 1.45rem;
+  border: 1px solid rgba(15, 118, 110, 0.14);
+  border-radius: var(--kd-radius);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(247, 244, 238, 0.92) 100%),
+    radial-gradient(circle at 100% 0%, rgba(20, 184, 166, 0.12), transparent 42%);
+  box-shadow: var(--kd-shadow-sm);
 }
 
-.kodda-metrics-date {
+.kodda-admin-metrics-eyebrow {
+  margin: 0 0 0.35rem;
+  color: var(--kd-accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.kodda-admin-metrics-hero .kodda-admin-page-title {
+  margin-bottom: 0.35rem;
+}
+
+.kodda-admin-metrics-hero .kodda-admin-page-lead {
+  margin: 0;
+  max-width: 38rem;
+}
+
+.kodda-admin-metrics-range {
   flex: 0 0 auto;
-  padding: 0.45rem 0.7rem;
+  align-self: flex-start;
+  padding: 0.55rem 0.85rem;
   border: 1px solid rgba(15, 118, 110, 0.18);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.7);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
   color: var(--kd-accent);
   font-size: 0.82rem;
   font-weight: 700;
+  white-space: nowrap;
 }
 
-.kodda-metrics-grid {
+.kodda-admin-metrics-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+  margin-bottom: 1.25rem;
+}
+
+.kodda-admin-period-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.kodda-admin-period-pill {
+  border: 1px solid var(--kd-line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--kd-ink-soft);
+  padding: 0.48rem 0.95rem;
+  font-size: 0.84rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.kodda-admin-period-pill:hover {
+  border-color: rgba(15, 118, 110, 0.35);
+  color: var(--kd-accent);
+}
+
+.kodda-admin-period-pill--active {
+  background: linear-gradient(135deg, rgba(15, 118, 110, 0.14), rgba(20, 184, 166, 0.1));
+  border-color: rgba(15, 118, 110, 0.35);
+  color: var(--kd-accent);
+  box-shadow: 0 8px 20px rgba(15, 118, 110, 0.12);
+}
+
+.kodda-admin-metrics-context {
+  color: var(--kd-mist);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.kodda-admin-metrics-loading {
+  margin-bottom: 1rem;
+}
+
+.kodda-admin-kpi-grid {
   display: grid;
   grid-template-columns: repeat(1, minmax(0, 1fr));
-  gap: 1rem;
+  gap: 0.85rem;
   margin-bottom: 1.25rem;
 }
 
 @media (min-width: 680px) {
-  .kodda-metrics-grid {
+  .kodda-admin-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 980px) {
+  .kodda-admin-kpi-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
-.kodda-metric-card,
-.kodda-metrics-panel {
+.kodda-admin-kpi {
+  position: relative;
+  overflow: hidden;
+  min-height: 118px;
+  padding: 1rem 1.05rem;
   border: 1px solid var(--kd-line);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.84);
+  border-radius: var(--kd-radius-sm);
+  background: rgba(255, 255, 255, 0.88);
   box-shadow: var(--kd-shadow-sm);
 }
 
-.kodda-metric-card {
-  min-height: 126px;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+.kodda-admin-kpi-glow {
+  position: absolute;
+  top: -30%;
+  right: -10%;
+  width: 7rem;
+  height: 7rem;
+  border-radius: 50%;
+  opacity: 0.45;
+  filter: blur(18px);
+  pointer-events: none;
 }
 
-.kodda-metric-card-label,
-.kodda-metric-card-note {
+.kodda-admin-kpi--teal .kodda-admin-kpi-glow {
+  background: rgba(20, 184, 166, 0.55);
+}
+
+.kodda-admin-kpi--amber .kodda-admin-kpi-glow {
+  background: rgba(234, 88, 12, 0.45);
+}
+
+.kodda-admin-kpi--violet .kodda-admin-kpi-glow {
+  background: rgba(124, 58, 237, 0.42);
+}
+
+.kodda-admin-kpi--rose .kodda-admin-kpi-glow {
+  background: rgba(219, 39, 119, 0.42);
+}
+
+.kodda-admin-kpi-label {
+  position: relative;
+  display: block;
   color: var(--kd-mist);
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 700;
-}
-
-.kodda-metric-card-label {
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-.kodda-metric-card strong {
+.kodda-admin-kpi-value {
+  position: relative;
+  display: block;
   margin-top: 0.55rem;
   color: var(--kd-ink);
-  font-size: clamp(1.35rem, 3vw, 1.8rem);
+  font-size: clamp(1.25rem, 2.8vw, 1.75rem);
   line-height: 1.05;
 }
 
-.kodda-metrics-panels {
+.kodda-admin-dashboard-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1.25rem;
-  margin-top: 1.25rem;
+  gap: 1rem;
 }
 
-@media (min-width: 900px) {
-  .kodda-metrics-panels {
-    grid-template-columns: minmax(0, 0.9fr) minmax(280px, 0.55fr);
+@media (min-width: 980px) {
+  .kodda-admin-dashboard-grid {
+    grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.85fr);
+    grid-template-rows: auto auto;
   }
 
-  .kodda-metrics-panel--wide {
-    grid-column: span 1;
+  .kodda-admin-dash-panel--chart {
+    grid-row: span 2;
+  }
+
+  .kodda-admin-dash-panel--table {
+    grid-column: 1 / -1;
   }
 }
 
-.kodda-metrics-panel {
-  padding: 1rem;
+.kodda-admin-dash-panel {
   min-width: 0;
+  padding: 1.05rem 1.1rem 1.15rem;
+  border: 1px solid var(--kd-line);
+  border-radius: var(--kd-radius-sm);
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: var(--kd-shadow-sm);
 }
 
-.kodda-metrics-panel-head {
+.kodda-admin-dash-panel-head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 0.8rem;
+  gap: 0.85rem;
   margin-bottom: 1rem;
 }
 
-.kodda-metrics-panel-head h2 {
+.kodda-admin-dash-panel-head h2 {
   margin: 0;
   font-size: 1rem;
   color: var(--kd-ink-soft);
 }
 
-.kodda-metrics-panel-head span {
+.kodda-admin-dash-panel-head p {
+  margin: 0.25rem 0 0;
   color: var(--kd-mist);
   font-size: 0.82rem;
-  font-weight: 700;
 }
 
-.kodda-hour-chart {
-  height: 230px;
+.kodda-admin-dash-badge {
+  flex: 0 0 auto;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(15, 118, 110, 0.08);
+  color: var(--kd-accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.kodda-admin-chart-hint {
+  margin: 0 0 0.65rem;
+  color: var(--kd-mist);
+  font-size: 0.8rem;
+}
+
+.kodda-admin-chart {
+  --chart-columns: 12;
+  height: 250px;
   display: grid;
-  grid-template-columns: repeat(24, minmax(12px, 1fr));
+  grid-template-columns: repeat(var(--chart-columns), minmax(6px, 1fr));
   align-items: end;
-  gap: 0.3rem;
-  padding: 0.75rem 0.15rem 0;
+  gap: 0.28rem;
+  padding: 0.35rem 0.1rem 0;
   border-top: 1px solid var(--kd-line);
 }
 
-.kodda-hour-bar {
+.kodda-admin-chart--compact {
+  gap: 0.12rem;
+}
+
+.kodda-admin-chart--compact .kodda-admin-chart-bar-stack {
+  max-width: 10px;
+}
+
+.kodda-admin-chart-bar {
   height: 100%;
   min-width: 0;
   display: flex;
@@ -2656,141 +3371,314 @@ a.kodda-user-chip:hover {
   gap: 0.35rem;
 }
 
-.kodda-hour-bar-fill {
+.kodda-admin-chart-bar-stack {
+  position: relative;
   width: 100%;
   max-width: 18px;
   min-height: 0;
-  border-radius: 6px 6px 2px 2px;
-  background: linear-gradient(180deg, #14b8a6 0%, #0f766e 100%);
-  box-shadow: 0 8px 18px rgba(15, 118, 110, 0.16);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  outline: none;
 }
 
-.kodda-hour-label {
+.kodda-admin-chart-bar-stack:hover .kodda-admin-chart-bar-fill,
+.kodda-admin-chart-bar-stack:focus-visible .kodda-admin-chart-bar-fill {
+  filter: brightness(1.08);
+  transform: scaleY(1.02);
+}
+
+.kodda-admin-chart-tooltip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 0.45rem);
+  transform: translateX(-50%) translateY(4px);
+  padding: 0.35rem 0.55rem;
+  border-radius: 6px;
+  background: var(--kd-ink);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 2;
+}
+
+.kodda-admin-chart-bar-stack:hover .kodda-admin-chart-tooltip,
+.kodda-admin-chart-bar-stack:focus-visible .kodda-admin-chart-tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.kodda-admin-chart-bar-fill {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px 8px 3px 3px;
+  background: linear-gradient(180deg, #2dd4bf 0%, #0f766e 55%, #115e59 100%);
+  box-shadow: 0 10px 22px rgba(15, 118, 110, 0.2);
+  transition: filter 0.15s ease, transform 0.15s ease;
+}
+
+.kodda-admin-chart-bar-label {
   width: 100%;
   color: var(--kd-mist);
   font-size: 0.62rem;
   text-align: center;
 }
 
-.kodda-payment-chart,
-.kodda-top-products {
+.kodda-admin-payment-layout {
   display: grid;
-  gap: 0.85rem;
+  gap: 1rem;
 }
 
-.kodda-payment-row {
-  display: grid;
-  gap: 0.45rem;
+@media (min-width: 560px) {
+  .kodda-admin-payment-layout {
+    grid-template-columns: 150px minmax(0, 1fr);
+    align-items: center;
+  }
 }
 
-.kodda-payment-row > div,
-.kodda-top-product {
+.kodda-admin-donut-wrap {
   display: flex;
+  justify-content: center;
+}
+
+.kodda-admin-donut {
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  box-shadow: inset 0 0 0 1px rgba(15, 20, 18, 0.06);
+}
+
+.kodda-admin-donut-hole {
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.96);
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 0.1rem;
+  box-shadow: 0 4px 14px rgba(15, 20, 18, 0.08);
+}
+
+.kodda-admin-donut-hole span {
+  color: var(--kd-mist);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.kodda-admin-donut-hole strong {
+  color: var(--kd-ink);
+  font-size: 0.78rem;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.kodda-admin-payment-list {
+  display: grid;
   gap: 0.75rem;
 }
 
-.kodda-payment-row span,
-.kodda-top-product span {
-  color: var(--kd-mist);
+.kodda-admin-payment-item {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.kodda-admin-payment-item-head {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--kd-ink-soft);
   font-size: 0.86rem;
 }
 
-.kodda-payment-row strong,
-.kodda-top-product b {
-  color: var(--kd-ink-soft);
-  font-size: 0.9rem;
+.kodda-admin-payment-item-head strong {
+  margin-left: auto;
+  color: var(--kd-ink);
+  font-size: 0.88rem;
 }
 
-.kodda-payment-track {
+.kodda-admin-payment-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+.kodda-admin-payment-track {
   display: block;
   width: 100%;
-  height: 0.55rem;
+  height: 0.5rem;
   border-radius: 999px;
   background: var(--kd-paper-deep);
   overflow: hidden;
 }
 
-.kodda-payment-track span {
+.kodda-admin-payment-track span {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #c2410c, #ea580c);
 }
 
-.kodda-top-product {
-  padding: 0.75rem 0;
-  border-bottom: 1px solid var(--kd-line);
+.kodda-admin-payment-pct {
+  color: var(--kd-mist);
+  font-size: 0.74rem;
+  font-weight: 600;
 }
 
-.kodda-top-product:last-child {
-  border-bottom: none;
+.kodda-admin-rank-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.55rem;
 }
 
-.kodda-top-product div {
+.kodda-admin-rank-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 0.75rem;
+  border: 1px solid var(--kd-line);
+  border-radius: 8px;
+  background: rgba(247, 244, 238, 0.55);
+}
+
+.kodda-admin-rank-index {
+  width: 1.65rem;
+  height: 1.65rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(15, 118, 110, 0.12);
+  color: var(--kd-accent);
+  font-size: 0.78rem;
+  font-weight: 800;
+  flex: 0 0 auto;
+}
+
+.kodda-admin-rank-copy {
   min-width: 0;
   display: grid;
-  gap: 0.2rem;
+  gap: 0.15rem;
 }
 
-.kodda-top-product strong {
+.kodda-admin-rank-copy strong {
   overflow-wrap: anywhere;
   color: var(--kd-ink);
-  font-size: 0.94rem;
+  font-size: 0.92rem;
 }
 
-.kodda-metrics-table-wrap {
+.kodda-admin-rank-copy span {
+  color: var(--kd-mist);
+  font-size: 0.8rem;
+}
+
+.kodda-admin-rank-item b {
+  margin-left: auto;
+  color: var(--kd-ink-soft);
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.kodda-admin-table-wrap {
   width: 100%;
   overflow-x: auto;
 }
 
-.kodda-metrics-table {
+.kodda-admin-table {
   width: 100%;
   min-width: 620px;
   border-collapse: collapse;
   font-size: 0.88rem;
 }
 
-.kodda-metrics-table th,
-.kodda-metrics-table td {
-  padding: 0.7rem 0.55rem;
+.kodda-admin-table th,
+.kodda-admin-table td {
+  padding: 0.72rem 0.55rem;
   border-bottom: 1px solid var(--kd-line);
   text-align: left;
   white-space: nowrap;
 }
 
-.kodda-metrics-table th {
+.kodda-admin-table th {
   color: var(--kd-mist);
   font-size: 0.72rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-.kodda-metrics-table td:last-child,
-.kodda-metrics-table th:last-child {
+.kodda-admin-table td:last-child,
+.kodda-admin-table th:last-child {
   text-align: right;
 }
 
-/* ----- Mis ventas (vendedor) ----- */
-.kodda-my-sales-layout--wide {
-  max-width: 1080px;
+/* ----- Mis ventas / Mis compras (historial de cuenta) ----- */
+.kodda-account-history-page {
+  min-height: 100vh;
+}
+
+.kodda-account-history-layout {
+  width: 100%;
+  max-width: min(1120px, 100%);
+  margin: 0 auto;
+  padding: clamp(1.25rem, 3vw, 2rem) clamp(1rem, 4vw, 2.5rem) 3rem;
+  box-sizing: border-box;
+}
+
+.kodda-my-sales-layout--stats {
+  max-width: min(1200px, 100%);
+}
+
+.kodda-account-history-hero {
+  margin-bottom: 1.35rem;
+  padding: 1.35rem 1.45rem;
+  border-radius: var(--kd-radius);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(247, 244, 238, 0.92) 100%),
+    radial-gradient(circle at 100% 0%, rgba(20, 184, 166, 0.12), transparent 42%);
+  border: 1px solid rgba(15, 118, 110, 0.14);
+  box-shadow: var(--kd-shadow-sm);
 }
 
 .kodda-my-sales-header {
-  margin-bottom: 1.25rem;
-  padding-bottom: 0;
-  border: none;
-  background: none;
-  box-shadow: none;
+  margin-bottom: 0;
 }
 
-.kodda-my-sales-title {
-  margin: 0 0 0.85rem;
+.kodda-account-history-eyebrow {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--kd-accent);
+}
+
+.kodda-account-history-title {
+  margin: 0 0 0.45rem;
   font-family: var(--kd-display);
-  font-size: clamp(1.5rem, 3.5vw, 1.85rem);
+  font-size: clamp(1.65rem, 4vw, 2.15rem);
   font-weight: var(--kd-display-weight);
+  letter-spacing: 0.02em;
   color: var(--kd-ink);
+  text-align: left;
+}
+
+.kodda-account-history-lead {
+  margin: 0 0 1rem;
+  max-width: 52ch;
+  color: var(--kd-mist);
+  font-size: 0.95rem;
+  line-height: 1.55;
+  text-align: left;
 }
 
 .kodda-my-sales-tabs {
@@ -2825,21 +3713,201 @@ a.kodda-user-chip:hover {
 
 .kodda-my-sales-content {
   min-width: 0;
+  width: 100%;
 }
 
+.kodda-account-history-panel,
 .kodda-my-sales-panel {
+  width: 100%;
   background: var(--kd-card);
   border: 1px solid var(--kd-line);
   border-radius: var(--kd-radius);
   box-shadow: var(--kd-shadow-sm);
-  padding: 1.25rem 1.35rem;
+  padding: clamp(1.15rem, 2.5vw, 1.65rem) clamp(1.1rem, 2.5vw, 1.75rem);
 }
 
+.kodda-account-history-status,
 .kodda-my-sales-status {
   margin: 0;
   color: var(--kd-mist);
-  font-size: 0.92rem;
+  font-size: 0.95rem;
   line-height: 1.5;
+}
+
+.kodda-account-history-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--kd-line);
+  border-radius: var(--kd-radius-sm);
+  background: rgba(247, 244, 238, 0.65);
+}
+
+.kodda-account-history-stat {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 7rem;
+}
+
+.kodda-account-history-stat-label {
+  color: var(--kd-mist);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.kodda-account-history-stat-value {
+  color: var(--kd-ink);
+  font-size: clamp(1.1rem, 2.5vw, 1.45rem);
+  line-height: 1.1;
+}
+
+.kodda-account-history-summary-link {
+  margin-left: auto;
+}
+
+.kodda-account-history-empty {
+  display: grid;
+  gap: 0.85rem;
+  justify-items: start;
+  padding: 2rem 1rem;
+  text-align: left;
+  color: var(--kd-mist);
+}
+
+.kodda-account-history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.kodda-account-history-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 1rem 1.25rem;
+  width: 100%;
+  padding: 1.1rem 1.2rem;
+  border: 1px solid var(--kd-line);
+  border-radius: var(--kd-radius-sm);
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: var(--kd-shadow-sm);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.kodda-account-history-card:hover {
+  border-color: rgba(15, 118, 110, 0.28);
+  box-shadow: var(--kd-shadow);
+  transform: translateY(-1px);
+}
+
+.kodda-account-history-card-icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 1.35rem;
+  background: rgba(15, 118, 110, 0.1);
+  flex-shrink: 0;
+}
+
+.kodda-account-history-card-body {
+  min-width: 0;
+}
+
+.kodda-account-history-card-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.65rem;
+  margin: 0 0 0.35rem;
+  font-size: clamp(1rem, 2vw, 1.12rem);
+  font-weight: 700;
+  color: var(--kd-ink);
+}
+
+.kodda-account-history-card-badge {
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(4, 120, 87, 0.1);
+  color: var(--kd-success);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.kodda-account-history-card-meta {
+  margin: 0 0 0.2rem;
+  color: var(--kd-mist);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.kodda-account-history-card-meta strong {
+  color: var(--kd-ink-soft);
+  font-weight: 600;
+}
+
+.kodda-account-history-card-aside {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.65rem;
+  flex-shrink: 0;
+}
+
+.kodda-account-history-card-amount {
+  color: var(--kd-ink);
+  font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.kodda-account-history-card-cta {
+  min-width: 8.5rem;
+  text-align: center;
+  margin-top: 0;
+}
+
+@media (max-width: 720px) {
+  .kodda-account-history-summary {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .kodda-account-history-summary-link {
+    margin-left: 0;
+    width: 100%;
+    text-align: center;
+  }
+
+  .kodda-account-history-card {
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+  }
+
+  .kodda-account-history-card-aside {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding-top: 0.35rem;
+    border-top: 1px solid var(--kd-line);
+  }
+
+  .kodda-account-history-card-cta {
+    flex: 1;
+    max-width: 12rem;
+  }
 }
 
 .kodda-my-sales-back {

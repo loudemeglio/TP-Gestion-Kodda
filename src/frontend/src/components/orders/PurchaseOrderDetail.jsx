@@ -54,7 +54,7 @@ export default function PurchaseOrderDetail({
   }
 
   return (
-    <div className="kodda-home kodda-profile-edit-page">
+    <div className="kodda-home kodda-account-history-page">
       <header className="kodda-topbar">
         <KoddaLogo compact />
         <div className="kodda-topbar-spacer" />
@@ -66,7 +66,7 @@ export default function PurchaseOrderDetail({
         </Link>
       </header>
 
-      <main className="kodda-profile-edit-layout kodda-checkout-success-card">
+      <main className="kodda-account-history-layout kodda-checkout-success-card">
         {loading ? <p className="kodda-auth-muted">Cargando…</p> : null}
         {error ? <p className="kodda-auth-error">{error}</p> : null}
 

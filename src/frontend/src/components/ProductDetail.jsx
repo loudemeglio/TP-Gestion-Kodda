@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../api/client';
 import { resolveMediaUrl } from '../utils/mediaUrl';
 import { KoddaLogo } from './KoddaLogo';
+import ProductImageViewer from './ProductImageViewer';
 import { useCarrito } from '../context/CarritoContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -13,6 +14,7 @@ export default function ProductDetail() {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     async function loadDetail() {
@@ -40,12 +42,28 @@ export default function ProductDetail() {
   const avatarSrc = resolveMediaUrl(user?.profile_image_url, avatarVersion || undefined);
   const initial = (user?.username || user?.email || '?').charAt(0).toUpperCase();
 
+  function handleAddToCart() {
+    if (product && hasStock) {
+      agregarAlCarrito(product);
+    }
+  }
+
   return (
-    <div className="kodda-home">
+    <div className="kodda-home kodda-product-detail-page">
       <header className="kodda-topbar">
         <KoddaLogo compact />
         <div className="kodda-topbar-spacer" />
-        <nav className="kodda-nav-actions">
+
+        <button
+          className="kodda-hamburger"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
+          aria-expanded={menuOpen}
+        >
+          {menuOpen ? '✕' : '☰'}
+        </button>
+
+        <nav className={`kodda-nav-actions-collapsible ${menuOpen ? 'open' : ''}`} aria-label="Acciones principales">
           <Link to="/" className="kodda-btn-ghost">
             Volver al catálogo
           </Link>
@@ -66,7 +84,7 @@ export default function ProductDetail() {
         </nav>
       </header>
 
-      <main className="kodda-home-main">
+      <main className="kodda-home-main kodda-product-detail-main">
         {loading ? <p className="kodda-auth-muted">Cargando detalle...</p> : null}
         {error ? <p className="kodda-auth-error">{error}</p> : null}
 
@@ -74,24 +92,42 @@ export default function ProductDetail() {
           <article className="kodda-product-detail">
             <section className="kodda-product-detail-media">
               {imageSrc ? (
-                <img src={imageSrc} alt={product.name} className="kodda-product-detail-image" />
+                <ProductImageViewer src={imageSrc} alt={product.name} className="kodda-product-detail-image" />
               ) : (
                 <div className="kodda-product-detail-image-placeholder">📷 Sin imagen</div>
               )}
             </section>
 
             <section className="kodda-product-detail-info">
+              <p className="kodda-product-detail-eyebrow">Detalle de prenda</p>
               <h1>{product.name}</h1>
               <div className="kodda-card-flags">
                 {product.brand ? <span className="kodda-card-flag">{product.brand}</span> : null}
                 <span className="kodda-card-flag">{product.category}</span>
+                {product.size ? <span className="kodda-card-flag kodda-card-flag--size">{product.size}</span> : null}
               </div>
 
               <p className="kodda-product-detail-price">${product.price.toLocaleString('es-AR')}</p>
-              <p className="kodda-card-meta">Talle: {product.size || '—'}</p>
               <p className={`kodda-product-stock${hasStock ? '' : ' kodda-product-stock--empty'}`}>
-                {hasStock ? `Stock disponible: ${product.stock}` : 'No hay stock disponible'}
+                {hasStock ? `${product.stock} disponibles · stock en tiempo real` : 'No hay stock disponible'}
               </p>
+
+              <div className="kodda-product-detail-specs">
+                <div>
+                  <span>Talle</span>
+                  <strong>{product.size || '—'}</strong>
+                </div>
+                <div>
+                  <span>Categoría</span>
+                  <strong>{product.category}</strong>
+                </div>
+                {product.brand ? (
+                  <div>
+                    <span>Marca</span>
+                    <strong>{product.brand}</strong>
+                  </div>
+                ) : null}
+              </div>
 
               <h3>Descripción</h3>
               <p className="kodda-product-detail-description">{product.description}</p>
@@ -105,8 +141,8 @@ export default function ProductDetail() {
 
               <button
                 type="button"
-                className="kodda-btn-add-to-cart"
-                onClick={() => agregarAlCarrito(product)}
+                className="kodda-btn-add-to-cart kodda-product-detail-cta"
+                onClick={handleAddToCart}
                 disabled={!hasStock}
                 title={!hasStock ? 'Sin stock disponible' : 'Agregar al carrito'}
               >
@@ -116,6 +152,43 @@ export default function ProductDetail() {
           </article>
         ) : null}
       </main>
+
+      {!loading && !error && product ? (
+        <div className="kodda-product-sticky-bar" aria-label="Acción de compra">
+          <div className="kodda-product-sticky-bar-copy">
+            <strong>{product.name}</strong>
+            <span>${product.price.toLocaleString('es-AR')}</span>
+          </div>
+          <button
+            type="button"
+            className="kodda-btn-add-to-cart"
+            onClick={handleAddToCart}
+            disabled={!hasStock}
+          >
+            {!hasStock ? 'Sin stock' : 'Agregar'}
+          </button>
+        </div>
+      ) : null}
+
+      <nav className="kodda-mobile-bottom-nav" aria-label="Accesos rápidos">
+        <Link to="/" className="kodda-mobile-bottom-nav-item">
+          <span aria-hidden="true">🏠</span>
+          Inicio
+        </Link>
+        <Link to="/carrito" className="kodda-mobile-bottom-nav-item">
+          <span aria-hidden="true">🛒</span>
+          Carrito
+          {cartCount > 0 ? <span className="kodda-mobile-bottom-nav-badge">{cartCount}</span> : null}
+        </Link>
+        <Link to="/publicar" className="kodda-mobile-bottom-nav-item">
+          <span aria-hidden="true">➕</span>
+          Vender
+        </Link>
+        <Link to="/perfil" className="kodda-mobile-bottom-nav-item">
+          <span aria-hidden="true">👤</span>
+          Perfil
+        </Link>
+      </nav>
     </div>
   );
 }
