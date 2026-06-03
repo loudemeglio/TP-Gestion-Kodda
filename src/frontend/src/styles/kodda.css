@@ -23,6 +23,15 @@
   --kd-logo-font: var(--kd-font);
   --kd-shadow: 0 18px 50px rgba(15, 20, 18, 0.08);
   --kd-shadow-sm: 0 8px 24px rgba(15, 20, 18, 0.06);
+  /* Superficies de gráficos — crema / beige suave */
+  --kd-chart-surface: #f3efe4;
+  --kd-chart-surface-mid: #ebe4d6;
+  --kd-chart-surface-deep: #e0d6c4;
+  --kd-chart-surface-highlight: #faf6ef;
+  --kd-chart-border: rgba(108, 88, 62, 0.14);
+  --kd-chart-grid: rgba(90, 82, 68, 0.12);
+  --kd-chart-warm-glow: rgba(194, 155, 108, 0.22);
+  --kd-chart-teal-wash: rgba(20, 184, 166, 0.1);
 }
 
 *,
@@ -3636,12 +3645,36 @@ a.kodda-user-chip:hover {
 .kodda-admin-revenue-area-plot {
   position: relative;
   height: clamp(220px, 32vw, 300px);
-  border: 1px solid rgba(15, 118, 110, 0.1);
+  border: 1px solid var(--kd-chart-border);
   border-radius: var(--kd-radius-sm);
   background:
-    radial-gradient(ellipse 80% 55% at 50% 0%, rgba(20, 184, 166, 0.1) 0%, transparent 65%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 253, 250, 0.35) 100%);
-  overflow: hidden;
+    linear-gradient(
+      180deg,
+      transparent 0%,
+      transparent calc(25% - 1px),
+      var(--kd-chart-grid) calc(25% - 1px),
+      var(--kd-chart-grid) 25%,
+      transparent 25%,
+      transparent calc(50% - 1px),
+      var(--kd-chart-grid) calc(50% - 1px),
+      var(--kd-chart-grid) 50%,
+      transparent 50%,
+      transparent calc(75% - 1px),
+      var(--kd-chart-grid) calc(75% - 1px),
+      var(--kd-chart-grid) 75%
+    ),
+    radial-gradient(ellipse 65% 48% at 88% 8%, var(--kd-chart-warm-glow), transparent 58%),
+    radial-gradient(ellipse 50% 40% at 8% 92%, var(--kd-chart-teal-wash), transparent 52%),
+    linear-gradient(
+      168deg,
+      var(--kd-chart-surface-highlight) 0%,
+      var(--kd-chart-surface) 38%,
+      var(--kd-chart-surface-mid) 100%
+    );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    inset 0 -18px 32px rgba(108, 88, 62, 0.05);
+  overflow: visible;
 }
 
 .kodda-admin-revenue-area-svg {
@@ -3652,9 +3685,9 @@ a.kodda-user-chip:hover {
 }
 
 .kodda-admin-revenue-area-grid {
-  stroke: rgba(15, 118, 110, 0.08);
+  stroke: var(--kd-chart-grid);
   stroke-width: 1;
-  stroke-dasharray: 4 6;
+  stroke-dasharray: 5 7;
 }
 
 .kodda-admin-revenue-area-fill {
@@ -3668,8 +3701,15 @@ a.kodda-user-chip:hover {
   stroke-width: 3;
   stroke-linecap: round;
   stroke-linejoin: round;
-  vector-effect: non-scaling-stroke;
+  stroke-dasharray: none;
+  stroke-dashoffset: 0;
   opacity: 0;
+  filter: drop-shadow(0 2px 8px rgba(15, 118, 110, 0.28));
+  transition: opacity 0.45s ease;
+}
+
+.kodda-admin-revenue-area-plot.kodda-chart-in-view .kodda-admin-revenue-area-line {
+  opacity: 1;
 }
 
 .kodda-admin-revenue-area-plot.kodda-chart-in-view .kodda-admin-revenue-area-fill {
@@ -3781,18 +3821,50 @@ a.kodda-user-chip:hover {
   position: relative;
   padding: 2.75rem 0.5rem 0.45rem;
   border-radius: calc(var(--kd-radius-sm) - 2px);
-  border: 1px solid rgba(15, 118, 110, 0.08);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.75) 0%, rgba(247, 244, 238, 0.35) 100%);
+  border: 1px solid var(--kd-chart-border);
+  background:
+    radial-gradient(ellipse 90% 55% at 50% 0%, var(--kd-chart-warm-glow), transparent 62%),
+    linear-gradient(
+      180deg,
+      var(--kd-chart-surface-highlight) 0%,
+      var(--kd-chart-surface) 45%,
+      var(--kd-chart-surface-mid) 100%
+    );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.68),
+    inset 0 -14px 28px rgba(108, 88, 62, 0.04);
   overflow: visible;
 }
 
+.kodda-admin-chart-stage::before {
+  content: '';
+  position: absolute;
+  left: 0.5rem;
+  right: 0.5rem;
+  top: 2.75rem;
+  bottom: 0.45rem;
+  border-radius: 6px;
+  pointer-events: none;
+  z-index: 0;
+  background: repeating-linear-gradient(
+    to top,
+    transparent,
+    transparent calc(25% - 1px),
+    var(--kd-chart-grid) calc(25% - 1px),
+    var(--kd-chart-grid) 25%
+  );
+  opacity: 0.9;
+}
+
 .kodda-admin-chart {
+  position: relative;
+  z-index: 1;
   --chart-columns: 12;
   height: 250px;
   display: grid;
   grid-template-columns: repeat(var(--chart-columns), minmax(6px, 1fr));
   align-items: end;
-  gap: 0.28rem;
+  gap: 0.22rem;
   padding: 0.35rem 0.15rem 0;
   border-top: 1px solid var(--kd-line);
   overflow: visible;
@@ -3800,17 +3872,19 @@ a.kodda-user-chip:hover {
 
 .kodda-admin-chart--weekly {
   height: 280px;
-  grid-template-columns: repeat(var(--chart-columns), minmax(0, 1fr));
-  gap: 0.4rem;
-  padding-bottom: 0.25rem;
+  grid-template-columns: repeat(var(--chart-columns), minmax(3.25rem, 1fr));
+  gap: 0.35rem;
+  padding-bottom: 2.5rem;
+  align-items: end;
 }
 
 .kodda-admin-chart--compact {
-  gap: 0.12rem;
+  gap: 0.14rem;
 }
 
 .kodda-admin-chart--compact .kodda-admin-chart-bar-stack {
-  max-width: 10px;
+  width: 92%;
+  max-width: none;
 }
 
 .kodda-admin-chart-bar {
@@ -3826,9 +3900,10 @@ a.kodda-user-chip:hover {
 
 .kodda-admin-chart-bar-stack {
   position: relative;
-  width: 100%;
-  max-width: 18px;
+  width: 78%;
+  max-width: 26px;
   min-height: 0;
+  margin-inline: auto;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -3843,7 +3918,8 @@ a.kodda-user-chip:hover {
 }
 
 .kodda-admin-chart--weekly .kodda-admin-chart-bar-stack {
-  max-width: 28px;
+  width: 72%;
+  max-width: 34px;
 }
 
 .kodda-admin-chart-tooltip {
@@ -3979,17 +4055,51 @@ a.kodda-user-chip:hover {
   text-align: center;
 }
 
-.kodda-admin-chart--weekly .kodda-admin-chart-bar-label {
+.kodda-admin-chart--weekly .kodda-admin-chart-bar {
+  justify-content: flex-end;
+}
+
+.kodda-admin-chart-bar-label--week {
+  display: grid;
+  gap: 0.1rem;
+  width: 100%;
+  min-height: 2.35em;
+  margin-top: 0.15rem;
+  text-align: center;
+  line-height: 1.1;
+}
+
+.kodda-admin-chart-bar-label-line {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--kd-ink-soft);
+  white-space: nowrap;
+}
+
+.kodda-admin-chart-bar-label-line--muted {
+  font-size: 0.58rem;
+  font-weight: 600;
+  color: var(--kd-mist);
+  text-transform: lowercase;
+}
+
+.kodda-admin-chart--weekly .kodda-admin-chart-bar-label:not(.kodda-admin-chart-bar-label--week) {
   font-size: 0.68rem;
   line-height: 1.2;
-  white-space: normal;
+  white-space: nowrap;
 }
 
 .kodda-admin-dash-panel--payment {
   position: relative;
   overflow: visible;
   padding: 1.25rem 1.35rem 1.4rem;
-  background: rgba(255, 255, 255, 0.92);
+  background: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.94) 0%,
+    var(--kd-chart-surface-highlight) 55%,
+    var(--kd-chart-surface) 100%
+  );
   container-type: inline-size;
   container-name: payment-panel;
 }
@@ -4036,6 +4146,17 @@ a.kodda-user-chip:hover {
   aspect-ratio: 1;
   max-width: min(100%, 280px);
   margin: 0 auto;
+  padding: 0.85rem;
+  border-radius: var(--kd-radius-sm);
+  border: 1px solid var(--kd-chart-border);
+  background:
+    radial-gradient(
+      circle at 50% 44%,
+      var(--kd-chart-surface-highlight) 0%,
+      var(--kd-chart-surface-mid) 68%,
+      var(--kd-chart-surface-deep) 100%
+    );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 @container payment-panel (min-width: 560px) {
@@ -4076,7 +4197,7 @@ a.kodda-user-chip:hover {
 }
 
 .kodda-admin-donut-track-ring {
-  stroke: rgba(15, 20, 18, 0.06);
+  stroke: rgba(108, 88, 62, 0.14);
 }
 
 .kodda-admin-donut-segment {
@@ -4098,8 +4219,8 @@ a.kodda-user-chip:hover {
   min-width: 6.5rem;
   min-height: 6.5rem;
   border-radius: 50%;
-  background: linear-gradient(165deg, #ffffff 0%, #f0fdfa 55%, #ecfdf5 100%);
-  border: 1px solid rgba(15, 118, 110, 0.1);
+  background: linear-gradient(165deg, #fffef9 0%, var(--kd-chart-surface-highlight) 48%, #f0fdfa 100%);
+  border: 1px solid var(--kd-chart-border);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -4152,8 +4273,13 @@ a.kodda-user-chip:hover {
   margin: 0;
   padding: 0.65rem 0.85rem;
   border-radius: 10px;
-  background: linear-gradient(90deg, rgba(20, 184, 166, 0.12) 0%, rgba(255, 255, 255, 0.6) 100%);
-  border: 1px solid rgba(15, 118, 110, 0.12);
+  background: linear-gradient(
+    90deg,
+    rgba(20, 184, 166, 0.1) 0%,
+    var(--kd-chart-surface-highlight) 55%,
+    var(--kd-chart-surface) 100%
+  );
+  border: 1px solid var(--kd-chart-border);
   color: var(--kd-ink-soft);
   font-size: 0.88rem;
   line-height: 1.35;
@@ -4185,8 +4311,8 @@ a.kodda-user-chip:hover {
   padding: 0.75rem 0.85rem;
   min-width: 0;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.65);
-  border: 1px solid rgba(15, 20, 18, 0.05);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.88) 0%, var(--kd-chart-surface-highlight) 100%);
+  border: 1px solid var(--kd-chart-border);
   opacity: 0;
   animation: koddaPaymentFadeIn 0.5s ease forwards;
   animation-delay: var(--payment-delay, 0s);
@@ -4194,8 +4320,8 @@ a.kodda-user-chip:hover {
 }
 
 .kodda-admin-payment-item:hover {
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 8px 22px rgba(15, 20, 18, 0.07);
+  background: linear-gradient(180deg, #ffffff 0%, var(--kd-chart-surface) 100%);
+  box-shadow: 0 8px 22px rgba(108, 88, 62, 0.1);
   transform: translateX(4px);
 }
 
@@ -4238,9 +4364,9 @@ a.kodda-user-chip:hover {
   min-width: 0;
   height: 0.72rem;
   border-radius: 999px;
-  background: rgba(15, 20, 18, 0.06);
+  background: var(--kd-chart-surface-deep);
   overflow: hidden;
-  box-shadow: inset 0 1px 3px rgba(15, 20, 18, 0.08);
+  box-shadow: inset 0 1px 3px rgba(108, 88, 62, 0.12);
 }
 
 .kodda-admin-payment-bar {
@@ -4361,6 +4487,8 @@ a.kodda-user-chip:hover {
     opacity: 1;
     transform: none;
     transition: none !important;
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
   }
 
   .kodda-admin-kpi--interactive:hover,

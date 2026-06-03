@@ -62,6 +62,23 @@ export function shouldShowChartAxisLabels(pointCount) {
   return pointCount <= CHART_AXIS_LABELS_MAX;
 }
 
+/**
+ * Altura de barra en % del contenedor.
+ * Ventas muy bajas respecto al pico se muestran con la misma altura mínima (evita “picos” falsos).
+ */
+export function computeBarHeightPercent(value, maxValue, options = {}) {
+  const { floorPct = 4, smallRatio = 0.1 } = options;
+  const v = Number(value || 0);
+  const max = Number(maxValue || 0);
+  if (max <= 0) return 0;
+
+  if (v <= 0) return floorPct;
+
+  const pct = (v / max) * 100;
+  if (pct <= smallRatio * 100) return floorPct;
+  return pct;
+}
+
 /** Parsea etiqueta ISO de día (YYYY-MM-DD) del gráfico. */
 function parseChartDay(label) {
   if (!label || !/^\d{4}-\d{2}-\d{2}$/.test(label)) return null;
@@ -120,14 +137,48 @@ export function bucketChartPointsByWeek(points) {
   return [...buckets.values()].sort((a, b) => a.label.localeCompare(b.label));
 }
 
+/** Etiqueta corta en una línea: "23–29 mar" (sin cortes raros entre palabras). */
 export function formatWeekChartLabel(weekStartIso) {
   const start = parseChartDay(weekStartIso);
   if (!start) return '';
+
   const end = new Date(start);
   end.setDate(end.getDate() + 6);
-  const startStr = new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'short' }).format(start);
-  const endStr = new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'short' }).format(end);
-  return `${startStr}–${endStr}`;
+
+  const startMonth = start.getMonth();
+  const endMonth = end.getMonth();
+  const nbsp = '\u00a0';
+
+  if (startMonth === endMonth) {
+    const month = new Intl.DateTimeFormat('es-AR', { month: 'short' }).format(start);
+    return `${start.getDate()}–${end.getDate()}${nbsp}${month}`;
+  }
+
+  const startPart = new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'short' }).format(start);
+  const endPart = new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'short' }).format(end);
+  return `${startPart.replace(' ', nbsp)}–${endPart.replace(' ', nbsp)}`;
+}
+
+/** Dos líneas alineadas bajo cada barra (días arriba, mes abajo). */
+export function formatWeekChartLabelLines(weekStartIso) {
+  const start = parseChartDay(weekStartIso);
+  if (!start) return { top: '', bottom: '' };
+
+  const end = new Date(start);
+  end.setDate(end.getDate() + 6);
+  const monthFmt = new Intl.DateTimeFormat('es-AR', { month: 'short' });
+
+  if (start.getMonth() === end.getMonth()) {
+    return {
+      top: `${start.getDate()}–${end.getDate()}`,
+      bottom: monthFmt.format(start),
+    };
+  }
+
+  return {
+    top: `${start.getDate()}–${end.getDate()}`,
+    bottom: `${monthFmt.format(start)}–${monthFmt.format(end)}`,
+  };
 }
 
 export function formatWeekChartTooltip(weekStartIso, valueFormatted) {

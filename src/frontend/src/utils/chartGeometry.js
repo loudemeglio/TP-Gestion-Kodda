@@ -1,6 +1,6 @@
 /** Geometría SVG para gráficos de área con curva suave (estilo monotone). */
 
-const CHART_PAD = { top: 12, right: 8, bottom: 8, left: 8 };
+const CHART_PAD = { top: 12, right: 14, bottom: 8, left: 8 };
 
 export function getAreaChartLayout(viewWidth, viewHeight, pointCount) {
   const innerW = viewWidth - CHART_PAD.left - CHART_PAD.right;

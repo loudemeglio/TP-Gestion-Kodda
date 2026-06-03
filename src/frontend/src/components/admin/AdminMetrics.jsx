@@ -9,10 +9,12 @@ import {
 import { useChartInView } from '../../hooks/useChartInView';
 import {
   bucketChartPointsByWeek,
+  computeBarHeightPercent,
   formatChartLabel,
   formatChartTooltip,
   formatStatsRangeLabel,
   formatWeekChartLabel,
+  formatWeekChartLabelLines,
   formatWeekChartTooltip,
   shouldShowChartAxisLabels,
 } from '../../utils/sellerStatsPeriod';
@@ -143,7 +145,6 @@ function getAreaTooltipLabel(point, variant, isWeekly) {
 
 function RevenueAreaChart({ points, variant, activeTab }) {
   const svgRef = useRef(null);
-  const lineRef = useRef(null);
   const [plotRef, isInView] = useChartInView();
   const [activeIndex, setActiveIndex] = useState(-1);
 
@@ -191,35 +192,6 @@ function RevenueAreaChart({ points, variant, activeTab }) {
 
   const clearPointer = useCallback(() => setActiveIndex(-1), []);
 
-  useEffect(() => {
-    const path = lineRef.current;
-    if (!path || !linePath) return undefined;
-
-    const length = path.getTotalLength();
-    path.style.strokeDasharray = `${length}`;
-
-    if (!isInView) {
-      path.style.strokeDashoffset = `${length}`;
-      path.style.opacity = '0';
-      return undefined;
-    }
-
-    path.style.opacity = '1';
-    path.style.strokeDashoffset = `${length}`;
-    path.style.transition = 'none';
-
-    const frame = requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        path.style.transition = 'stroke-dashoffset 1.35s cubic-bezier(0.22, 1, 0.36, 1)';
-        path.style.strokeDashoffset = '0';
-      });
-    });
-
-    return () => {
-      path.style.transition = '';
-    };
-  }, [isInView, linePath]);
-
   if (!displayPoints.length) {
     return <EmptyState>No hay ingresos registrados en este período.</EmptyState>;
   }
@@ -256,6 +228,7 @@ function RevenueAreaChart({ points, variant, activeTab }) {
           ref={svgRef}
           viewBox={`0 0 ${AREA_VIEW_WIDTH} ${AREA_VIEW_HEIGHT}`}
           preserveAspectRatio="none"
+          overflow="visible"
           className="kodda-admin-revenue-area-svg"
           role="img"
           aria-label="Evolución de ingresos"
@@ -274,13 +247,6 @@ function RevenueAreaChart({ points, variant, activeTab }) {
               <stop offset="0%" stopColor="#14b8a6" />
               <stop offset="100%" stopColor="#0f766e" />
             </linearGradient>
-            <filter id="koddaRevenueGlow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="2" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
           </defs>
 
           {[0.25, 0.5, 0.75].map((pct) => (
@@ -296,12 +262,7 @@ function RevenueAreaChart({ points, variant, activeTab }) {
 
           {areaPath ? <path d={areaPath} className="kodda-admin-revenue-area-fill" /> : null}
           {linePath ? (
-            <path
-              ref={lineRef}
-              d={linePath}
-              className="kodda-admin-revenue-area-line"
-              filter="url(#koddaRevenueGlow)"
-            />
+            <path d={linePath} className="kodda-admin-revenue-area-line" />
           ) : null}
 
           {geometry.coords.map((coord, index) => (
@@ -410,7 +371,11 @@ function SalesChart({ points, variant, activeTab, peakLabel }) {
         {displayPoints.map((point, index) => {
           const value = Number(point.value || 0);
           const valueStr = formatCurrency(value);
-          const height = maxValue ? Math.max(4, (value / maxValue) * 100) : 0;
+          const height = computeBarHeightPercent(value, maxValue, {
+            floorPct: 4,
+            smallRatio: isWeekly ? 0.1 : 0.06,
+          });
+          const weekLabelLines = isWeekly ? formatWeekChartLabelLines(point.label) : null;
           const axisLabel =
             variant === 'hour'
               ? point.label.slice(0, 2)
@@ -451,7 +416,16 @@ function SalesChart({ points, variant, activeTab, peakLabel }) {
                 </span>
                 <span className="kodda-admin-chart-bar-fill" aria-hidden="true" />
               </div>
-              {axisLabel ? <span className="kodda-admin-chart-bar-label">{axisLabel}</span> : null}
+              {isWeekly && weekLabelLines?.top ? (
+                <span className="kodda-admin-chart-bar-label kodda-admin-chart-bar-label--week">
+                  <span className="kodda-admin-chart-bar-label-line">{weekLabelLines.top}</span>
+                  <span className="kodda-admin-chart-bar-label-line kodda-admin-chart-bar-label-line--muted">
+                    {weekLabelLines.bottom}
+                  </span>
+                </span>
+              ) : axisLabel ? (
+                <span className="kodda-admin-chart-bar-label">{axisLabel}</span>
+              ) : null}
             </div>
           );
         })}
