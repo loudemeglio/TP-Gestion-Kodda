@@ -2,18 +2,30 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { KoddaLogo } from './KoddaLogo';
 import { api } from '../api/client';
-import { findCategoryIdByName, useActiveCatalog } from '../hooks/useActiveCatalog';
+import { findBrandIdByName, findCategoryIdByName, useActiveCatalog } from '../hooks/useActiveCatalog';
 
 const GEMINI_API_KEY = process.env.REACT_APP_GEMINI_API_KEY;
 const GEMINI_URL = GEMINI_API_KEY
   ? `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${GEMINI_API_KEY}`
   : null;
 
+const VALID_CONDITIONS = new Set(['nuevo', 'como_nuevo', 'bueno', 'regular']);
+
+const CONDITION_LABELS = {
+  nuevo: 'Nuevo',
+  como_nuevo: 'Como nuevo',
+  bueno: 'Bueno',
+  regular: 'Regular',
+};
+
+function formatArs(amount) {
+  return Number(amount).toLocaleString('es-AR', { maximumFractionDigits: 0 });
+}
+
 function fileToBase64(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
-      // result is "data:<mime>;base64,<data>"
       const base64 = reader.result.split(',')[1];
       resolve(base64);
     };
@@ -22,11 +34,30 @@ function fileToBase64(file) {
   });
 }
 
+function buildGeminiPrompt(categoryNames, brandNames) {
+  return `Analizá esta prenda de ropa de segunda mano para una plataforma argentina (Kodda).
+Respondé SOLO un JSON válido (sin markdown ni texto extra) con estas claves:
+- name: nombre del producto en español (ej. "Campera de cuero negra")
+- description: descripción breve en español rioplatense, máximo 120 caracteres
+- category: una sola categoría de esta lista: ${categoryNames}
+- brand: marca visible o inferida; si no hay, "desconocida". Preferí marcas de esta lista si aplica: ${brandNames}
+- condition: uno de nuevo, como_nuevo, bueno, regular (estado de la prenda)
+- size: talle estimado (ej. M, L, 42) o "desconocido"
+- suggested_price: número entero en pesos argentinos (ARS) o null
+- can_suggest_price: true solo si identificás con confianza la marca, el tipo de prenda y el estado
+- price_rationale: una línea en español explicando el rango de precio en el mercado de segunda mano en Argentina (2025/2026)
+
+Reglas para el precio en ARS:
+- Usá precios realistas del mercado argentino de ropa usada (Mercado Libre, redes locales), no USD.
+- Marcas premium valen más que genéricas.
+- Ajustá por estado: nuevo ~100%, como_nuevo ~85%, bueno ~70%, regular ~50% del precio de referencia usado.
+- Si no podés identificar marca + categoría + estado con confianza: can_suggest_price false y suggested_price null.`;
+}
+
 export default function PublishProduct() {
   const navigate = useNavigate();
   const { brands, categories, loading: catalogLoading, error: catalogError } = useActiveCatalog();
 
-  // Form fields
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
@@ -36,24 +67,95 @@ export default function PublishProduct() {
   const [size, setSize] = useState('');
   const [mainImageUrl, setMainImageUrl] = useState('');
 
-  // IA
   const [iaFile, setIaFile] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [iaError, setIaError] = useState('');
+  const [iaAnalysisDone, setIaAnalysisDone] = useState(false);
 
-  // Submit
+  const [suggestedPrice, setSuggestedPrice] = useState(null);
+  const [canSuggestPrice, setCanSuggestPrice] = useState(false);
+  const [detectedCondition, setDetectedCondition] = useState('');
+  const [detectedBrandName, setDetectedBrandName] = useState('');
+  const [priceRationale, setPriceRationale] = useState('');
+  const [priceFromSuggestion, setPriceFromSuggestion] = useState(false);
+
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  function resetPriceSuggestion() {
+    setSuggestedPrice(null);
+    setCanSuggestPrice(false);
+    setDetectedCondition('');
+    setDetectedBrandName('');
+    setPriceRationale('');
+    setPriceFromSuggestion(false);
+    setIaAnalysisDone(false);
+  }
+
+  function applyParsedAnalysis(parsed) {
+    if (parsed.name) setName(parsed.name);
+    if (parsed.description) setDescription(parsed.description);
+
+    if (parsed.category) {
+      const matchedCategoryId = findCategoryIdByName(categories, parsed.category);
+      if (matchedCategoryId) setCategoryId(matchedCategoryId);
+    }
+
+    if (parsed.brand) {
+      setDetectedBrandName(parsed.brand);
+      const matchedBrandId = findBrandIdByName(brands, parsed.brand);
+      if (matchedBrandId) setBrandId(matchedBrandId);
+    }
+
+    if (parsed.size && parsed.size !== 'desconocido') {
+      setSize(parsed.size);
+    }
+
+    const condition = typeof parsed.condition === 'string' ? parsed.condition.toLowerCase() : '';
+    const hasValidCondition = VALID_CONDITIONS.has(condition);
+    if (hasValidCondition) {
+      setDetectedCondition(condition);
+    } else {
+      setDetectedCondition('');
+    }
+
+    const wantsSuggestion = parsed.can_suggest_price === true;
+    const priceNum = Number(parsed.suggested_price);
+    const hasValidPrice = !Number.isNaN(priceNum) && priceNum > 0;
+
+    if (wantsSuggestion && hasValidCondition && hasValidPrice) {
+      setSuggestedPrice(Math.round(priceNum));
+      setCanSuggestPrice(true);
+      setPriceRationale(
+        typeof parsed.price_rationale === 'string' ? parsed.price_rationale.trim() : ''
+      );
+    } else {
+      setSuggestedPrice(null);
+      setCanSuggestPrice(false);
+      setPriceRationale('');
+    }
+
+    setIaAnalysisDone(true);
+  }
+
+  function handleIaFileChange(file) {
+    setIaFile(file);
+    resetPriceSuggestion();
+    setIaError('');
+  }
 
   async function handleAnalyzeIA() {
     if (!iaFile) return;
     setAnalyzing(true);
     setIaError('');
+    resetPriceSuggestion();
+
     try {
       const base64 = await fileToBase64(iaFile);
       const mimeType = iaFile.type || 'image/jpeg';
-
       const categoryNames = categories.map((c) => c.name).join(', ');
+      const brandNames = brands.map((b) => b.name).join(', ');
+
       const body = {
         contents: [
           {
@@ -65,7 +167,7 @@ export default function PublishProduct() {
                 },
               },
               {
-                text: `Analizá esta prenda de ropa y respondé en JSON con estas claves: name (nombre del producto, ej: 'Campera de cuero negra'), description (descripción breve en español, máx 120 caracteres), category (una sola categoría de: ${categoryNames}). Solo el JSON, sin texto extra.`,
+                text: buildGeminiPrompt(categoryNames, brandNames || 'cualquier marca'),
               },
             ],
           },
@@ -85,27 +187,40 @@ export default function PublishProduct() {
       const data = await resp.json();
       const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
-      // Extract JSON from the response (it may be wrapped in ```json ... ```)
       const jsonMatch = text.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
         throw new Error('No se pudo interpretar la respuesta de la IA.');
       }
 
       const parsed = JSON.parse(jsonMatch[0]);
-
-      if (parsed.name) setName(parsed.name);
-      if (parsed.description) setDescription(parsed.description);
-      if (parsed.category) {
-        const matchedId = findCategoryIdByName(categories, parsed.category);
-        if (matchedId) setCategoryId(matchedId);
-      }
+      applyParsedAnalysis(parsed);
     } catch (err) {
       console.error('Error IA:', err);
       setIaError('No se pudo analizar la imagen. Completá los datos manualmente.');
+      setIaAnalysisDone(false);
     } finally {
       setAnalyzing(false);
     }
   }
+
+  function handleUseSuggestedPrice() {
+    if (suggestedPrice == null) return;
+    setPrice(String(suggestedPrice));
+    setPriceFromSuggestion(true);
+  }
+
+  function handlePriceChange(value) {
+    setPrice(value);
+    setPriceFromSuggestion(false);
+  }
+
+  const categoryLabel =
+    categories.find((c) => String(c.id) === categoryId)?.name || '';
+  const suggestionMetaParts = [
+    detectedBrandName || brands.find((b) => String(b.id) === brandId)?.name,
+    categoryLabel,
+    detectedCondition ? `Estado: ${CONDITION_LABELS[detectedCondition] || detectedCondition}` : '',
+  ].filter(Boolean);
 
   function validateForm() {
     const missing = [];
@@ -235,7 +350,6 @@ export default function PublishProduct() {
           <form onSubmit={handleSubmit}>
             {error ? <p className="kodda-auth-error">{error}</p> : null}
 
-            {/* IA Section — only shown if API key is available */}
             {GEMINI_URL ? (
               <>
                 <label className="kodda-field">
@@ -244,7 +358,7 @@ export default function PublishProduct() {
                     className="kodda-input"
                     type="file"
                     accept="image/*"
-                    onChange={(e) => setIaFile(e.target.files?.[0] || null)}
+                    onChange={(e) => handleIaFileChange(e.target.files?.[0] || null)}
                   />
                 </label>
 
@@ -262,7 +376,6 @@ export default function PublishProduct() {
               </>
             ) : null}
 
-            {/* Product fields */}
             <label className="kodda-field">
               <span>Nombre del producto</span>
               <input
@@ -287,13 +400,45 @@ export default function PublishProduct() {
               />
             </label>
 
+            {iaAnalysisDone && canSuggestPrice ? (
+              <div className="kodda-price-suggestion" role="status" aria-live="polite">
+                <p className="kodda-price-suggestion-label">Precio sugerido</p>
+                <p className="kodda-price-suggestion-amount">${formatArs(suggestedPrice)}</p>
+                {suggestionMetaParts.length > 0 ? (
+                  <p className="kodda-price-suggestion-meta">{suggestionMetaParts.join(' · ')}</p>
+                ) : null}
+                <p className="kodda-price-suggestion-hint">
+                  {priceRationale ||
+                    'Basado en tendencias del mercado de segunda mano en Argentina.'}
+                </p>
+                <button
+                  type="button"
+                  className="kodda-btn-accent-outline kodda-price-suggestion-btn"
+                  onClick={handleUseSuggestedPrice}
+                >
+                  Usar este precio
+                </button>
+              </div>
+            ) : null}
+
+            {iaAnalysisDone && !canSuggestPrice && !iaError ? (
+              <p className="kodda-price-suggestion-manual" role="status">
+                No hay datos suficientes para estimar un precio. Ingresalo manualmente.
+              </p>
+            ) : null}
+
             <label className="kodda-field">
-              <span>Precio ($)</span>
+              <span>
+                Precio (ARS)
+                {priceFromSuggestion ? (
+                  <span className="kodda-price-suggestion-badge">Precio aceptado de la sugerencia</span>
+                ) : null}
+              </span>
               <input
                 className="kodda-input"
                 type="number"
                 value={price}
-                onChange={(e) => setPrice(e.target.value)}
+                onChange={(e) => handlePriceChange(e.target.value)}
                 placeholder="ej. 15000"
                 min="0.01"
                 step="0.01"
