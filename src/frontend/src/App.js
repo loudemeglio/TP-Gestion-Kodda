@@ -17,6 +17,7 @@ import AdminMetrics from './components/admin/AdminMetrics';
 import VerifyEmail from './components/VerifyEmail';
 import PublishProduct from './components/PublishProduct';
 import ProductDetail from './components/ProductDetail';
+import SizeGuide from './components/SizeGuide';
 import ProfileEdit from './components/ProfileEdit';
 import ProfileView from './components/ProfileView';
 import RegisterForm from './components/RegisterForm';
@@ -95,6 +96,14 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <ProductDetail />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/guia-de-talles"
+        element={
+          <PrivateRoute>
+            <SizeGuide />
           </PrivateRoute>
         }
       />

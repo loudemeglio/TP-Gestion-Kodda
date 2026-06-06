@@ -11,6 +11,15 @@ export default function RegisterForm() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [showFit, setShowFit] = useState(false);
+  const [height, setHeight] = useState('');
+  const [weight, setWeight] = useState('');
+  const [topSize, setTopSize] = useState('');
+  const [bottomSize, setBottomSize] = useState('');
+  const [shoeSize, setShoeSize] = useState('');
+  const [topFitPreference, setTopFitPreference] = useState('');
+  const [bottomFitPreference, setBottomFitPreference] = useState('');
+  const [shoeFitPreference, setShoeFitPreference] = useState('');
 
   function validateEmail(value) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
@@ -33,9 +42,35 @@ export default function RegisterForm() {
       return;
     }
 
+    const payload = { username, email, password };
+    const h = height.trim().replace(',', '.');
+    if (h !== '') {
+      const n = Number.parseFloat(h);
+      if (Number.isNaN(n) || n < 0) {
+        setError('Altura inválida.');
+        return;
+      }
+      payload.height = n;
+    }
+    const w = weight.trim().replace(',', '.');
+    if (w !== '') {
+      const n = Number.parseFloat(w);
+      if (Number.isNaN(n) || n < 0) {
+        setError('Peso inválido.');
+        return;
+      }
+      payload.weight = n;
+    }
+    if (topSize.trim()) payload.top_size = topSize.trim();
+    if (bottomSize.trim()) payload.bottom_size = bottomSize.trim();
+    if (shoeSize.trim()) payload.shoe_size = shoeSize.trim();
+    if (topFitPreference) payload.top_fit_preference = topFitPreference;
+    if (bottomFitPreference) payload.bottom_fit_preference = bottomFitPreference;
+    if (shoeFitPreference) payload.shoe_fit_preference = shoeFitPreference;
+
     setSubmitting(true);
     try {
-      await api.post('/api/users/', { username, email, password });
+      await api.post('/api/users/', payload);
       navigate('/login', {
         replace: true,
         state: {
@@ -161,6 +196,127 @@ export default function RegisterForm() {
                 minLength={8}
               />
             </label>
+
+            <div className="kodda-register-fit">
+              <button
+                type="button"
+                className="kodda-register-fit-toggle"
+                onClick={() => setShowFit((v) => !v)}
+                aria-expanded={showFit}
+              >
+                <span>Personalizá tus recomendaciones de talle (opcional)</span>
+                <span aria-hidden="true">{showFit ? '−' : '+'}</span>
+              </button>
+
+              {showFit ? (
+                <div className="kodda-register-fit-panel">
+                  <p className="kodda-auth-muted kodda-register-fit-hint">
+                    Con esto, la IA te dice si una prenda te va a quedar bien. Podés completarlo después en tu perfil.
+                  </p>
+                  <div className="kodda-register-fit-grid">
+                    <label className="kodda-field">
+                      <span>Altura (cm)</span>
+                      <input
+                        className="kodda-input"
+                        type="text"
+                        inputMode="decimal"
+                        value={height}
+                        onChange={(e) => setHeight(e.target.value)}
+                        placeholder="175"
+                      />
+                    </label>
+                    <label className="kodda-field">
+                      <span>Peso (kg)</span>
+                      <input
+                        className="kodda-input"
+                        type="text"
+                        inputMode="decimal"
+                        value={weight}
+                        onChange={(e) => setWeight(e.target.value)}
+                        placeholder="70"
+                      />
+                    </label>
+                    <label className="kodda-field">
+                      <span>Talle superior</span>
+                      <input
+                        className="kodda-input"
+                        type="text"
+                        value={topSize}
+                        onChange={(e) => setTopSize(e.target.value)}
+                        maxLength={20}
+                        placeholder="M"
+                      />
+                    </label>
+                    <label className="kodda-field">
+                      <span>Talle inferior</span>
+                      <input
+                        className="kodda-input"
+                        type="text"
+                        value={bottomSize}
+                        onChange={(e) => setBottomSize(e.target.value)}
+                        maxLength={20}
+                        placeholder="40"
+                      />
+                    </label>
+                    <label className="kodda-field">
+                      <span>Calzado</span>
+                      <input
+                        className="kodda-input"
+                        type="text"
+                        value={shoeSize}
+                        onChange={(e) => setShoeSize(e.target.value)}
+                        maxLength={20}
+                        placeholder="42"
+                      />
+                    </label>
+                  </div>
+                  <p className="kodda-auth-muted kodda-register-fit-hint" style={{ marginTop: '0.75rem' }}>
+                    ¿Cómo te gusta que te quede? Podés elegir distinto calce arriba y abajo.
+                  </p>
+                  <div className="kodda-register-fit-grid">
+                    <label className="kodda-field">
+                      <span>Calce superior</span>
+                      <select
+                        className="kodda-input"
+                        value={topFitPreference}
+                        onChange={(e) => setTopFitPreference(e.target.value)}
+                      >
+                        <option value="">Sin preferencia</option>
+                        <option value="ajustado">Ajustado</option>
+                        <option value="regular">Regular</option>
+                        <option value="holgado">Holgado</option>
+                      </select>
+                    </label>
+                    <label className="kodda-field">
+                      <span>Calce inferior</span>
+                      <select
+                        className="kodda-input"
+                        value={bottomFitPreference}
+                        onChange={(e) => setBottomFitPreference(e.target.value)}
+                      >
+                        <option value="">Sin preferencia</option>
+                        <option value="ajustado">Ajustado</option>
+                        <option value="regular">Regular</option>
+                        <option value="holgado">Holgado</option>
+                      </select>
+                    </label>
+                    <label className="kodda-field">
+                      <span>Calce calzado</span>
+                      <select
+                        className="kodda-input"
+                        value={shoeFitPreference}
+                        onChange={(e) => setShoeFitPreference(e.target.value)}
+                      >
+                        <option value="">Sin preferencia</option>
+                        <option value="ajustado">Ajustado</option>
+                        <option value="regular">Regular</option>
+                        <option value="holgado">Holgado</option>
+                      </select>
+                    </label>
+                  </div>
+                </div>
+              ) : null}
+            </div>
 
             <button className="kodda-btn-primary" type="submit" disabled={submitting}>
               {submitting ? 'Registrando…' : 'Crear cuenta'}

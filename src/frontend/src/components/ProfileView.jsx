@@ -14,6 +14,12 @@ function formatStat(value, suffix = '') {
   return `${value}${suffix}`;
 }
 
+const FIT_PREFERENCE_LABELS = {
+  ajustado: 'Ajustado',
+  regular: 'Regular',
+  holgado: 'Oversize / Holgado',
+};
+
 const MEASURE_STATS = [
   { key: 'weight', label: 'Peso', suffix: ' kg' },
   { key: 'height', label: 'Altura', suffix: ' cm' },
@@ -21,6 +27,30 @@ const MEASURE_STATS = [
   { key: 'top_size', label: 'Superior', suffix: '' },
   { key: 'bottom_size', label: 'Inferior', suffix: '' },
 ];
+
+const FIT_PREF_STATS = [
+  { key: 'top_fit_preference', label: 'Calce superior' },
+  { key: 'bottom_fit_preference', label: 'Calce inferior' },
+  { key: 'shoe_fit_preference', label: 'Calce calzado' },
+];
+
+function getFitPrefsForView(profile) {
+  if (!profile) return [];
+  const items = FIT_PREF_STATS.map(({ key, label }) => {
+    if (!hasValue(profile[key])) return null;
+    return { label, value: FIT_PREFERENCE_LABELS[profile[key]] || profile[key] };
+  }).filter(Boolean);
+  if (items.length) return items;
+  if (hasValue(profile.fit_preference)) {
+    return [
+      {
+        label: 'Calce general',
+        value: FIT_PREFERENCE_LABELS[profile.fit_preference] || profile.fit_preference,
+      },
+    ];
+  }
+  return [];
+}
 
 export default function ProfileView() {
   const location = useLocation();
@@ -62,16 +92,20 @@ export default function ProfileView() {
   const initial = (profile?.username || user?.username || '?').charAt(0).toUpperCase();
 
   const filledStats = profile
-    ? MEASURE_STATS.map(({ key, label, suffix, icon }) => {
-        const formatted = formatStat(profile[key], suffix);
+    ? MEASURE_STATS.map(({ key, label, suffix, icon, format }) => {
+        if (!hasValue(profile[key])) return null;
+        const raw = format ? format(profile[key]) : profile[key];
+        const formatted = formatStat(raw, suffix);
         if (!formatted) return null;
         return { label, value: formatted, icon };
       }).filter(Boolean)
     : [];
 
+  const fitPrefs = getFitPrefsForView(profile);
+
   const hasAddress = profile && hasValue(profile.address);
   const hasBio = profile && hasValue(profile.bio);
-  const profileComplete = filledStats.length >= 3 || (hasBio && filledStats.length >= 1);
+  const profileComplete = filledStats.length >= 3 || fitPrefs.length >= 1 || (hasBio && filledStats.length >= 1);
 
   return (
     <div className="kodda-home kodda-profile-view-page">
@@ -188,6 +222,19 @@ export default function ProfileView() {
                     </Link>
                   </div>
                 )}
+                {fitPrefs.length > 0 ? (
+                  <div className="kodda-profile-fit-prefs-view">
+                    <h3 className="kodda-profile-fit-prefs-view-title">Preferencias de calce</h3>
+                    <div className="kodda-profile-stat-grid">
+                      {fitPrefs.map((item) => (
+                        <div key={item.label} className="kodda-profile-stat">
+                          <span className="kodda-profile-stat-label">{item.label}</span>
+                          <span className="kodda-profile-stat-value">{item.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
               </section>
 
               <div className="kodda-profile-view-nav">

@@ -4,6 +4,7 @@ import { api } from '../api/client';
 import { resolveMediaUrl } from '../utils/mediaUrl';
 import { KoddaLogo } from './KoddaLogo';
 import ProductImageViewer from './ProductImageViewer';
+import FitRecommendation from './FitRecommendation';
 import { useCarrito } from '../context/CarritoContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -128,6 +129,8 @@ export default function ProductDetail() {
                   </div>
                 ) : null}
               </div>
+
+              <FitRecommendation productId={product.id} />
 
               <h3>Descripción</h3>
               <p className="kodda-product-detail-description">{product.description}</p>

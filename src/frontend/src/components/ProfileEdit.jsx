@@ -5,6 +5,31 @@ import { useAuth } from '../context/AuthContext';
 import { resolveMediaUrl } from '../utils/mediaUrl';
 import { KoddaLogo } from './KoddaLogo';
 
+const FIT_OPTIONS = [
+  { value: '', label: 'Sin preferencia' },
+  { value: 'ajustado', label: 'Ajustado / ceñido' },
+  { value: 'regular', label: 'Regular / al cuerpo' },
+  { value: 'holgado', label: 'Holgado / oversize' },
+];
+
+function FitPreferenceSelect({ id, value, onChange, describedBy }) {
+  return (
+    <select
+      id={id}
+      className="kodda-input kodda-profile-fit-pref-select"
+      value={value}
+      onChange={onChange}
+      aria-describedby={describedBy}
+    >
+      {FIT_OPTIONS.map((opt) => (
+        <option key={opt.value || 'none'} value={opt.value}>
+          {opt.label}
+        </option>
+      ))}
+    </select>
+  );
+}
+
 function numToInput(value) {
   if (value === null || value === undefined) return '';
   return String(value);
@@ -24,6 +49,10 @@ function buildPatchBody(form) {
   if (top) body.top_size = top;
   const bottom = form.bottomSize.trim();
   if (bottom) body.bottom_size = bottom;
+  if (form.topFitPreference) body.top_fit_preference = form.topFitPreference;
+  if (form.bottomFitPreference) body.bottom_fit_preference = form.bottomFitPreference;
+  if (form.shoeFitPreference) body.shoe_fit_preference = form.shoeFitPreference;
+  if (form.bodyType) body.body_type = form.bodyType;
 
   const w = form.weight.trim().replace(',', '.');
   if (w !== '') {
@@ -58,6 +87,10 @@ export default function ProfileEdit() {
   const [shoeSize, setShoeSize] = useState('');
   const [topSize, setTopSize] = useState('');
   const [bottomSize, setBottomSize] = useState('');
+  const [topFitPreference, setTopFitPreference] = useState('');
+  const [bottomFitPreference, setBottomFitPreference] = useState('');
+  const [shoeFitPreference, setShoeFitPreference] = useState('');
+  const [bodyType, setBodyType] = useState('');
 
   useEffect(() => {
     let cancelled = false;
@@ -73,6 +106,11 @@ export default function ProfileEdit() {
         setShoeSize(data.shoe_size || '');
         setTopSize(data.top_size || '');
         setBottomSize(data.bottom_size || '');
+        const legacyFit = data.fit_preference || '';
+        setTopFitPreference(data.top_fit_preference || legacyFit);
+        setBottomFitPreference(data.bottom_fit_preference || legacyFit);
+        setShoeFitPreference(data.shoe_fit_preference || legacyFit);
+        setBodyType(data.body_type || '');
         setAvatarPreview(resolveMediaUrl(data.profile_image_url, avatarVersion || undefined));
       } catch (err) {
         if (!cancelled) {
@@ -134,6 +172,10 @@ export default function ProfileEdit() {
         shoeSize,
         topSize,
         bottomSize,
+        topFitPreference,
+        bottomFitPreference,
+        shoeFitPreference,
+        bodyType,
       });
     } catch (validationErr) {
       setError(validationErr.message);
@@ -317,6 +359,78 @@ export default function ProfileEdit() {
                     placeholder="32"
                   />
                 </label>
+                <label className="kodda-field">
+                  <span>Contextura</span>
+                  <select
+                    className="kodda-input"
+                    value={bodyType}
+                    onChange={(e) => setBodyType(e.target.value)}
+                  >
+                    <option value="">Prefiero no decir</option>
+                    <option value="delgado">Delgada</option>
+                    <option value="promedio">Promedio</option>
+                    <option value="atletico">Atlética</option>
+                    <option value="robusto">Robusta</option>
+                  </select>
+                </label>
+              </div>
+
+              <div className="kodda-profile-fit-prefs">
+                <h3 className="kodda-profile-fit-prefs-title">¿Cómo te gusta que te quede?</h3>
+                <p className="kodda-profile-fit-prefs-desc" id="fit-prefs-help">
+                  Podés elegir un calce distinto para cada zona. Por ejemplo: remeras más ajustadas y pantalones
+                  más holgados.
+                </p>
+                <div className="kodda-profile-fit-prefs-grid">
+                  <div className="kodda-profile-fit-pref-row">
+                    <span className="kodda-profile-fit-pref-icon" aria-hidden="true">
+                      👕
+                    </span>
+                    <div className="kodda-profile-fit-pref-copy">
+                      <label htmlFor="top-fit-pref">Parte superior</label>
+                      <small>Remeras, camperas, vestidos…</small>
+                      <FitPreferenceSelect
+                        id="top-fit-pref"
+                        value={topFitPreference}
+                        onChange={(e) => setTopFitPreference(e.target.value)}
+                        describedBy="fit-prefs-help"
+                      />
+                    </div>
+                  </div>
+                  <div className="kodda-profile-fit-pref-row">
+                    <span className="kodda-profile-fit-pref-icon" aria-hidden="true">
+                      👖
+                    </span>
+                    <div className="kodda-profile-fit-pref-copy">
+                      <label htmlFor="bottom-fit-pref">Parte inferior</label>
+                      <small>Pantalones, jeans, shorts…</small>
+                      <FitPreferenceSelect
+                        id="bottom-fit-pref"
+                        value={bottomFitPreference}
+                        onChange={(e) => setBottomFitPreference(e.target.value)}
+                        describedBy="fit-prefs-help"
+                      />
+                    </div>
+                  </div>
+                  <div className="kodda-profile-fit-pref-row">
+                    <span className="kodda-profile-fit-pref-icon" aria-hidden="true">
+                      👟
+                    </span>
+                    <div className="kodda-profile-fit-pref-copy">
+                      <label htmlFor="shoe-fit-pref">Calzado</label>
+                      <small>Zapatillas, botas, sandalias…</small>
+                      <FitPreferenceSelect
+                        id="shoe-fit-pref"
+                        value={shoeFitPreference}
+                        onChange={(e) => setShoeFitPreference(e.target.value)}
+                        describedBy="fit-prefs-help"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="kodda-profile-edit-grid">
                 <label className="kodda-field kodda-profile-edit-grid-full">
                   <span>Dirección de envío</span>
                   <input
