@@ -35,6 +35,13 @@ class User(Base):
     top_size = Column(String(20), nullable=True)
     bottom_size = Column(String(20), nullable=True)
 
+    # AI Fit Predictor (US #7): preferencia de calce y contextura corporal
+    fit_preference = Column(String(20), nullable=True)  # fallback global (legacy)
+    top_fit_preference = Column(String(20), nullable=True)
+    bottom_fit_preference = Column(String(20), nullable=True)
+    shoe_fit_preference = Column(String(20), nullable=True)
+    body_type = Column(String(30), nullable=True)  # delgado | promedio | atletico | robusto
+
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(
         DateTime(timezone=True),

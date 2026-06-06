@@ -36,6 +36,29 @@ def apply_schema_patches(engine: Engine) -> None:
         conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS shoe_size VARCHAR(20)"))
         conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS top_size VARCHAR(20)"))
         conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS bottom_size VARCHAR(20)"))
+        conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS fit_preference VARCHAR(20)"))
+        conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS top_fit_preference VARCHAR(20)"))
+        conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS bottom_fit_preference VARCHAR(20)"))
+        conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS shoe_fit_preference VARCHAR(20)"))
+        conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS body_type VARCHAR(30)"))
+        conn.execute(
+            text(
+                "UPDATE users SET top_fit_preference = fit_preference "
+                "WHERE top_fit_preference IS NULL AND fit_preference IS NOT NULL"
+            )
+        )
+        conn.execute(
+            text(
+                "UPDATE users SET bottom_fit_preference = fit_preference "
+                "WHERE bottom_fit_preference IS NULL AND fit_preference IS NOT NULL"
+            )
+        )
+        conn.execute(
+            text(
+                "UPDATE users SET shoe_fit_preference = fit_preference "
+                "WHERE shoe_fit_preference IS NULL AND fit_preference IS NOT NULL"
+            )
+        )
         conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_flagged BOOLEAN DEFAULT FALSE"))
         conn.execute(
             text("ALTER TABLE users ADD COLUMN IF NOT EXISTS scam_report_count INTEGER DEFAULT 0")

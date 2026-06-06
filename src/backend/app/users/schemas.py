@@ -13,6 +13,40 @@ class UserRole(str, Enum):
     USER = "user"
 
 
+class FitPreference(str, Enum):
+    """Preferencia de calce del comprador (AI Fit Predictor)."""
+
+    AJUSTADO = "ajustado"
+    REGULAR = "regular"
+    HOLGADO = "holgado"
+
+
+def _normalize_fit_preference(value):
+    if value is None:
+        return None
+    text = str(value).strip().lower()
+    if text == "":
+        return None
+    aliases = {
+        "ajustado": "ajustado",
+        "ceñido": "ajustado",
+        "cenido": "ajustado",
+        "slim": "ajustado",
+        "tight": "ajustado",
+        "regular": "regular",
+        "normal": "regular",
+        "standard": "regular",
+        "estandar": "regular",
+        "holgado": "holgado",
+        "oversize": "holgado",
+        "suelto": "holgado",
+        "loose": "holgado",
+    }
+    if text not in aliases:
+        raise ValueError("Preferencia de calce inválida (usá: ajustado, regular u holgado)")
+    return aliases[text]
+
+
 class UserCreateDTO(BaseModel):
     """DTO para crear un nuevo usuario"""
 
@@ -22,6 +56,27 @@ class UserCreateDTO(BaseModel):
     weight: Optional[float] = Field(None, ge=0, description="Peso en kg")
     height: Optional[float] = Field(None, ge=0, description="Altura en cm")
     address: Optional[str] = Field(None, max_length=200, description="Dirección")
+    shoe_size: Optional[str] = Field(None, max_length=20, description="Talle de calzado")
+    top_size: Optional[str] = Field(None, max_length=20, description="Talle parte superior")
+    bottom_size: Optional[str] = Field(None, max_length=20, description="Talle parte inferior")
+    fit_preference: Optional[str] = Field(
+        None, max_length=20, description="Preferencia de calce global (fallback)"
+    )
+    top_fit_preference: Optional[str] = Field(None, max_length=20, description="Calce parte superior")
+    bottom_fit_preference: Optional[str] = Field(None, max_length=20, description="Calce parte inferior")
+    shoe_fit_preference: Optional[str] = Field(None, max_length=20, description="Calce calzado")
+    body_type: Optional[str] = Field(None, max_length=30, description="Contextura corporal")
+
+    @field_validator(
+        "fit_preference",
+        "top_fit_preference",
+        "bottom_fit_preference",
+        "shoe_fit_preference",
+        mode="before",
+    )
+    @classmethod
+    def validate_fit_preference(cls, value):
+        return _normalize_fit_preference(value)
 
 
 class UserUpdateDTO(BaseModel):
@@ -81,6 +136,11 @@ class UserDTO(BaseModel):
     shoe_size: Optional[str] = None
     top_size: Optional[str] = None
     bottom_size: Optional[str] = None
+    fit_preference: Optional[str] = None
+    top_fit_preference: Optional[str] = None
+    bottom_fit_preference: Optional[str] = None
+    shoe_fit_preference: Optional[str] = None
+    body_type: Optional[str] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
     email_verified_at: Optional[datetime] = None
@@ -105,6 +165,11 @@ class UserProfileDTO(BaseModel):
     shoe_size: Optional[str] = None
     top_size: Optional[str] = None
     bottom_size: Optional[str] = None
+    fit_preference: Optional[str] = None
+    top_fit_preference: Optional[str] = None
+    bottom_fit_preference: Optional[str] = None
+    shoe_fit_preference: Optional[str] = None
+    body_type: Optional[str] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
 
@@ -123,6 +188,22 @@ class UserProfileUpdateDTO(BaseModel):
     shoe_size: Optional[str] = Field(None, max_length=20)
     top_size: Optional[str] = Field(None, max_length=20)
     bottom_size: Optional[str] = Field(None, max_length=20)
+    fit_preference: Optional[str] = Field(None, max_length=20)
+    top_fit_preference: Optional[str] = Field(None, max_length=20)
+    bottom_fit_preference: Optional[str] = Field(None, max_length=20)
+    shoe_fit_preference: Optional[str] = Field(None, max_length=20)
+    body_type: Optional[str] = Field(None, max_length=30)
+
+    @field_validator(
+        "fit_preference",
+        "top_fit_preference",
+        "bottom_fit_preference",
+        "shoe_fit_preference",
+        mode="before",
+    )
+    @classmethod
+    def validate_fit_preference(cls, value):
+        return _normalize_fit_preference(value)
 
 
 class TaxCondition(str, Enum):
