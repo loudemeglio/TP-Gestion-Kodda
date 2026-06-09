@@ -12,6 +12,7 @@ import NotificationBell from './notifications/NotificationBell';
 import ProductFilters, { EMPTY_CATALOG_FILTERS } from './ProductFilters';
 import { useActiveCatalog } from '../hooks/useActiveCatalog';
 import ChatBot from './ChatBot';
+import PersonalRecommendationsSection from './PersonalRecommendationsSection';
 import { api } from '../api/client';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -229,6 +230,8 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
           categoryOptions={activeCategories}
           brandOptions={activeBrands}
         />
+
+        <PersonalRecommendationsSection />
 
         <div className="kodda-section-title">
           <h2>Prendas disponibles</h2>

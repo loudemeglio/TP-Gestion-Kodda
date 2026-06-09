@@ -22,6 +22,7 @@ from app.catalog.routes.public_catalog import router as public_catalog_router
 from app.metrics.routes import router as metrics_router
 from app.seller_analytics.routes import router as seller_stats_router
 from app.fit.routes.fit import router as fit_router
+from app.recommendations.routes import router as recommendations_router
 import app.products.models  # noqa: F401 — registra metadata antes de create_all
 import app.catalog.models  # noqa: F401 — registra metadata antes de create_all
 import app.cart.models  # noqa: F401 — registra metadata antes de create_all
@@ -80,6 +81,7 @@ app.include_router(public_catalog_router)
 app.include_router(metrics_router)
 app.include_router(seller_stats_router)
 app.include_router(fit_router)
+app.include_router(recommendations_router)
 
 
 @app.get("/")
