@@ -23,6 +23,7 @@ from app.metrics.routes import router as metrics_router
 from app.seller_analytics.routes import router as seller_stats_router
 from app.fit.routes.fit import router as fit_router
 from app.recommendations.routes import router as recommendations_router
+from app.likes.routes import router as likes_router
 import app.products.models  # noqa: F401 — registra metadata antes de create_all
 import app.catalog.models  # noqa: F401 — registra metadata antes de create_all
 import app.cart.models  # noqa: F401 — registra metadata antes de create_all
@@ -32,6 +33,7 @@ import app.payments.models  # noqa: F401 — registra metadata antes de create_a
 import app.ratings.models  # noqa: F401 — registra metadata antes de create_all
 import app.buyer_reviews.models  # noqa: F401 — registra metadata antes de create_all
 import app.notifications.models  # noqa: F401 — registra metadata antes de create_all
+import app.likes.models  # noqa: F401 — registra metadata antes de create_all
 import app.system_settings.models  # noqa: F401 — registra metadata antes de create_all
 
 # Los routers importan modelos SQLAlchemy → metadata registrada antes de create_all
@@ -81,6 +83,7 @@ app.include_router(public_catalog_router)
 app.include_router(metrics_router)
 app.include_router(seller_stats_router)
 app.include_router(fit_router)
+app.include_router(likes_router)
 app.include_router(recommendations_router)
 
 

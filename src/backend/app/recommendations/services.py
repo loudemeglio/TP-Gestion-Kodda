@@ -5,6 +5,7 @@ from sqlalchemy import and_
 from app.products.models import Product
 from app.orders.models import Order, OrderItem
 from app.users.models import User
+from app.likes.models import ProductLike
 from app.recommendations.schemas import (
     RecommendationProduct,
     PersonalRecommendationsResponse,
@@ -58,34 +59,67 @@ class RecommendationService:
         return product_ids, stats
 
     @staticmethod
+    def _get_likes_history(db: Session, user_id: int) -> dict:
+        """
+        Obtiene historial de likes del usuario.
+        Retorna: dict con categorías, marcas y talles de productos con like
+        """
+        likes = (
+            db.query(ProductLike, Product)
+            .join(Product, ProductLike.product_id == Product.id)
+            .filter(ProductLike.user_id == user_id)
+            .all()
+        )
+        
+        categories = []
+        brands = []
+        sizes = []
+
+        for like, product in likes:
+            categories.append(product.category)
+            if product.brand:
+                brands.append(product.brand)
+            sizes.append(product.size)
+
+        return {
+            "categories": Counter(categories),
+            "brands": Counter(brands),
+            "sizes": Counter(sizes),
+        }
+
+    @staticmethod
     def _calculate_relevance_score(
         product: Product,
         user_categories: Counter,
         user_brands: Counter,
         user_sizes: Counter,
+        like_categories: Counter,
+        like_brands: Counter,
+        like_sizes: Counter,
         user_top_size: str | None = None,
         user_bottom_size: str | None = None,
         user_shoe_size: str | None = None,
     ) -> tuple[int, str]:
         """
         Calcula score de relevancia (0-100) y razón.
+        Considera compras y likes.
         """
         score = 0
         reasons = []
 
-        # 1. Categorías similares (85 pts max)
-        if product.category in user_categories:
+        # 1. Categorías similares (85 pts max) - compras o likes
+        if product.category in user_categories or product.category in like_categories:
             score += 85
             reasons.append(
                 f"Similar a '{product.category}' que compraste"
             )
 
-        # 2. Marcas favoritas (80 pts)
-        if product.brand and product.brand in user_brands:
+        # 2. Marcas favoritas (80 pts) - compras o likes
+        if product.brand and (product.brand in user_brands or product.brand in like_brands):
             score += 80 if not reasons else 20
             reasons.append(f"De la marca {product.brand} que te gusta")
 
-        # 3. Talles usuales
+        # 3. Talles usuales - compras o likes
         if user_top_size and product.size == user_top_size:
             score += 75 if not reasons else 20
             reasons.append(f"En tu talle {product.size}")
@@ -129,6 +163,9 @@ class RecommendationService:
             db, user_id
         )
 
+        # Obtener historial de likes
+        likes_stats = RecommendationService._get_likes_history(db, user_id)
+
         # Obtener productos activos que no ha comprado
         query = db.query(Product).filter(
             Product.is_paused == False,
@@ -150,6 +187,9 @@ class RecommendationService:
                 purchase_stats["categories"],
                 purchase_stats["brands"],
                 purchase_stats["sizes"],
+                likes_stats["categories"],
+                likes_stats["brands"],
+                likes_stats["sizes"],
                 user_top_size=user.top_size,
                 user_bottom_size=user.bottom_size,
                 user_shoe_size=user.shoe_size,

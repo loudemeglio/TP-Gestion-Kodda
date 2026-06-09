@@ -239,6 +239,24 @@ export default function ProfileView() {
 
               <div className="kodda-profile-view-nav">
                 <Link
+                  to="/mis-likes"
+                  className="kodda-profile-view-nav-item"
+                  style={{ textDecoration: 'none', color: 'inherit' }}
+                >
+                  <span className="kodda-profile-view-nav-icon" aria-hidden="true">
+                    ❤️
+                  </span>
+                  <span className="kodda-profile-view-nav-text">
+                    <span className="kodda-profile-view-nav-title">Mis likes</span>
+                    <span className="kodda-profile-view-nav-desc">
+                      Todas las prendas que marcaste como favoritas
+                    </span>
+                  </span>
+                  <span className="kodda-profile-view-nav-chevron" aria-hidden="true">
+                    ›
+                  </span>
+                </Link>
+                <Link
                   to="/mis-compras"
                   className="kodda-profile-view-nav-item"
                   style={{ textDecoration: 'none', color: 'inherit' }}

@@ -35,6 +35,7 @@ import SaleOrderDetail from './components/orders/SaleOrderDetail';
 import BuyerPublicProfile from './components/profile/BuyerPublicProfile';
 import SellerPublicProfile from './components/profile/SellerPublicProfile';
 import BuyerOwnReputationProfile from './components/profile/BuyerOwnReputationProfile';
+import MyLikes from './components/MyLikes';
 import PayPage from './components/PayPage';
 
 function PrivateRoute({ children }) {
@@ -168,6 +169,14 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <MyOrders />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/mis-likes"
+        element={
+          <PrivateRoute>
+            <MyLikes />
           </PrivateRoute>
         }
       />
