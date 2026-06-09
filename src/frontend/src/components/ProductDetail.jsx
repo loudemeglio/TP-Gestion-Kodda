@@ -4,8 +4,10 @@ import { api } from '../api/client';
 import { resolveMediaUrl } from '../utils/mediaUrl';
 import { KoddaLogo } from './KoddaLogo';
 import ProductImageViewer from './ProductImageViewer';
+import FitRecommendation from './FitRecommendation';
 import { useCarrito } from '../context/CarritoContext';
 import { useAuth } from '../context/AuthContext';
+import '../styles/likeButton.css';
 
 export default function ProductDetail() {
   const { productId } = useParams();
@@ -15,6 +17,8 @@ export default function ProductDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeLoading, setLikeLoading] = useState(false);
 
   useEffect(() => {
     async function loadDetail() {
@@ -45,6 +49,18 @@ export default function ProductDetail() {
   function handleAddToCart() {
     if (product && hasStock) {
       agregarAlCarrito(product);
+    }
+  }
+
+  async function handleToggleLike() {
+    try {
+      setLikeLoading(true);
+      const { data } = await api.post(`/api/likes/toggle/${productId}`);
+      setIsLiked(data.liked);
+    } catch (err) {
+      console.error('Error al actualizar like:', err);
+    } finally {
+      setLikeLoading(false);
     }
   }
 
@@ -129,6 +145,8 @@ export default function ProductDetail() {
                 ) : null}
               </div>
 
+              <FitRecommendation productId={product.id} />
+
               <h3>Descripción</h3>
               <p className="kodda-product-detail-description">{product.description}</p>
 
@@ -139,15 +157,29 @@ export default function ProductDetail() {
                 </Link>
               </p>
 
-              <button
-                type="button"
-                className="kodda-btn-add-to-cart kodda-product-detail-cta"
-                onClick={handleAddToCart}
-                disabled={!hasStock}
-                title={!hasStock ? 'Sin stock disponible' : 'Agregar al carrito'}
-              >
-                {!hasStock ? 'Sin stock' : 'Agregar al carrito'}
-              </button>
+              <div style={{ display: 'flex', gap: '1rem', alignItems: 'stretch' }}>
+                <button
+                  type="button"
+                  className={`kodda-btn-like ${isLiked ? 'kodda-btn-like--liked' : 'kodda-btn-like--not-liked'}`}
+                  onClick={handleToggleLike}
+                  disabled={likeLoading}
+                  title={isLiked ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+                  aria-label={isLiked ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+                  style={{ flex: '0 0 auto', width: '50px', height: 'auto' }}
+                >
+                  {isLiked ? '❤️' : '♡'}
+                </button>
+                <button
+                  type="button"
+                  className="kodda-btn-add-to-cart kodda-product-detail-cta"
+                  onClick={handleAddToCart}
+                  disabled={!hasStock}
+                  title={!hasStock ? 'Sin stock disponible' : 'Agregar al carrito'}
+                  style={{ flex: 1 }}
+                >
+                  {!hasStock ? 'Sin stock' : 'Agregar al carrito'}
+                </button>
+              </div>
             </section>
           </article>
         ) : null}

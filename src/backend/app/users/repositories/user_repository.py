@@ -19,6 +19,14 @@ class UserRepository:
             weight=user_data.weight,
             height=user_data.height,
             address=user_data.address,
+            shoe_size=getattr(user_data, "shoe_size", None),
+            top_size=getattr(user_data, "top_size", None),
+            bottom_size=getattr(user_data, "bottom_size", None),
+            fit_preference=getattr(user_data, "fit_preference", None),
+            top_fit_preference=getattr(user_data, "top_fit_preference", None),
+            bottom_fit_preference=getattr(user_data, "bottom_fit_preference", None),
+            shoe_fit_preference=getattr(user_data, "shoe_fit_preference", None),
+            body_type=getattr(user_data, "body_type", None),
         )
         db.add(db_user)
         db.commit()
@@ -113,6 +121,16 @@ class UserRepository:
             db_user.top_size = data.top_size
         if data.bottom_size is not None:
             db_user.bottom_size = data.bottom_size
+        if data.fit_preference is not None:
+            db_user.fit_preference = data.fit_preference
+        if data.top_fit_preference is not None:
+            db_user.top_fit_preference = data.top_fit_preference
+        if data.bottom_fit_preference is not None:
+            db_user.bottom_fit_preference = data.bottom_fit_preference
+        if data.shoe_fit_preference is not None:
+            db_user.shoe_fit_preference = data.shoe_fit_preference
+        if data.body_type is not None:
+            db_user.body_type = data.body_type
 
         db.commit()
         db.refresh(db_user)

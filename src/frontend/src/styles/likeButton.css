@@ -1,0 +1,42 @@
+/* Botón de like en tarjetas */
+.kodda-btn-like {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.25rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  z-index: 5;
+}
+
+.kodda-btn-like:hover {
+  background: white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  transform: scale(1.1);
+}
+
+.kodda-btn-like:active {
+  transform: scale(0.95);
+}
+
+.kodda-btn-like--liked {
+  color: #d63031;
+}
+
+.kodda-btn-like--not-liked {
+  color: #999;
+}
+
+/* Posicionar el botón en tarjetas */
+.kodda-card-visual {
+  position: relative;
+}
