@@ -11,6 +11,7 @@ import { KoddaLogo } from './KoddaLogo';
 import NotificationBell from './notifications/NotificationBell';
 import ProductFilters, { EMPTY_CATALOG_FILTERS } from './ProductFilters';
 import { useActiveCatalog } from '../hooks/useActiveCatalog';
+import ChatBot from './ChatBot';
 import { api } from '../api/client';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -40,6 +41,7 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
   const { user, logout, avatarVersion } = useAuth();
   const { agregarAlCarrito, obtenerCantidadTotal } = useCarrito();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -153,7 +155,7 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
           <Link to="/publicar" className="kodda-btn-accent-outline">
             Vender prenda
           </Link>
-          <button type="button" className="kodda-btn-ghost" disabled title="Próximamente">
+          <button type="button" className="kodda-btn-ghost" onClick={() => setChatOpen(true)}>
             Chat Kodda
           </button>
           <NotificationBell />
@@ -367,6 +369,12 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
       </nav>
 
       <footer className="kodda-home-footer">Kodda — moda circular inteligente · Prototipo de producto</footer>
+
+      {chatOpen && (
+        <div className="kodda-chat-modal-overlay">
+          <ChatBot onClose={() => setChatOpen(false)} />
+        </div>
+      )}
     </div>
   );
 }

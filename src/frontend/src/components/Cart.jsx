@@ -4,12 +4,14 @@ import { useAuth } from '../context/AuthContext';
 import { useCarrito } from '../context/CarritoContext';
 import { resolveMediaUrl } from '../utils/mediaUrl';
 import { KoddaLogo } from './KoddaLogo';
+import ChatBot from './ChatBot';
 import '../styles/cart.css';
 
 export default function Cart() {
   const { user, logout } = useAuth();
   const { items, eliminarDelCarrito, incrementarCantidad, decrementarCantidad, obtenerTotal, vaciarCarrito } = useCarrito();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
   const initial = (user?.username || user?.email || '?').charAt(0).toUpperCase();
 
   const total = obtenerTotal();
@@ -39,7 +41,7 @@ export default function Cart() {
           <Link to="/publicar" className="kodda-btn-accent-outline">
             Vender prenda
           </Link>
-          <button type="button" className="kodda-btn-ghost" disabled title="Próximamente">
+          <button type="button" className="kodda-btn-ghost" onClick={() => setChatOpen(true)}>
             Chat Kodda
           </button>
           <Link to="/perfil" className="kodda-user-chip" title="Mi perfil">
@@ -154,6 +156,12 @@ export default function Cart() {
           )}
         </div>
       </main>
+
+      {chatOpen && (
+        <div className="kodda-chat-modal-overlay">
+          <ChatBot onClose={() => setChatOpen(false)} />
+        </div>
+      )}
     </div>
   );
 }
