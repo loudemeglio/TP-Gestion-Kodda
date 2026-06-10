@@ -1,8 +1,5 @@
-/* Botón de like en tarjetas */
+/* Botón de like */
 .kodda-btn-like {
-  position: absolute;
-  top: 12px;
-  left: 12px;
   background: rgba(255, 255, 255, 0.95);
   border: none;
   border-radius: 50%;
@@ -15,7 +12,6 @@
   font-size: 1.25rem;
   transition: all 0.2s ease;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  z-index: 5;
 }
 
 .kodda-btn-like:hover {
@@ -36,7 +32,29 @@
   color: #999;
 }
 
-/* Posicionar el botón en tarjetas */
-.kodda-card-visual {
-  position: relative;
+/* Posicionar el botón en tarjetas (esquina superior derecha) */
+.kodda-card-visual .kodda-btn-like {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 5;
+}
+
+/* Detalle: corazón al costado del título */
+.kodda-product-detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.kodda-product-detail-header h1 {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+.kodda-product-detail-header .kodda-btn-like {
+  flex-shrink: 0;
 }

@@ -39,32 +39,31 @@ function buildPatchBody(form) {
   const body = {};
   const username = form.username.trim();
   if (username) body.username = username;
-  const bio = form.bio.trim();
-  if (bio) body.bio = bio;
-  const address = form.address.trim();
-  if (address) body.address = address;
-  const shoe = form.shoeSize.trim();
-  if (shoe) body.shoe_size = shoe;
-  const top = form.topSize.trim();
-  if (top) body.top_size = top;
-  const bottom = form.bottomSize.trim();
-  if (bottom) body.bottom_size = bottom;
-  if (form.topFitPreference) body.top_fit_preference = form.topFitPreference;
-  if (form.bottomFitPreference) body.bottom_fit_preference = form.bottomFitPreference;
-  if (form.shoeFitPreference) body.shoe_fit_preference = form.shoeFitPreference;
-  if (form.bodyType) body.body_type = form.bodyType;
+  body.bio = form.bio.trim() || null;
+  body.address = form.address.trim() || null;
+  body.shoe_size = form.shoeSize.trim() || null;
+  body.top_size = form.topSize.trim() || null;
+  body.bottom_size = form.bottomSize.trim() || null;
+  body.top_fit_preference = form.topFitPreference || null;
+  body.bottom_fit_preference = form.bottomFitPreference || null;
+  body.shoe_fit_preference = form.shoeFitPreference || null;
+  body.body_type = form.bodyType || null;
 
   const w = form.weight.trim().replace(',', '.');
   if (w !== '') {
     const n = Number.parseFloat(w);
     if (Number.isNaN(n) || n < 0) throw new Error('Peso inválido.');
     body.weight = n;
+  } else {
+    body.weight = null;
   }
   const h = form.height.trim().replace(',', '.');
   if (h !== '') {
     const n = Number.parseFloat(h);
     if (Number.isNaN(n) || n < 0) throw new Error('Altura inválida.');
     body.height = n;
+  } else {
+    body.height = null;
   }
   return body;
 }
