@@ -105,31 +105,32 @@ class UserRepository:
         if not db_user:
             return None
 
-        if data.username is not None:
+        fields_set = data.model_fields_set
+        if "username" in fields_set and data.username is not None:
             db_user.username = data.username
-        if data.bio is not None:
+        if "bio" in fields_set:
             db_user.bio = data.bio
-        if data.weight is not None:
+        if "weight" in fields_set:
             db_user.weight = data.weight
-        if data.height is not None:
+        if "height" in fields_set:
             db_user.height = data.height
-        if data.address is not None:
+        if "address" in fields_set:
             db_user.address = data.address
-        if data.shoe_size is not None:
+        if "shoe_size" in fields_set:
             db_user.shoe_size = data.shoe_size
-        if data.top_size is not None:
+        if "top_size" in fields_set:
             db_user.top_size = data.top_size
-        if data.bottom_size is not None:
+        if "bottom_size" in fields_set:
             db_user.bottom_size = data.bottom_size
-        if data.fit_preference is not None:
+        if "fit_preference" in fields_set:
             db_user.fit_preference = data.fit_preference
-        if data.top_fit_preference is not None:
+        if "top_fit_preference" in fields_set:
             db_user.top_fit_preference = data.top_fit_preference
-        if data.bottom_fit_preference is not None:
+        if "bottom_fit_preference" in fields_set:
             db_user.bottom_fit_preference = data.bottom_fit_preference
-        if data.shoe_fit_preference is not None:
+        if "shoe_fit_preference" in fields_set:
             db_user.shoe_fit_preference = data.shoe_fit_preference
-        if data.body_type is not None:
+        if "body_type" in fields_set:
             db_user.body_type = data.body_type
 
         db.commit()

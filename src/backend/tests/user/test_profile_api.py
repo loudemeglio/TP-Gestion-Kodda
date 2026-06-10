@@ -56,6 +56,37 @@ def test_patch_my_profile_updates_fields(api_client, register_payload):
     assert data["bottom_size"] == "32"
 
 
+def test_patch_my_profile_clears_optional_fields(api_client, register_payload):
+    headers = _register_and_login(api_client, register_payload)
+    assert api_client.patch(
+        "/api/users/me/profile",
+        headers=headers,
+        json={
+            "weight": 70.5,
+            "height": 175,
+            "shoe_size": "42",
+            "bio": "Con medidas",
+        },
+    ).status_code == 200
+
+    r = api_client.patch(
+        "/api/users/me/profile",
+        headers=headers,
+        json={
+            "weight": None,
+            "height": None,
+            "shoe_size": None,
+            "bio": None,
+        },
+    )
+    assert r.status_code == 200
+    data = r.json()
+    assert data["weight"] is None
+    assert data["height"] is None
+    assert data["shoe_size"] is None
+    assert data["bio"] is None
+
+
 def test_patch_my_profile_duplicate_username(api_client, register_payload):
     other = {
         "username": "other_user",
