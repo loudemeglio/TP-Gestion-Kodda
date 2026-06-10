@@ -40,6 +40,21 @@ export default function ProductDetail() {
     }
   }, [productId]);
 
+  useEffect(() => {
+    if (!productId) return;
+
+    async function checkLikeStatus() {
+      try {
+        const { data } = await api.get(`/api/likes/product/${productId}/is-liked`);
+        setIsLiked(data.is_liked);
+      } catch (err) {
+        console.error('Error al verificar like:', err);
+      }
+    }
+
+    void checkLikeStatus();
+  }, [productId]);
+
   const imageSrc = resolveMediaUrl(product?.main_image_url);
   const hasStock = Number(product?.stock || 0) > 0;
   const cartCount = obtenerCantidadTotal();
@@ -52,7 +67,8 @@ export default function ProductDetail() {
     }
   }
 
-  async function handleToggleLike() {
+  async function handleToggleLike(e) {
+    e?.stopPropagation();
     try {
       setLikeLoading(true);
       const { data } = await api.post(`/api/likes/toggle/${productId}`);
@@ -116,7 +132,19 @@ export default function ProductDetail() {
 
             <section className="kodda-product-detail-info">
               <p className="kodda-product-detail-eyebrow">Detalle de prenda</p>
-              <h1>{product.name}</h1>
+              <div className="kodda-product-detail-header">
+                <h1>{product.name}</h1>
+                <button
+                  type="button"
+                  className={`kodda-btn-like ${isLiked ? 'kodda-btn-like--liked' : 'kodda-btn-like--not-liked'}`}
+                  onClick={handleToggleLike}
+                  disabled={likeLoading}
+                  title={isLiked ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+                  aria-label={isLiked ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+                >
+                  {isLiked ? '❤️' : '♡'}
+                </button>
+              </div>
               <div className="kodda-card-flags">
                 {product.brand ? <span className="kodda-card-flag">{product.brand}</span> : null}
                 <span className="kodda-card-flag">{product.category}</span>
@@ -157,29 +185,15 @@ export default function ProductDetail() {
                 </Link>
               </p>
 
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'stretch' }}>
-                <button
-                  type="button"
-                  className={`kodda-btn-like ${isLiked ? 'kodda-btn-like--liked' : 'kodda-btn-like--not-liked'}`}
-                  onClick={handleToggleLike}
-                  disabled={likeLoading}
-                  title={isLiked ? 'Quitar de favoritos' : 'Agregar a favoritos'}
-                  aria-label={isLiked ? 'Quitar de favoritos' : 'Agregar a favoritos'}
-                  style={{ flex: '0 0 auto', width: '50px', height: 'auto' }}
-                >
-                  {isLiked ? '❤️' : '♡'}
-                </button>
-                <button
-                  type="button"
-                  className="kodda-btn-add-to-cart kodda-product-detail-cta"
-                  onClick={handleAddToCart}
-                  disabled={!hasStock}
-                  title={!hasStock ? 'Sin stock disponible' : 'Agregar al carrito'}
-                  style={{ flex: 1 }}
-                >
-                  {!hasStock ? 'Sin stock' : 'Agregar al carrito'}
-                </button>
-              </div>
+              <button
+                type="button"
+                className="kodda-btn-add-to-cart kodda-product-detail-cta"
+                onClick={handleAddToCart}
+                disabled={!hasStock}
+                title={!hasStock ? 'Sin stock disponible' : 'Agregar al carrito'}
+              >
+                {!hasStock ? 'Sin stock' : 'Agregar al carrito'}
+              </button>
             </section>
           </article>
         ) : null}
