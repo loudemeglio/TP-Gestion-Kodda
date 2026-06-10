@@ -64,6 +64,41 @@ function formatProductsForContext(products) {
     .join('\n');
 }
 
+function renderAssistantMessage(text) {
+  const lines = text.split('\n');
+  const hasList = lines.some((line) => /^[\s]*[-•*]\s+/.test(line));
+
+  if (!hasList) {
+    return <p className="kodda-chat-message-text">{text}</p>;
+  }
+
+  return (
+    <div className="kodda-chat-message-text kodda-chat-message-text--formatted">
+      {lines.map((line, i) => {
+        const listMatch = line.match(/^[\s]*[-•*]\s+(.*)/);
+        if (listMatch) {
+          return (
+            <div key={i} className="kodda-chat-list-item">
+              <span className="kodda-chat-list-bullet" aria-hidden="true">
+                •
+              </span>
+              <span>{listMatch[1]}</span>
+            </div>
+          );
+        }
+        if (line.trim() === '') {
+          return <div key={i} className="kodda-chat-list-spacer" />;
+        }
+        return (
+          <p key={i} className="kodda-chat-message-paragraph">
+            {line}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
 async function buildChatPromptWithContext() {
   try {
     // Obtener datos reales del catálogo
@@ -115,6 +150,7 @@ REGLAS:
 ✓ "Encontramos X prendas de [categoría]..." - Datos concretos
 ✓ Recomendaciones de talle basadas en talles disponibles
 ✓ Si no hay en stock → "No tenemos disponible ahora"
+✓ Al sugerir productos, listalos uno por línea con guión (-) al inicio
 ✗ NO inventes productos/precios/vendedores
 ✗ NO des información general (solo lo que existe en BD)
 
@@ -301,7 +337,11 @@ Kodda:`;
               {msg.role === 'assistant' ? '🧠' : '👤'}
             </div>
             <div className="kodda-chat-message-content">
-              <p className="kodda-chat-message-text">{msg.text}</p>
+              {msg.role === 'assistant' ? (
+                renderAssistantMessage(msg.text)
+              ) : (
+                <p className="kodda-chat-message-text">{msg.text}</p>
+              )}
               <span className="kodda-chat-message-time">
                 {msg.timestamp.toLocaleTimeString('es-AR', {
                   hour: '2-digit',

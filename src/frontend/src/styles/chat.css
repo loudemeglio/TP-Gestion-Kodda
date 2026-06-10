@@ -152,6 +152,40 @@
   font-weight: 500;
 }
 
+.kodda-chat-message-text--formatted {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  white-space: pre-line;
+}
+
+.kodda-chat-message-paragraph {
+  margin: 0;
+}
+
+.kodda-chat-list-item {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--kd-line);
+}
+
+.kodda-chat-list-item:last-child {
+  border-bottom: none;
+}
+
+.kodda-chat-list-bullet {
+  flex-shrink: 0;
+  color: var(--kd-accent);
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.kodda-chat-list-spacer {
+  height: 0.25rem;
+}
+
 .kodda-chat-message-time {
   font-size: 0.7rem;
   color: var(--kd-mist);
