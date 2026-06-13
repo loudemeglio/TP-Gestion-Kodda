@@ -37,6 +37,8 @@ import SellerPublicProfile from './components/profile/SellerPublicProfile';
 import BuyerOwnReputationProfile from './components/profile/BuyerOwnReputationProfile';
 import MyLikes from './components/MyLikes';
 import PayPage from './components/PayPage';
+import AdminTicketsPanel from './components/admin/AdminTicketsPanel';
+import MyTickets from './components/support/MyTickets';
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
@@ -225,6 +227,14 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/mis-reclamos"
+        element={
+          <PrivateRoute>
+            <MyTickets />
+          </PrivateRoute>
+        }
+      />
+      <Route
         path="/admin"
         element={
           <PrivateRoute>
@@ -245,6 +255,7 @@ function AppRoutes() {
         />
         <Route path="roles" element={<AdminRolesPanel />} />
         <Route path="catalog" element={<AdminCatalogPanel />} />
+        <Route path="tickets" element={<AdminTicketsPanel />} />
       </Route>
       <Route
         path="/users"
