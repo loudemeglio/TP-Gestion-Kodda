@@ -407,3 +407,24 @@ def apply_schema_patches(engine: Engine) -> None:
                 ),
                 {"name": category_name},
             )
+
+        conn.execute(
+            text(
+                """
+                CREATE TABLE IF NOT EXISTS tickets (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    subject VARCHAR(200) NOT NULL,
+                    description TEXT NOT NULL,
+                    status VARCHAR(20) NOT NULL DEFAULT 'open',
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                )
+                """
+            )
+        )
+        conn.execute(
+            text(
+                "CREATE INDEX IF NOT EXISTS ix_tickets_user_id ON tickets (user_id)"
+            )
+        )

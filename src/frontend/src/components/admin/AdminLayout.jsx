@@ -135,6 +135,20 @@ export default function AdminLayout() {
               <small>Permisos y acceso</small>
             </span>
           </NavLink>
+          <NavLink
+            to="/admin/tickets"
+            className={({ isActive }) =>
+              `kodda-admin-navlink${isActive ? ' kodda-admin-navlink--active' : ''}`
+            }
+          >
+            <span className="kodda-admin-navlink-icon" aria-hidden="true">
+              TK
+            </span>
+            <span className="kodda-admin-navlink-copy">
+              <strong>Tickets / Reclamos</strong>
+              <small>Soporte y reclamos de usuarios</small>
+            </span>
+          </NavLink>
 
           <p className="kodda-admin-nav-eyebrow kodda-admin-nav-eyebrow--spaced">Prototipo</p>
           <NavLink
