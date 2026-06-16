@@ -155,10 +155,10 @@ class ProductRepository:
             Product.id == product_id,
             Product.seller_id == seller_id
         ).first()
-        
+
         if not product:
             return None
-        
+
         product.is_paused = True
         db.commit()
         db.refresh(product)
@@ -171,11 +171,46 @@ class ProductRepository:
             Product.id == product_id,
             Product.seller_id == seller_id
         ).first()
-        
+
         if not product:
             return None
-        
+
         product.is_paused = False
         db.commit()
         db.refresh(product)
         return product
+
+    @staticmethod
+    def admin_pause(db: Session, product_id: int, reason: str) -> Product:
+        """Pausar un producto como admin, con motivo obligatorio."""
+        product = db.query(Product).filter(Product.id == product_id).first()
+        if not product:
+            return None
+        product.is_paused = True
+        product.pause_reason = reason
+        db.commit()
+        db.refresh(product)
+        return product
+
+    @staticmethod
+    def admin_resume(db: Session, product_id: int) -> Product:
+        """Reanudar un producto como admin, limpiando el motivo."""
+        product = db.query(Product).filter(Product.id == product_id).first()
+        if not product:
+            return None
+        product.is_paused = False
+        product.pause_reason = None
+        db.commit()
+        db.refresh(product)
+        return product
+
+    @staticmethod
+    def get_all_paused(db: Session):
+        """Obtener todos los productos pausados para revisión de moderación."""
+        return (
+            db.query(Product)
+            .options(joinedload(Product.seller))
+            .filter(Product.is_paused == True)
+            .order_by(Product.updated_at.desc())
+            .all()
+        )

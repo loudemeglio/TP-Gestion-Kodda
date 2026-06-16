@@ -32,6 +32,7 @@ class ProductDTO(BaseModel):
     size: str
     main_image_url: Optional[str]
     is_paused: bool
+    pause_reason: Optional[str] = None
     seller_id: int
     seller_username: Optional[str] = None
     created_at: datetime

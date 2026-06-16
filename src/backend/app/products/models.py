@@ -22,6 +22,7 @@ class Product(Base):
     size = Column(String(20), nullable=False)
     main_image_url = Column(String, nullable=True)
     is_paused = Column(Boolean, default=False, nullable=False)
+    pause_reason = Column(String, nullable=True)
     seller_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
