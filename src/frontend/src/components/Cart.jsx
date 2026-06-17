@@ -20,10 +20,6 @@ export default function Cart() {
     <div className="kodda-home">
       <header className="kodda-topbar">
         <KoddaLogo compact />
-        <div className="kodda-search" title="Próximamente: búsqueda en lenguaje natural">
-          <span aria-hidden="true">🔍</span>
-          <input type="search" placeholder='Probá: "ropa para boda de día en noviembre"' disabled />
-        </div>
         <div className="kodda-topbar-spacer" />
         
         <button 

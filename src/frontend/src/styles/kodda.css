@@ -463,100 +463,6 @@ body {
   flex: 1;
 }
 
-.kodda-search {
-  display: flex;
-  flex: 1 1 100%;
-  order: 3;
-  min-width: 0;
-  max-width: none;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.85rem;
-  background: var(--kd-card);
-  border: 1px solid var(--kd-line);
-  border-radius: 999px;
-  color: var(--kd-mist);
-  font-size: 0.9rem;
-  box-shadow: var(--kd-shadow-sm);
-}
-
-@media (min-width: 768px) {
-  .kodda-search {
-    flex: 1;
-    order: 0;
-    min-width: 180px;
-    max-width: 420px;
-  }
-}
-
-.kodda-search-icon {
-  flex: 0 0 auto;
-  font-size: 0.95rem;
-  line-height: 1;
-}
-
-.kodda-search input {
-  flex: 1;
-  border: none;
-  background: transparent;
-  font: inherit;
-  min-width: 0;
-  color: var(--kd-ink);
-}
-
-.kodda-search input:focus {
-  outline: none;
-}
-
-.kodda-search-submit {
-  flex: 0 0 auto;
-  border: none;
-  border-radius: 999px;
-  padding: 0.35rem 0.75rem;
-  background: rgba(15, 118, 110, 0.12);
-  color: var(--kd-accent);
-  font-size: 0.78rem;
-  font-weight: 700;
-  font-family: inherit;
-  cursor: pointer;
-}
-
-.kodda-mobile-search {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  margin-bottom: 1rem;
-  padding: 0.55rem 0.75rem;
-  background: var(--kd-card);
-  border: 1px solid var(--kd-line);
-  border-radius: var(--kd-radius-sm);
-  box-shadow: var(--kd-shadow-sm);
-}
-
-@media (min-width: 768px) {
-  .kodda-mobile-search {
-    display: none;
-  }
-}
-
-.kodda-mobile-search input {
-  flex: 1;
-  min-width: 0;
-  border: none;
-  background: transparent;
-  font: inherit;
-  color: var(--kd-ink);
-}
-
-.kodda-mobile-search input:focus {
-  outline: none;
-}
-
-@media (max-width: 767px) {
-  .kodda-topbar .kodda-search {
-    display: none;
-  }
-}
 
 .kodda-hamburger {
   display: flex;
@@ -6311,3 +6217,93 @@ a.kodda-user-chip:hover {
     grid-template-columns: 1fr;
   }
 }
+
+/* ----- Búsqueda IA integrada ----- */
+.kodda-ai-search-form {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  max-width: 500px;
+}
+
+.kodda-ai-search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  background: var(--kd-card);
+  border: 1px solid var(--kd-line);
+  border-radius: var(--kd-radius-sm);
+  padding: 0.25rem 0.65rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.kodda-ai-search-input-wrapper:focus-within {
+  border-color: var(--kd-accent-mid);
+  box-shadow: 0 0 0 3px var(--kd-accent-glow);
+}
+
+.kodda-ai-search-sparkle {
+  margin-right: 0.35rem;
+  font-size: 0.95rem;
+}
+
+.kodda-ai-search-input {
+  border: none;
+  background: transparent;
+  width: 100%;
+  font-family: inherit;
+  font-size: 0.88rem;
+  color: var(--kd-ink);
+  outline: none;
+  padding: 0.35rem 0;
+}
+
+.kodda-ai-search-clear {
+  background: transparent;
+  border: none;
+  color: var(--kd-mist);
+  cursor: pointer;
+  padding: 0.25rem;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kodda-ai-search-clear:hover {
+  color: var(--kd-ink);
+}
+
+.kodda-ai-search-btn {
+  background: linear-gradient(135deg, var(--kd-accent) 0%, #0d9488 100%);
+  color: #fff;
+  border: none;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.55rem 1rem;
+  border-radius: var(--kd-radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 0.12s, filter 0.12s;
+}
+
+.kodda-ai-search-btn:hover:not(:disabled) {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+
+.kodda-ai-search-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* AI Filter Chip style */
+.kodda-filter-chip--ai {
+  background: linear-gradient(135deg, rgba(15, 118, 110, 0.12), rgba(20, 184, 166, 0.15)) !important;
+  color: var(--kd-accent) !important;
+  border: 1px solid rgba(15, 118, 110, 0.3) !important;
+  font-weight: 600;
+}
+

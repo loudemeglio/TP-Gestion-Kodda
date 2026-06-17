@@ -49,6 +49,9 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
   const [error, setError] = useState(null);
   const [filterDraft, setFilterDraft] = useState(EMPTY_CATALOG_FILTERS);
   const [appliedFilters, setAppliedFilters] = useState(EMPTY_CATALOG_FILTERS);
+  const [aiQuery, setAiQuery] = useState('');
+  const [appliedAiQuery, setAppliedAiQuery] = useState('');
+  const [isAiSearching, setIsAiSearching] = useState(false);
   const initial = (user?.username || user?.email || '?').charAt(0).toUpperCase();
   const avatarSrc = resolveMediaUrl(user?.profile_image_url, avatarVersion || undefined);
   const showAdminPreviewBar = allowAdminPreview && user?.role === 'admin';
@@ -79,10 +82,13 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
   }, []);
 
   useEffect(() => {
-    cargarProductos(appliedFilters);
-  }, [appliedFilters, cargarProductos]);
+    if (!appliedAiQuery) {
+      cargarProductos(appliedFilters);
+    }
+  }, [appliedFilters, appliedAiQuery, cargarProductos]);
 
   const handleApplyFilters = () => {
+    setAppliedAiQuery('');
     setAppliedFilters({ ...filterDraft });
   };
 
@@ -98,14 +104,115 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
     setFilterDraft(nextDraft);
   };
 
-  const handleSearchSubmit = (event) => {
-    event.preventDefault();
-    handleApplyFilters();
+  const handleAiSearch = async (event) => {
+    if (event) event.preventDefault();
+    if (!aiQuery.trim()) return;
+
+    setIsAiSearching(true);
+    setError(null);
+
+    try {
+      const { data: allProducts } = await api.get('/api/catalog/products?limit=200');
+
+      if (allProducts.length === 0) {
+        setProductos([]);
+        setAppliedAiQuery(aiQuery);
+        setIsAiSearching(false);
+        return;
+      }
+
+      const GEMINI_API_KEY = process.env.REACT_APP_GEMINI_API_KEY;
+      if (!GEMINI_API_KEY) {
+        throw new Error('La IA no está configurada. Falta la clave de API.');
+      }
+
+      const prompt = `Actúas como un motor de búsqueda semántico inteligente para la tienda de ropa Kodda en Argentina.
+Consulta del usuario: "${aiQuery}"
+
+Debes evaluar cuáles de las siguientes prendas disponibles corresponden con lo que el usuario está buscando (por ejemplo, por su deporte, uso, estilo, ocasión, descripción o tipo de prenda).
+Prendas disponibles en el catálogo:
+${JSON.stringify(allProducts.map(p => ({ id: p.id, name: p.name, description: p.description, category: p.category, brand: p.brand })))}
+
+Responde ÚNICAMENTE con un array JSON de números que representen los IDs de las prendas que coinciden (ej. [1, 3, 12]). Si ninguna coincide, responde con un array vacío: [].
+No agregues explicaciones, formato Markdown, ni bloques de código. El output debe ser directamente parseable por JSON.parse().`;
+
+      const body = {
+        contents: [{ parts: [{ text: prompt }] }]
+      };
+
+      const modelsToTry = [
+        'gemini-2.5-flash',
+        'gemini-2.5-flash-lite',
+        'gemini-2.0-flash-lite',
+        'gemini-flash-latest',
+        'gemini-3.5-flash',
+        'gemini-2.0-flash'
+      ];
+
+      let response = null;
+      let lastError = null;
+
+      for (const model of modelsToTry) {
+        try {
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+          });
+          
+          if (res.ok) {
+            response = res;
+            break;
+          } else {
+            const errorData = await res.json().catch(() => ({}));
+            const errMsg = errorData.error?.message || `HTTP ${res.status}`;
+            console.warn(`Model ${model} failed: ${errMsg}`);
+            lastError = new Error(errMsg);
+          }
+        } catch (err) {
+          console.warn(`Failed calling ${model}:`, err);
+          lastError = err;
+        }
+      }
+
+      if (!response) {
+        throw lastError || new Error('No se pudo conectar con ningún modelo de IA de búsqueda.');
+      }
+
+      const responseData = await response.json();
+      const rawText = responseData?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const cleanText = rawText.replace(/```json|```/g, '').trim();
+      
+      let matchedIds = [];
+      try {
+        matchedIds = JSON.parse(cleanText);
+      } catch (parseErr) {
+        console.error('Error parseando JSON de Gemini:', cleanText, parseErr);
+        throw new Error('La respuesta de la IA no pudo ser interpretada.');
+      }
+
+      if (Array.isArray(matchedIds)) {
+        const filtered = allProducts.filter(p => matchedIds.includes(p.id));
+        setProductos(filtered);
+      } else {
+        setProductos([]);
+      }
+      setAppliedAiQuery(aiQuery);
+    } catch (err) {
+      console.error('Error en búsqueda con IA:', err);
+      setError(err.message || 'Ocurrió un error al procesar la búsqueda con IA.');
+      setProductos([]);
+    } finally {
+      setIsAiSearching(false);
+    }
   };
 
-  const handleSearchChange = (value) => {
-    setFilterDraft((prev) => ({ ...prev, name: value }));
+  const handleClearAiSearch = () => {
+    setAiQuery('');
+    setAppliedAiQuery('');
   };
+
 
   return (
     <div className="kodda-home">
@@ -120,23 +227,6 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
 
       <header className="kodda-topbar">
         <KoddaLogo compact />
-        <form className="kodda-search" onSubmit={handleSearchSubmit} role="search">
-          <span className="kodda-search-icon" aria-hidden="true">
-            🔍
-          </span>
-          <input
-            type="search"
-            value={filterDraft.name}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            placeholder="Buscar por nombre de prenda…"
-            aria-label="Buscar prendas por nombre"
-          />
-          {filterDraft.name ? (
-            <button type="submit" className="kodda-search-submit" aria-label="Buscar">
-              Ir
-            </button>
-          ) : null}
-        </form>
         <div className="kodda-topbar-spacer" />
 
         <button
@@ -203,22 +293,6 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
           </div>
         </section>
 
-        <form className="kodda-mobile-search" onSubmit={handleSearchSubmit} role="search">
-          <span className="kodda-search-icon" aria-hidden="true">
-            🔍
-          </span>
-          <input
-            type="search"
-            value={filterDraft.name}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            placeholder="Buscar campera, jean, vestido…"
-            aria-label="Buscar prendas"
-          />
-          <button type="submit" className="kodda-btn-accent-outline kodda-btn-sm">
-            Buscar
-          </button>
-        </form>
-
         <ProductFilters
           values={filterDraft}
           appliedFilters={appliedFilters}
@@ -230,6 +304,12 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
           resultCount={loading ? null : productos.length}
           categoryOptions={activeCategories}
           brandOptions={activeBrands}
+          aiQuery={aiQuery}
+          onChangeAiQuery={setAiQuery}
+          onAiSearch={handleAiSearch}
+          onClearAiSearch={handleClearAiSearch}
+          isAiSearching={isAiSearching}
+          appliedAiQuery={appliedAiQuery}
         />
 
         <PersonalRecommendationsSection />
@@ -237,7 +317,7 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
         <div className="kodda-section-title">
           <h2>Prendas disponibles</h2>
           <span className="kodda-badge-ia">
-            {hasActiveCatalogFilters(appliedFilters) ? 'Filtrado' : 'Catálogo en vivo'}
+            {appliedAiQuery ? 'Búsqueda IA' : hasActiveCatalogFilters(appliedFilters) ? 'Filtrado' : 'Catálogo en vivo'}
           </span>
         </div>
 
@@ -250,9 +330,11 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
         ) : productos.length === 0 ? (
           <div className="kodda-catalog-empty">
             <p>
-              {hasActiveCatalogFilters(appliedFilters)
-                ? 'No hay prendas que coincidan con los filtros'
-                : 'No hay prendas disponibles por el momento'}
+              {appliedAiQuery
+                ? 'ninguna publicacion coincide con lo requerido'
+                : hasActiveCatalogFilters(appliedFilters)
+                  ? 'No hay prendas que coincidan con los filtros'
+                  : 'No hay prendas disponibles por el momento'}
             </p>
           </div>
         ) : (
