@@ -361,6 +361,24 @@ export default function ProfileView() {
                     ›
                   </span>
                 </Link>
+                <Link
+                  to="/mis-reclamos"
+                  className="kodda-profile-view-nav-item"
+                  style={{ textDecoration: 'none', color: 'inherit' }}
+                >
+                  <span className="kodda-profile-view-nav-icon" aria-hidden="true">
+                    🎫
+                  </span>
+                  <span className="kodda-profile-view-nav-text">
+                    <span className="kodda-profile-view-nav-title">Mis reclamos</span>
+                    <span className="kodda-profile-view-nav-desc">
+                      Enviá y seguí tus tickets de soporte
+                    </span>
+                  </span>
+                  <span className="kodda-profile-view-nav-chevron" aria-hidden="true">
+                    ›
+                  </span>
+                </Link>
               </div>
             </div>
           </>

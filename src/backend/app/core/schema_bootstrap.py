@@ -66,8 +66,15 @@ def apply_schema_patches(engine: Engine) -> None:
         conn.execute(
             text("ALTER TABLE users ADD COLUMN IF NOT EXISTS needs_review BOOLEAN DEFAULT FALSE")
         )
+        conn.execute(
+            text("ALTER TABLE users ADD COLUMN IF NOT EXISTS bad_review_count INTEGER DEFAULT 0")
+        )
 
         conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS is_paused BOOLEAN DEFAULT FALSE"))
+        conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS pause_reason TEXT"))
+        conn.execute(
+            text("ALTER TABLE products ADD COLUMN IF NOT EXISTS needs_review BOOLEAN DEFAULT FALSE")
+        )
         conn.execute(
             text("ALTER TABLE products ADD COLUMN IF NOT EXISTS size VARCHAR(20) DEFAULT 'Único'")
         )
@@ -307,6 +314,12 @@ def apply_schema_patches(engine: Engine) -> None:
                 "ON notifications (user_id)"
             )
         )
+        conn.execute(
+            text(
+                "ALTER TABLE notifications ADD COLUMN IF NOT EXISTS product_id "
+                "INTEGER REFERENCES products(id) ON DELETE CASCADE"
+            )
+        )
 
         conn.execute(
             text(
@@ -323,6 +336,24 @@ def apply_schema_patches(engine: Engine) -> None:
                 """
                 INSERT INTO system_settings (key, value)
                 VALUES ('max_scam_reports', 1)
+                ON CONFLICT (key) DO NOTHING
+            """
+            )
+        )
+        conn.execute(
+            text(
+                """
+                INSERT INTO system_settings (key, value)
+                VALUES ('min_bad_ratings', 2)
+                ON CONFLICT (key) DO NOTHING
+            """
+            )
+        )
+        conn.execute(
+            text(
+                """
+                INSERT INTO system_settings (key, value)
+                VALUES ('max_stars', 2)
                 ON CONFLICT (key) DO NOTHING
                 """
             )
@@ -407,3 +438,24 @@ def apply_schema_patches(engine: Engine) -> None:
                 ),
                 {"name": category_name},
             )
+
+        conn.execute(
+            text(
+                """
+                CREATE TABLE IF NOT EXISTS tickets (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    subject VARCHAR(200) NOT NULL,
+                    description TEXT NOT NULL,
+                    status VARCHAR(20) NOT NULL DEFAULT 'open',
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                )
+                """
+            )
+        )
+        conn.execute(
+            text(
+                "CREATE INDEX IF NOT EXISTS ix_tickets_user_id ON tickets (user_id)"
+            )
+        )

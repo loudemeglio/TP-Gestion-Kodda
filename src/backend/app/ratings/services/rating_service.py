@@ -6,6 +6,8 @@ from app.ratings.models import SellerRating, SellerReviewQueue
 from app.ratings.repositories.rating_repository import RatingRepository
 from app.users.repositories.user_repository import UserRepository
 from app.moderation.services.scam_moderation_service import ScamModerationService
+from app.moderation.services.bad_feedback_moderation_service import BadFeedbackModerationService
+from app.system_settings.repositories.system_setting_repository import SystemSettingRepository
 
 
 SCAM_REVIEW_THRESHOLD = 3
@@ -78,6 +80,15 @@ class RatingService:
                 db,
                 seller_id=seller_id,
                 scam_count=scam_count,
+            )
+
+        max_stars = SystemSettingRepository.get_int(db, "max_stars", default=2) or 2
+        if stars <= max_stars:
+            BadFeedbackModerationService.maybe_flag_products_and_notify_admins(
+                db,
+                order_id=order_id,
+                seller_id=seller_id,
+                stars=stars,
             )
 
         return created

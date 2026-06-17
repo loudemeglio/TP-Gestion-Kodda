@@ -198,3 +198,15 @@ class UserRepository:
         db.commit()
         db.refresh(db_user)
         return db_user
+
+    @staticmethod
+    def apply_bad_buyer_review(db: Session, buyer_id: int) -> User | None:
+        """Marca al comprador y suma una reseña negativa acumulada."""
+        db_user = UserRepository.get_by_id(db, buyer_id)
+        if not db_user:
+            return None
+        db_user.is_flagged = True
+        db_user.bad_review_count = (db_user.bad_review_count or 0) + 1
+        db.commit()
+        db.refresh(db_user)
+        return db_user

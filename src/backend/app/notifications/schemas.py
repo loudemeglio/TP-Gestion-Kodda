@@ -10,6 +10,7 @@ class NotificationDTO(BaseModel):
     message: str
     is_read: bool
     order_id: int | None
+    product_id: int | None = None
     created_at: datetime
 
     class Config:

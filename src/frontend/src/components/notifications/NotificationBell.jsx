@@ -52,15 +52,22 @@ export default function NotificationBell() {
     }
     setOpen(false);
     if (notif.order_id) {
-      // El título del comprador contiene "Compra" (¡Compra realizada!),
-      // el del vendedor contiene "confirmada" (Compra confirmada).
       const isBuyerNotif = notif.title.startsWith('¡Compra');
       navigate(isBuyerNotif ? `/mis-compras/${notif.order_id}` : `/mis-ventas/${notif.order_id}`);
-    } else if (
-      notif.title &&
-      notif.title.toLowerCase().includes('administrativa')
-    ) {
-      navigate('/admin/moderation');
+      return;
+    }
+
+    const title = (notif.title || '').toLowerCase();
+    if (title.includes('publicación') || title.includes('publicacion')) {
+      navigate('/admin/moderation?tab=review');
+      return;
+    }
+    if (title.includes('críticas') || title.includes('criticas') || title.includes('comprador')) {
+      navigate(title.includes('comprador') ? '/admin/moderation?tab=flagged' : '/admin/moderation?tab=review');
+      return;
+    }
+    if (title.includes('administrativa')) {
+      navigate('/admin/moderation?tab=flagged');
     }
   }
 

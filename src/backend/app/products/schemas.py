@@ -14,7 +14,7 @@ class ProductCreateDTO(BaseModel):
     brand_id: int = Field(..., gt=0, description="ID de marca activa del catálogo maestro")
     category_id: int = Field(..., gt=0, description="ID de categoría activa del catálogo maestro")
     size: str = Field(..., min_length=1, max_length=20, description="Talle de la prenda")
-    main_image_url: Optional[str] = Field(None, max_length=2000, description="URL de la imagen principal")
+    main_image_url: Optional[str] = Field(None, description="URL de la imagen principal o string base64")
 
 
 class ProductDTO(BaseModel):
@@ -32,6 +32,7 @@ class ProductDTO(BaseModel):
     size: str
     main_image_url: Optional[str]
     is_paused: bool
+    pause_reason: Optional[str] = None
     seller_id: int
     seller_username: Optional[str] = None
     created_at: datetime

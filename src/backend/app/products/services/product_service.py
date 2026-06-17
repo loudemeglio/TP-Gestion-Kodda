@@ -117,8 +117,14 @@ class ProductService:
 
     @staticmethod
     def resume_product(db: Session, product_id: int, seller_id: int) -> ProductDTO:
-        """Reanudar un producto. Solo el dueño puede reanudar."""
-        db_product = ProductRepository.resume(db, product_id, seller_id)
-        if not db_product:
+        """Reanudar un producto. Solo el dueño puede reanudar, excepto si fue pausado por moderación."""
+        product = ProductRepository.get_by_id(db, product_id)
+        if not product or product.seller_id != seller_id:
             raise ValueError("Producto no encontrado o no tienes permisos para reanudarlo")
+        if product.pause_reason:
+            raise PermissionError(
+                "Esta publicación fue pausada por un moderador. "
+                "Para solicitar su reactivación debés crear un ticket de soporte."
+            )
+        db_product = ProductRepository.resume(db, product_id, seller_id)
         return ProductService._to_dto(db_product)

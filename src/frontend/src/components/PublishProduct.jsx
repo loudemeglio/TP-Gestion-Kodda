@@ -79,6 +79,13 @@ export default function PublishProduct() {
   const [priceRationale, setPriceRationale] = useState('');
   const [priceFromSuggestion, setPriceFromSuggestion] = useState(false);
 
+  // Estados para modelo virtual
+  const [virtualModelFile, setVirtualModelFile] = useState(null);
+  const [generatingModel, setGeneratingModel] = useState(false);
+  const [virtualModelError, setVirtualModelError] = useState('');
+  const [virtualModelImageUrl, setVirtualModelImageUrl] = useState('');
+  const [virtualModelGenerated, setVirtualModelGenerated] = useState(false);
+
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -200,6 +207,65 @@ export default function PublishProduct() {
       setIaAnalysisDone(false);
     } finally {
       setAnalyzing(false);
+    }
+  }
+
+  function handleVirtualModelFileChange(file) {
+    setVirtualModelFile(file);
+    setVirtualModelImageUrl('');
+    setVirtualModelError('');
+    setVirtualModelGenerated(false);
+  }
+
+  async function handleGenerateVirtualModel() {
+    if (!virtualModelFile) return;
+    setGeneratingModel(true);
+    setVirtualModelError('');
+    setVirtualModelImageUrl('');
+    setVirtualModelGenerated(false);
+
+    try {
+      // Crear una descripción basada en los datos del formulario
+      const garmentDescription = name.trim() || 'una prenda';
+      const categoryInfo = categories.find((c) => String(c.id) === categoryId)?.name || '';
+      const fullDescription = categoryInfo ? `${categoryInfo}: ${garmentDescription}` : garmentDescription;
+
+      // Convertir imagen a base64
+      const imageBase64 = await fileToBase64(virtualModelFile);
+      const imageMimeType = virtualModelFile.type || 'image/jpeg';
+
+      // Enviar solicitud al backend para generar modelo
+      const response = await api.post(
+        '/api/virtual-models/generate',
+        {
+          garment_description: fullDescription,
+          garment_image_base64: imageBase64,
+          image_mime_type: imageMimeType,
+        },
+        { timeout: 180000 },
+      );
+
+      if (response.data?.model_image_url) {
+        setVirtualModelImageUrl(response.data.model_image_url);
+        setVirtualModelGenerated(true);
+      } else {
+        throw new Error('No se generó la imagen del modelo');
+      }
+    } catch (err) {
+      console.error('Error generando modelo virtual:', err);
+      const errorMessage = 
+        err.response?.data?.detail || 
+        'No se pudo generar el modelo virtual. Intenta de nuevo más tarde.';
+      setVirtualModelError(errorMessage);
+      setVirtualModelGenerated(false);
+    } finally {
+      setGeneratingModel(false);
+    }
+  }
+
+  function handleUseVirtualModelImage() {
+    if (virtualModelImageUrl) {
+      setMainImageUrl(virtualModelImageUrl);
     }
   }
 
@@ -375,6 +441,72 @@ export default function PublishProduct() {
                 {iaError ? <p className="kodda-auth-error">{iaError}</p> : null}
               </>
             ) : null}
+
+            {/* Sección de Modelo Virtual */}
+            <>
+              <hr style={{ margin: '1.5rem 0', opacity: 0.3 }} />
+              <label className="kodda-field">
+                <span>Generar modelo virtual con la prenda (opcional)</span>
+                <p style={{ fontSize: '0.85rem', color: '#666', margin: '0.5rem 0 0 0' }}>
+                  Subí una foto de tu prenda y la IA generará una imagen de un modelo vistiendo esa prenda exacta.
+                  Puede tardar hasta 2 minutos.
+                </p>
+                <input
+                  className="kodda-input"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleVirtualModelFileChange(e.target.files?.[0] || null)}
+                  style={{ marginTop: '0.5rem' }}
+                />
+              </label>
+
+              <button
+                type="button"
+                className="kodda-btn-accent-outline"
+                onClick={handleGenerateVirtualModel}
+                disabled={!virtualModelFile || generatingModel}
+                style={{ marginBottom: '1rem' }}
+              >
+                {generatingModel ? 'Generando modelo con IA…' : 'Generar modelo virtual'}
+              </button>
+
+              {virtualModelError ? (
+                <p className="kodda-auth-error">{virtualModelError}</p>
+              ) : null}
+
+              {virtualModelGenerated && virtualModelImageUrl ? (
+                <div className="kodda-model-preview" role="status" aria-live="polite" style={{ 
+                  marginBottom: '1rem',
+                  padding: '1rem',
+                  border: '2px solid #e0e0e0',
+                  borderRadius: '0.5rem',
+                  backgroundColor: '#f9f9f9'
+                }}>
+                  <p className="kodda-field" style={{ marginBottom: '0.5rem', fontWeight: 600 }}>
+                    ✓ Modelo virtual generado
+                  </p>
+                  <img 
+                    src={virtualModelImageUrl} 
+                    alt="Modelo virtual generado"
+                    style={{
+                      maxWidth: '100%',
+                      maxHeight: '400px',
+                      borderRadius: '0.5rem',
+                      marginBottom: '0.5rem',
+                      display: 'block'
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="kodda-btn-accent-outline"
+                    onClick={handleUseVirtualModelImage}
+                    style={{ width: '100%' }}
+                  >
+                    Usar esta imagen como foto principal
+                  </button>
+                </div>
+              ) : null}
+            </>
 
             <label className="kodda-field">
               <span>Nombre del producto</span>

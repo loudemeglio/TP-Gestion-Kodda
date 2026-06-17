@@ -6,6 +6,8 @@ from app.buyer_reviews.schemas import BuyerReputationDTO, BuyerReviewPublicDTO
 from app.orders.models import OrderStatus
 from app.orders.repositories.order_repository import OrderRepository
 from app.users.repositories.user_repository import UserRepository
+from app.moderation.services.buyer_review_moderation_service import BuyerReviewModerationService
+from app.system_settings.repositories.system_setting_repository import SystemSettingRepository
 
 
 class BuyerReviewService:
@@ -38,7 +40,7 @@ class BuyerReviewService:
         if len(comment) < 10:
             raise ValueError("El comentario debe tener al menos 10 caracteres.")
 
-        return BuyerReviewRepository.create(
+        created = BuyerReviewRepository.create(
             db,
             BuyerReview(
                 order_id=order_id,
@@ -48,6 +50,19 @@ class BuyerReviewService:
                 comment=comment,
             ),
         )
+
+        max_stars = SystemSettingRepository.get_int(db, "max_stars", default=2) or 2
+        if stars <= max_stars:
+            UserRepository.apply_bad_buyer_review(db, buyer_id)
+            buyer = UserRepository.get_by_id(db, buyer_id)
+            bad_count = buyer.bad_review_count if buyer else 0
+            BuyerReviewModerationService.maybe_flag_buyer_and_notify_admins(
+                db,
+                buyer_id=buyer_id,
+                bad_review_count=bad_count,
+            )
+
+        return created
 
     @staticmethod
     def buyer_already_rated(db: Session, order_id: int, seller_id: int) -> bool:
