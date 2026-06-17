@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { api } from '../../api/client';
 
 // ─── Star display ──────────────────────────────────────────────────────────
@@ -68,13 +69,30 @@ function EstadoChips({ value, onChange }) {
   );
 }
 
+function flagReasonLabel(reason) {
+  if (reason === 'estafa') return 'Reportes de estafa';
+  if (reason === 'reseñas_negativas') return 'Reseñas negativas';
+  if (reason === 'ambos') return 'Estafa y reseñas negativas';
+  return 'Revisión';
+}
+
 // ─── Main component ─────────────────────────────────────────────────────────
 export default function AdminModerationPanel() {
-  const [tab, setTab] = useState('config');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab') || 'config';
+  const [tab, setTab] = useState(initialTab);
 
   // Config
-  const [settings, setSettings] = useState({ max_scam_reports: 1 });
-  const [settingsDraft, setSettingsDraft] = useState(1);
+  const [settings, setSettings] = useState({
+    max_scam_reports: 1,
+    min_bad_ratings: 2,
+    max_stars: 2,
+  });
+  const [settingsDraft, setSettingsDraft] = useState({
+    max_scam_reports: 1,
+    min_bad_ratings: 2,
+    max_stars: 2,
+  });
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -85,7 +103,7 @@ export default function AdminModerationPanel() {
   const [resolvingId, setResolvingId] = useState(null);
 
   // Publicaciones en revisión (bad-feedback)
-  const [minBadRatings, setMinBadRatings] = useState(1);
+  const [minBadRatings, setMinBadRatings] = useState(2);
   const [maxStars, setMaxStars] = useState(2);
   const [estadoFilter, setEstadoFilter] = useState('all');
   const [reviewProducts, setReviewProducts] = useState([]);
@@ -116,7 +134,13 @@ export default function AdminModerationPanel() {
         api.get('/api/admin/flagged-users'),
       ]);
       setSettings(s);
-      setSettingsDraft(s.max_scam_reports || 1);
+      setSettingsDraft({
+        max_scam_reports: s.max_scam_reports || 1,
+        min_bad_ratings: s.min_bad_ratings || 2,
+        max_stars: s.max_stars || 2,
+      });
+      setMinBadRatings(s.min_bad_ratings || 2);
+      setMaxStars(s.max_stars || 2);
       setFlaggedUsers(f);
     } catch (err) {
       setError(err.response?.data?.detail || 'Error al cargar la moderación.');
@@ -157,23 +181,55 @@ export default function AdminModerationPanel() {
   useEffect(() => { void loadAll(); }, []);
 
   useEffect(() => {
+    const urlTab = searchParams.get('tab');
+    if (urlTab && urlTab !== tab) {
+      setTab(urlTab);
+    }
+  }, [searchParams, tab]);
+
+  function selectTab(nextTab) {
+    setTab(nextTab);
+    setSearchParams(nextTab === 'config' ? {} : { tab: nextTab });
+  }
+
+  useEffect(() => {
     if (tab === 'review') void loadReview();
     if (tab === 'paused') void loadPaused();
   }, [tab]);
 
   // ── Config ──────────────────────────────────────────────────────────────
   const canSave = useMemo(() => {
-    const v = Number(settingsDraft);
-    return Number.isFinite(v) && v >= 1 && v !== settings.max_scam_reports;
-  }, [settingsDraft, settings.max_scam_reports]);
+    const scam = Number(settingsDraft.max_scam_reports);
+    const minBad = Number(settingsDraft.min_bad_ratings);
+    const stars = Number(settingsDraft.max_stars);
+    if (!Number.isFinite(scam) || scam < 1) return false;
+    if (!Number.isFinite(minBad) || minBad < 1) return false;
+    if (!Number.isFinite(stars) || stars < 1 || stars > 5) return false;
+    return (
+      scam !== settings.max_scam_reports
+      || minBad !== settings.min_bad_ratings
+      || stars !== settings.max_stars
+    );
+  }, [settingsDraft, settings]);
 
   async function handleSave() {
     setSaving(true);
     setError('');
     try {
-      const { data } = await api.put('/api/admin/settings', { max_scam_reports: Number(settingsDraft) });
+      const payload = {
+        max_scam_reports: Number(settingsDraft.max_scam_reports),
+        min_bad_ratings: Number(settingsDraft.min_bad_ratings),
+        max_stars: Number(settingsDraft.max_stars),
+      };
+      const { data } = await api.put('/api/admin/settings', payload);
       setSettings(data);
-      setSettingsDraft(data.max_scam_reports || 1);
+      setSettingsDraft({
+        max_scam_reports: data.max_scam_reports || 1,
+        min_bad_ratings: data.min_bad_ratings || 2,
+        max_stars: data.max_stars || 2,
+      });
+      setMinBadRatings(data.min_bad_ratings || 2);
+      setMaxStars(data.max_stars || 2);
     } catch (err) {
       setError(err.response?.data?.detail || 'No se pudo guardar la configuración.');
     } finally {
@@ -266,6 +322,21 @@ export default function AdminModerationPanel() {
     }
   }
 
+  async function resolveProductReview(productId) {
+    setActionId(productId);
+    setReviewError('');
+    try {
+      const { data } = await api.put(`/api/admin/products/${productId}/resolve`);
+      setReviewProducts((prev) =>
+        prev.map((p) => (p.product_id === productId ? { ...p, needs_review: data.needs_review } : p)),
+      );
+    } catch (err) {
+      setReviewError(err.response?.data?.detail || 'No se pudo marcar como revisada.');
+    } finally {
+      setActionId(null);
+    }
+  }
+
   // ── Filtered review list ─────────────────────────────────────────────────
   const filteredReview = useMemo(() => {
     if (estadoFilter === 'active') return reviewProducts.filter((p) => !p.is_paused);
@@ -277,7 +348,7 @@ export default function AdminModerationPanel() {
   const tabs = [
     { key: 'config', label: 'Configuración' },
     { key: 'flagged', label: 'Usuarios en revisión', count: flaggedUsers.length || null },
-    { key: 'review', label: 'Publicaciones en revisión' },
+    { key: 'review', label: 'Publicaciones en revisión', count: reviewProducts.filter((p) => p.needs_review).length || null },
     { key: 'paused', label: 'Publicaciones pausadas', count: pausedProducts.length || null },
   ];
 
@@ -300,7 +371,7 @@ export default function AdminModerationPanel() {
             key={t.key}
             type="button"
             className={`kodda-admin-tab${tab === t.key ? ' kodda-admin-tab--active' : ''}`}
-            onClick={() => setTab(t.key)}
+            onClick={() => selectTab(t.key)}
           >
             {t.label}
             {t.count ? (
@@ -326,19 +397,49 @@ export default function AdminModerationPanel() {
           {settingsLoading
             ? <p className="kodda-auth-muted">Cargando configuración…</p>
             : (
-              <div className="kodda-auth-card" style={{ maxWidth: 480 }}>
-                <h3 style={{ marginTop: 0, fontSize: '1rem' }}>Límite de reportes de estafa</h3>
+              <div className="kodda-auth-card" style={{ maxWidth: 520 }}>
+                <h3 style={{ marginTop: 0, fontSize: '1rem' }}>Umbrales de alerta</h3>
                 <p className="kodda-auth-muted" style={{ marginTop: 0, fontSize: '0.88rem' }}>
-                  Cuando un vendedor acumula esta cantidad de reportes, queda bajo revisión administrativa.
+                  Definí cuándo el sistema avisa a los administradores por actividad inusual.
                 </p>
                 <label className="kodda-field">
-                  <span>Reportes para análisis</span>
+                  <span>Reportes de estafa para revisión</span>
                   <input
                     className="kodda-input"
                     type="number"
                     min={1}
-                    value={settingsDraft}
-                    onChange={(e) => setSettingsDraft(e.target.value)}
+                    value={settingsDraft.max_scam_reports}
+                    onChange={(e) => setSettingsDraft((prev) => ({
+                      ...prev,
+                      max_scam_reports: e.target.value,
+                    }))}
+                  />
+                </label>
+                <label className="kodda-field">
+                  <span>Críticas para alertar (publicaciones y perfiles)</span>
+                  <input
+                    className="kodda-input"
+                    type="number"
+                    min={1}
+                    value={settingsDraft.min_bad_ratings}
+                    onChange={(e) => setSettingsDraft((prev) => ({
+                      ...prev,
+                      min_bad_ratings: e.target.value,
+                    }))}
+                  />
+                </label>
+                <label className="kodda-field">
+                  <span>Estrellas máximas consideradas crítica</span>
+                  <input
+                    className="kodda-input"
+                    type="number"
+                    min={1}
+                    max={5}
+                    value={settingsDraft.max_stars}
+                    onChange={(e) => setSettingsDraft((prev) => ({
+                      ...prev,
+                      max_stars: e.target.value,
+                    }))}
                   />
                 </label>
                 <div style={{ marginTop: '1rem' }}>
@@ -368,7 +469,9 @@ export default function AdminModerationPanel() {
                   <thead>
                     <tr>
                       <th>Usuario</th>
+                      <th>Motivo</th>
                       <th style={{ textAlign: 'center' }}>Reportes</th>
+                      <th style={{ textAlign: 'center' }}>Críticas</th>
                       <th>Acciones</th>
                     </tr>
                   </thead>
@@ -379,6 +482,7 @@ export default function AdminModerationPanel() {
                           <strong>{u.username}</strong>
                           <div className="kodda-auth-muted" style={{ fontSize: '0.82rem' }}>{u.email}</div>
                         </td>
+                        <td>{flagReasonLabel(u.flag_reason)}</td>
                         <td style={{ textAlign: 'center' }}>
                           <span style={{
                             background: 'rgba(220,38,38,0.1)',
@@ -389,6 +493,18 @@ export default function AdminModerationPanel() {
                             fontWeight: 700,
                           }}>
                             {u.report_count}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: 'center' }}>
+                          <span style={{
+                            background: 'rgba(245,158,11,0.12)',
+                            color: '#b45309',
+                            borderRadius: '999px',
+                            padding: '0.15rem 0.55rem',
+                            fontSize: '0.82rem',
+                            fontWeight: 700,
+                          }}>
+                            {u.bad_review_count || 0}
                           </span>
                         </td>
                         <td>
@@ -406,7 +522,7 @@ export default function AdminModerationPanel() {
                     ))}
                     {flaggedUsers.length === 0 && (
                       <tr>
-                        <td colSpan={3} style={{ textAlign: 'center', padding: '2rem' }}>
+                        <td colSpan={5} style={{ textAlign: 'center', padding: '2rem' }}>
                           <span className="kodda-auth-muted">No hay usuarios en revisión.</span>
                         </td>
                       </tr>
@@ -499,6 +615,7 @@ export default function AdminModerationPanel() {
                       <th style={{ textAlign: 'center' }}>Valoraciones negativas</th>
                       <th style={{ textAlign: 'center' }}>Promedio</th>
                       <th style={{ textAlign: 'center' }}>Estado</th>
+                      <th style={{ textAlign: 'center' }}>Alerta</th>
                       <th>Acción</th>
                     </tr>
                   </thead>
@@ -531,7 +648,35 @@ export default function AdminModerationPanel() {
                         <td style={{ textAlign: 'center' }}>
                           <StatusBadge isPaused={p.is_paused} />
                         </td>
+                        <td style={{ textAlign: 'center' }}>
+                          {p.needs_review ? (
+                            <span style={{
+                              background: 'rgba(220,38,38,0.1)',
+                              color: '#dc2626',
+                              borderRadius: '999px',
+                              padding: '0.15rem 0.55rem',
+                              fontSize: '0.78rem',
+                              fontWeight: 700,
+                            }}>
+                              En revisión
+                            </span>
+                          ) : (
+                            <span className="kodda-auth-muted" style={{ fontSize: '0.78rem' }}>—</span>
+                          )}
+                        </td>
                         <td>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                          {p.needs_review ? (
+                            <button
+                              type="button"
+                              className="kodda-btn-ghost"
+                              style={{ fontSize: '0.78rem', padding: '0.3rem 0.75rem' }}
+                              disabled={actionId === p.product_id}
+                              onClick={() => resolveProductReview(p.product_id)}
+                            >
+                              {actionId === p.product_id ? '…' : 'Marcar revisada'}
+                            </button>
+                          ) : null}
                           {p.is_paused ? (
                             <button
                               type="button"
@@ -553,12 +698,13 @@ export default function AdminModerationPanel() {
                               ⏸ Pausar
                             </button>
                           )}
+                          </div>
                         </td>
                       </tr>
                     ))}
                     {filteredReview.length === 0 && (
                       <tr>
-                        <td colSpan={6} style={{ textAlign: 'center', padding: '2.5rem' }}>
+                        <td colSpan={7} style={{ textAlign: 'center', padding: '2.5rem' }}>
                           <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🔍</div>
                           <span className="kodda-auth-muted">
                             {reviewProducts.length === 0

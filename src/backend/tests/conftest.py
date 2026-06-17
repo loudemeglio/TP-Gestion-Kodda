@@ -88,6 +88,24 @@ def _truncate_user_tables(api_client):
                 """
             )
         )
+        conn.execute(
+            text(
+                """
+                INSERT INTO system_settings (key, value)
+                VALUES ('min_bad_ratings', 2)
+                ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value
+                """
+            )
+        )
+        conn.execute(
+            text(
+                """
+                INSERT INTO system_settings (key, value)
+                VALUES ('max_stars', 2)
+                ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value
+                """
+            )
+        )
     yield
 
 
