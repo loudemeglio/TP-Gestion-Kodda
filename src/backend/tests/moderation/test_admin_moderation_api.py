@@ -84,6 +84,7 @@ def test_admin_flagged_users_created_at_default_limit(api_client):
     seller_row = next(u for u in rows if u["username"] == "seller_mod")
     assert seller_row["report_count"] >= 1
     assert seller_row["needs_review"] is True
+    assert seller_row["flag_reason"] == "estafa"
 
     # Cada admin recibe una notificación interna
     n1 = api_client.get("/api/notifications", headers=admin_h).json()
@@ -105,7 +106,11 @@ def test_admin_flagged_users_respects_dynamic_limit(api_client):
     buyer_h = _register_and_token_admin(api_client, "buyer_limit", "buyer_limit@example.com")
 
     # Setear max_scam_reports=2
-    rset = api_client.put("/api/admin/settings", json={"max_scam_reports": 2}, headers=admin_h)
+    rset = api_client.put(
+        "/api/admin/settings",
+        json={"max_scam_reports": 2, "min_bad_ratings": 2, "max_stars": 2},
+        headers=admin_h,
+    )
     assert rset.status_code == 200
     assert rset.json()["max_scam_reports"] == 2
 
@@ -150,4 +155,123 @@ def test_admin_flagged_users_respects_dynamic_limit(api_client):
 
     flagged2 = api_client.get("/api/admin/flagged-users", headers=admin_h).json()
     assert any(u["username"] == "seller_limit" for u in flagged2)
+
+
+def _rate_seller(client, buyer_headers, order, seller_id, *, stars=2):
+    return client.post(
+        f"/api/ratings/orders/{order['id']}",
+        json={
+            "seller_id": seller_id,
+            "stars": stars,
+            "description": "Experiencia negativa con el producto recibido.",
+            "matches_description": False,
+            "delivered_on_time": False,
+            "is_scam_report": False,
+        },
+        headers=buyer_headers,
+    )
+
+
+def _rate_buyer(client, seller_headers, order_id, *, stars=1):
+    return client.post(
+        f"/api/buyer-reviews/orders/{order_id}",
+        json={
+            "stars": stars,
+            "comment": "Comprador problemático en esta transacción.",
+        },
+        headers=seller_headers,
+    )
+
+
+def test_admin_settings_include_bad_rating_thresholds(api_client):
+    admin_h = _register_and_token_admin(api_client, "admin_settings", "admin_settings@example.com")
+    _promote_to_admin("admin_settings")
+
+    settings = api_client.get("/api/admin/settings", headers=admin_h)
+    assert settings.status_code == 200
+    data = settings.json()
+    assert data["min_bad_ratings"] == 2
+    assert data["max_stars"] == 2
+
+
+def test_product_bad_feedback_notifies_admins_at_threshold(api_client):
+    admin_h = _register_and_token_admin(api_client, "admin_prod", "admin_prod@example.com")
+    _promote_to_admin("admin_prod")
+
+    seller_h = _register_and_token_admin(api_client, "seller_prod", "seller_prod@example.com")
+    buyer1_h = _register_and_token_admin(api_client, "buyer1_prod", "buyer1_prod@example.com")
+    buyer2_h = _register_and_token_admin(api_client, "buyer2_prod", "buyer2_prod@example.com")
+    buyer3_h = _register_and_token_admin(api_client, "buyer3_prod", "buyer3_prod@example.com")
+
+    product = _create_product(api_client, seller_h, stock=5)
+
+    _add_to_cart(api_client, buyer1_h, product["id"])
+    order1 = _checkout(api_client, buyer1_h)
+    r1 = _rate_seller(api_client, buyer1_h, order1, product["seller_id"])
+    assert r1.status_code == 201
+
+    notifs_after_one = api_client.get("/api/notifications", headers=admin_h).json()
+    assert not any("publicación" in n["title"].lower() for n in notifs_after_one)
+
+    _add_to_cart(api_client, buyer2_h, product["id"])
+    order2 = _checkout(api_client, buyer2_h)
+    r2 = _rate_seller(api_client, buyer2_h, order2, product["seller_id"])
+    assert r2.status_code == 201
+
+    notifs_after_two = api_client.get("/api/notifications", headers=admin_h).json()
+    product_alerts = [n for n in notifs_after_two if "publicación" in n["title"].lower()]
+    assert len(product_alerts) == 1
+    assert product["id"] == product_alerts[0]["product_id"]
+
+    bad_feedback = api_client.get(
+        "/api/admin/products/bad-feedback?min_bad_ratings=2&max_stars=2",
+        headers=admin_h,
+    )
+    assert bad_feedback.status_code == 200
+    rows = bad_feedback.json()
+    assert any(p["product_id"] == product["id"] and p["needs_review"] is True for p in rows)
+
+    _add_to_cart(api_client, buyer3_h, product["id"])
+    order3 = _checkout(api_client, buyer3_h)
+    r3 = _rate_seller(api_client, buyer3_h, order3, product["seller_id"])
+    assert r3.status_code == 201
+
+    notifs_after_three = api_client.get("/api/notifications", headers=admin_h).json()
+    product_alerts_after_three = [n for n in notifs_after_three if "publicación" in n["title"].lower()]
+    assert len(product_alerts_after_three) == 1
+
+
+def test_buyer_bad_reviews_notify_admins_at_threshold(api_client):
+    admin_h = _register_and_token_admin(api_client, "admin_buyer", "admin_buyer@example.com")
+    _promote_to_admin("admin_buyer")
+
+    seller1_h = _register_and_token_admin(api_client, "seller1_buyer", "seller1_buyer@example.com")
+    seller2_h = _register_and_token_admin(api_client, "seller2_buyer", "seller2_buyer@example.com")
+    buyer_h = _register_and_token_admin(api_client, "buyer_flag", "buyer_flag@example.com")
+
+    product1 = _create_product(api_client, seller1_h, name="Producto seller 1")
+    product2 = _create_product(api_client, seller2_h, name="Producto seller 2")
+
+    _add_to_cart(api_client, buyer_h, product1["id"])
+    order1 = _checkout(api_client, buyer_h)
+    r1 = _rate_buyer(api_client, seller1_h, order1["id"])
+    assert r1.status_code == 201
+
+    notifs_after_one = api_client.get("/api/notifications", headers=admin_h).json()
+    assert not any("comprador" in n["title"].lower() for n in notifs_after_one)
+
+    _add_to_cart(api_client, buyer_h, product2["id"])
+    order2 = _checkout(api_client, buyer_h)
+    r2 = _rate_buyer(api_client, seller2_h, order2["id"])
+    assert r2.status_code == 201
+
+    notifs_after_two = api_client.get("/api/notifications", headers=admin_h).json()
+    buyer_alerts = [n for n in notifs_after_two if "comprador" in n["title"].lower()]
+    assert len(buyer_alerts) == 1
+
+    flagged = api_client.get("/api/admin/flagged-users", headers=admin_h).json()
+    buyer_row = next(u for u in flagged if u["username"] == "buyer_flag")
+    assert buyer_row["bad_review_count"] >= 2
+    assert buyer_row["flag_reason"] == "reseñas_negativas"
+    assert buyer_row["needs_review"] is True
 
