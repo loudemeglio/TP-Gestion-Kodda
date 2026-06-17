@@ -195,11 +195,17 @@ def resume_product(
 ):
     """
     Reanudar un producto existente.
-    
-    Requiere usuario autenticado. Solo el dueño del producto puede reanudarlo.
+
+    Requiere usuario autenticado. Solo el dueño del producto puede reanudarlo,
+    a menos que haya sido pausado por moderación (requiere ticket de soporte).
     """
     try:
         return ProductService.resume_product(db, product_id, current_user.id)
+    except PermissionError as e:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=str(e),
+        )
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

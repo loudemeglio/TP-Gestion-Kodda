@@ -68,6 +68,7 @@ def apply_schema_patches(engine: Engine) -> None:
         )
 
         conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS is_paused BOOLEAN DEFAULT FALSE"))
+        conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS pause_reason TEXT"))
         conn.execute(
             text("ALTER TABLE products ADD COLUMN IF NOT EXISTS size VARCHAR(20) DEFAULT 'Único'")
         )

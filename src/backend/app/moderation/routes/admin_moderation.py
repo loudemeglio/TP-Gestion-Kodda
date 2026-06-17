@@ -3,7 +3,10 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, case
 
 from app.core.database import get_db
-from app.moderation.schemas import AdminSettingsDTO, FlaggedUserDTO, BadFeedbackProductDTO
+from app.moderation.schemas import AdminSettingsDTO, FlaggedUserDTO, BadFeedbackProductDTO, AdminPauseProductBody, PausedProductDTO
+from app.notifications.models import Notification
+from app.notifications.repositories.notification_repository import NotificationRepository
+from app.products.repositories.product_repository import ProductRepository
 from app.products.models import Product
 from app.orders.models import OrderItem
 from app.ratings.models import SellerRating
@@ -88,6 +91,99 @@ def resolve_flag(
             email=user.email,
             report_count=user.scam_report_count or 0,
             needs_review=bool(user.needs_review),
+        )
+    except LookupError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
+@router.get("/products/paused", response_model=list[PausedProductDTO])
+def list_paused_products(
+    _: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    try:
+        products = ProductRepository.get_all_paused(db)
+        return [
+            PausedProductDTO(
+                product_id=p.id,
+                product_name=p.name,
+                seller_id=p.seller_id,
+                seller_username=p.seller.username if p.seller else "",
+                category=p.category,
+                price=p.price,
+                pause_reason=p.pause_reason,
+                paused_at=p.updated_at,
+            )
+            for p in products
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
+@router.patch("/products/{product_id}/pause", response_model=PausedProductDTO)
+def admin_pause_product(
+    product_id: int,
+    body: AdminPauseProductBody,
+    _: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    try:
+        product = ProductRepository.admin_pause(db, product_id, body.reason)
+        if not product:
+            raise LookupError("Publicación no encontrada.")
+
+        NotificationRepository.create(
+            db,
+            Notification(
+                user_id=product.seller_id,
+                title="Tu publicación fue pausada por moderación",
+                message=(
+                    f"La publicación \"{product.name}\" fue pausada por un moderador. "
+                    f"Motivo: {body.reason}. "
+                    "Si considerás que esto es un error, podés crear un ticket de soporte desde Mis reclamos."
+                ),
+                is_read=False,
+            ),
+        )
+        db.commit()
+
+        return PausedProductDTO(
+            product_id=product.id,
+            product_name=product.name,
+            seller_id=product.seller_id,
+            seller_username=product.seller.username if product.seller else "",
+            category=product.category,
+            price=product.price,
+            pause_reason=product.pause_reason,
+            paused_at=product.updated_at,
+        )
+    except LookupError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
+@router.patch("/products/{product_id}/resume", response_model=PausedProductDTO)
+def admin_resume_product(
+    product_id: int,
+    _: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    try:
+        product = ProductRepository.admin_resume(db, product_id)
+        if not product:
+            raise LookupError("Publicación no encontrada.")
+        return PausedProductDTO(
+            product_id=product.id,
+            product_name=product.name,
+            seller_id=product.seller_id,
+            seller_username=product.seller.username if product.seller else "",
+            category=product.category,
+            price=product.price,
+            pause_reason=product.pause_reason,
+            paused_at=product.updated_at,
         )
     except LookupError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))

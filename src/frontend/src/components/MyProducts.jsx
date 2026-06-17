@@ -227,7 +227,9 @@ function ProductCard({ product, brands, categories, onEdit, onEditCancel, isEdit
           )}
           {product.is_paused && (
             <div className="kodda-product-paused-overlay">
-              <span className="kodda-product-paused-badge">⏸ Pausado</span>
+              <span className="kodda-product-paused-badge">
+                {product.pause_reason ? '🚫 Pausado por moderación' : '⏸ Pausado'}
+              </span>
             </div>
           )}
         </div>
@@ -242,6 +244,16 @@ function ProductCard({ product, brands, categories, onEdit, onEditCancel, isEdit
           </div>
 
           <p className="kodda-product-description">{product.description}</p>
+
+          {product.is_paused && product.pause_reason && (
+            <div className="kodda-moderation-notice">
+              <strong>Pausada por moderación</strong>
+              <p>{product.pause_reason}</p>
+              <Link to="/mis-reclamos" className="kodda-btn-accent-outline kodda-btn-sm">
+                Crear ticket de soporte
+              </Link>
+            </div>
+          )}
 
           <div className="kodda-product-info-grid">
             <div className="kodda-product-info-item">
@@ -274,14 +286,24 @@ function ProductCard({ product, brands, categories, onEdit, onEditCancel, isEdit
             >
               ✎ Editar
             </button>
-            <button
-              type="button"
-              className="kodda-btn-secondary"
-              onClick={handleTogglePause}
-              disabled={isPauseToggling}
-            >
-              {isPauseToggling ? '…' : product.is_paused ? '▶ Reanudar' : '⏸ Pausar'}
-            </button>
+            {product.is_paused && product.pause_reason ? (
+              <span
+                className="kodda-btn-secondary"
+                title="Pausada por moderación. Creá un ticket para solicitar la reactivación."
+                style={{ opacity: 0.5, cursor: 'not-allowed' }}
+              >
+                🚫 Pausado por moderación
+              </span>
+            ) : (
+              <button
+                type="button"
+                className="kodda-btn-secondary"
+                onClick={handleTogglePause}
+                disabled={isPauseToggling}
+              >
+                {isPauseToggling ? '…' : product.is_paused ? '▶ Reanudar' : '⏸ Pausar'}
+              </button>
+            )}
             <button
               type="button"
               className="kodda-btn-danger"
