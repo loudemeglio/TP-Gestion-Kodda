@@ -90,6 +90,12 @@ export default function ProductFilters({
   resultCount = null,
   categoryOptions = [],
   brandOptions = [],
+  aiQuery = '',
+  onChangeAiQuery,
+  onAiSearch,
+  onClearAiSearch,
+  isAiSearching = false,
+  appliedAiQuery = '',
 }) {
   const [open, setOpen] = useState(false);
   const filterFields = useMemo(
@@ -131,6 +137,37 @@ export default function ProductFilters({
           </span>
         </button>
 
+        <form onSubmit={onAiSearch} className="kodda-ai-search-form">
+          <div className="kodda-ai-search-input-wrapper">
+            <span className="kodda-ai-search-sparkle" aria-hidden="true">✨</span>
+            <input
+              type="text"
+              value={aiQuery}
+              onChange={(e) => onChangeAiQuery?.(e.target.value)}
+              placeholder="Buscar con IA (ej: ropa para jugar al fútbol)..."
+              disabled={isAiSearching}
+              className="kodda-ai-search-input"
+            />
+            {aiQuery && (
+              <button
+                type="button"
+                onClick={onClearAiSearch}
+                className="kodda-ai-search-clear"
+                title="Limpiar búsqueda IA"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+          <button
+            type="submit"
+            disabled={isAiSearching || !aiQuery.trim()}
+            className="kodda-ai-search-btn"
+          >
+            {isAiSearching ? 'Pensando...' : 'Buscar con IA'}
+          </button>
+        </form>
+
         {resultCount !== null && !loading ? (
           <span className="kodda-filters-results">
             {resultCount} {resultCount === 1 ? 'prenda' : 'prendas'}
@@ -138,8 +175,19 @@ export default function ProductFilters({
         ) : null}
       </div>
 
-      {activeChips.length > 0 ? (
+      {(activeChips.length > 0 || appliedAiQuery) ? (
         <div className="kodda-filter-chips" aria-label="Filtros activos">
+          {appliedAiQuery && (
+            <button
+              type="button"
+              className="kodda-filter-chip kodda-filter-chip--ai"
+              onClick={onClearAiSearch}
+              title="Quitar búsqueda IA"
+            >
+              <span>✨ IA: "{appliedAiQuery}"</span>
+              <span aria-hidden="true">×</span>
+            </button>
+          )}
           {activeChips.map((chip) => (
             <button
               key={chip.key}
@@ -152,7 +200,14 @@ export default function ProductFilters({
               <span aria-hidden="true">×</span>
             </button>
           ))}
-          <button type="button" className="kodda-filter-chip kodda-filter-chip--clear" onClick={onClear}>
+          <button
+            type="button"
+            className="kodda-filter-chip kodda-filter-chip--clear"
+            onClick={() => {
+              onClear();
+              onClearAiSearch?.();
+            }}
+          >
             Limpiar todo
           </button>
         </div>
