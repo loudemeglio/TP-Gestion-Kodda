@@ -33,9 +33,6 @@ export default function AdminLayout() {
           >
             Cambiar de cuenta
           </Link>
-          <button type="button" className="kodda-btn-ghost kodda-btn-ghost--on-dark" onClick={() => logout()}>
-            Salir
-          </button>
         </nav>
       </header>
 

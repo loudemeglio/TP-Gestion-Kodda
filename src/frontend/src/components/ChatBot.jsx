@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { api } from '../api/client';
+import { useAuth } from '../context/AuthContext';
 import '../styles/chat.css';
 
 const GEMINI_API_KEY = process.env.REACT_APP_GEMINI_API_KEY;
@@ -163,14 +164,20 @@ Si no hay datos → "No tenemos eso disponible". Conciso, amigable.`;
 }
 
 export default function ChatBot({ onClose }) {
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      role: 'assistant',
-      text: '¡Hola! Soy Kodda, tu asistente de moda circular. Puedo ayudarte a encontrar prendas, recomendarte talles, o contarte sobre vendedores. ¿En qué te puedo ayudar?',
-      timestamp: new Date(),
-    },
-  ]);
+  const { user } = useAuth();
+  const storageKey = user ? `kodda_chat_messages_${user.username || user.id}` : 'kodda_chat_messages_guest';
+  const openStorageKey = user ? `kodda_chat_open_${user.username || user.id}` : 'kodda_chat_open_guest';
+
+  const [isOpen, setIsOpen] = useState(() => {
+    try {
+      const saved = localStorage.getItem(openStorageKey);
+      return saved === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -182,16 +189,84 @@ export default function ChatBot({ onClose }) {
   };
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    if (isOpen) {
+      scrollToBottom();
+    }
+  }, [messages, isOpen]);
 
-  // Cargar prompt del sistema al montar el componente
+  // Cargar historial y prompt del sistema al montar el componente/cambiar de usuario
   useEffect(() => {
+    if (!user) return;
+    try {
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setMessages(
+          parsed.map((msg) => ({
+            ...msg,
+            timestamp: new Date(msg.timestamp),
+          }))
+        );
+      } else {
+        setMessages([
+          {
+            id: 1,
+            role: 'assistant',
+            text: '¡Hola! Soy Kodda, tu asistente de moda circular. Puedo ayudarte a encontrar prendas, recomendarte talles, o contarte sobre vendedores. ¿En qué te puedo ayudar?',
+            timestamp: new Date(),
+          },
+        ]);
+      }
+    } catch (e) {
+      console.warn('Error loading chat messages:', e);
+      setMessages([
+        {
+          id: 1,
+          role: 'assistant',
+          text: '¡Hola! Soy Kodda, tu asistente de moda circular. Puedo ayudarte a encontrar prendas, recomendarte talles, o contarte sobre vendedores. ¿En qué te puedo ayudar?',
+          timestamp: new Date(),
+        },
+      ]);
+    }
+
     (async () => {
       const prompt = await buildChatPromptWithContext();
       setSystemPrompt(prompt);
     })();
-  }, []);
+  }, [user, storageKey]);
+
+  // Guardar historial en localStorage
+  useEffect(() => {
+    if (messages.length > 0 && user) {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(messages));
+      } catch (e) {
+        console.warn('Error saving chat messages:', e);
+      }
+    }
+  }, [messages, user, storageKey]);
+
+  const handleToggleOpen = () => {
+    const nextOpen = !isOpen;
+    setIsOpen(nextOpen);
+    try {
+      localStorage.setItem(openStorageKey, String(nextOpen));
+    } catch (e) {
+      console.warn('Error saving chat open state:', e);
+    }
+  };
+
+  const handleClose = () => {
+    setIsOpen(false);
+    try {
+      localStorage.setItem(openStorageKey, 'false');
+    } catch (e) {
+      console.warn('Error saving chat open state:', e);
+    }
+    if (onClose) {
+      onClose();
+    }
+  };
 
   const handleSendMessage = async () => {
     if (!inputValue.trim() || !GEMINI_URL || !systemPrompt) {
@@ -311,101 +386,116 @@ Kodda:`;
   };
 
   return (
-    <div className="kodda-chat-container">
-      <div className="kodda-chat-header">
-        <div className="kodda-chat-title">
-          <h2>Chat Kodda</h2>
-          <p className="kodda-chat-subtitle">Tu asistente de moda circular</p>
-        </div>
-        <button
-          className="kodda-chat-close"
-          onClick={onClose}
-          aria-label="Cerrar chat"
-          title="Cerrar"
-        >
-          ✕
-        </button>
-      </div>
+    <>
+      {/* Botón Burbuja Flotante de Chat */}
+      <button
+        className={`kodda-chat-bubble-trigger ${isOpen ? 'open' : ''}`}
+        onClick={handleToggleOpen}
+        aria-label={isOpen ? 'Cerrar chat' : 'Abrir chat'}
+        title="Chat Kodda"
+      >
+        <span className="kodda-chat-bubble-icon">{isOpen ? '✕' : '💬'}</span>
+      </button>
 
-      <div className="kodda-chat-messages">
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`kodda-chat-message kodda-chat-message--${msg.role}`}
-          >
-            <div className="kodda-chat-message-avatar" aria-hidden="true">
-              {msg.role === 'assistant' ? '🧠' : '👤'}
+      {/* Ventana de Chat Flotante */}
+      {isOpen && (
+        <div className="kodda-chat-floating-widget">
+          <div className="kodda-chat-header">
+            <div className="kodda-chat-title">
+              <h2>Chat Kodda</h2>
+              <p className="kodda-chat-subtitle">Tu asistente de moda circular</p>
             </div>
-            <div className="kodda-chat-message-content">
-              {msg.role === 'assistant' ? (
-                renderAssistantMessage(msg.text)
-              ) : (
-                <p className="kodda-chat-message-text">{msg.text}</p>
-              )}
-              <span className="kodda-chat-message-time">
-                {msg.timestamp.toLocaleTimeString('es-AR', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </span>
-            </div>
+            <button
+              className="kodda-chat-close"
+              onClick={handleClose}
+              aria-label="Cerrar chat"
+              title="Cerrar"
+            >
+              ✕
+            </button>
           </div>
-        ))}
 
-        {loading && (
-          <div className="kodda-chat-message kodda-chat-message--assistant">
-            <div className="kodda-chat-message-avatar" aria-hidden="true">
-              🧠
-            </div>
-            <div className="kodda-chat-message-content">
-              <div className="kodda-chat-loading">
-                <span className="kodda-chat-dot"></span>
-                <span className="kodda-chat-dot"></span>
-                <span className="kodda-chat-dot"></span>
+          <div className="kodda-chat-messages">
+            {messages.map((msg) => (
+              <div
+                key={msg.id}
+                className={`kodda-chat-message kodda-chat-message--${msg.role}`}
+              >
+                <div className="kodda-chat-message-avatar" aria-hidden="true">
+                  {msg.role === 'assistant' ? '🧠' : '👤'}
+                </div>
+                <div className="kodda-chat-message-content">
+                  {msg.role === 'assistant' ? (
+                    renderAssistantMessage(msg.text)
+                  ) : (
+                    <p className="kodda-chat-message-text">{msg.text}</p>
+                  )}
+                  <span className="kodda-chat-message-time">
+                    {msg.timestamp.toLocaleTimeString('es-AR', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </span>
+                </div>
               </div>
+            ))}
+
+            {loading && (
+              <div className="kodda-chat-message kodda-chat-message--assistant">
+                <div className="kodda-chat-message-avatar" aria-hidden="true">
+                  🧠
+                </div>
+                <div className="kodda-chat-message-content">
+                  <div className="kodda-chat-loading">
+                    <span className="kodda-chat-dot"></span>
+                    <span className="kodda-chat-dot"></span>
+                    <span className="kodda-chat-dot"></span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {error && (
+              <div className="kodda-chat-error">
+                <p>{error}</p>
+              </div>
+            )}
+
+            <div ref={messagesEndRef} />
+          </div>
+
+          <div className="kodda-chat-footer">
+            <div className="kodda-chat-input-wrapper">
+              <textarea
+                className="kodda-chat-input"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder={
+                  !systemPrompt
+                    ? 'Cargando contexto de la plataforma…'
+                    : 'Preguntá sobre prendas, vendedores, talles…'
+                }
+                disabled={loading || !GEMINI_URL || !systemPrompt}
+                rows={2}
+              />
+              <button
+                className="kodda-chat-send"
+                onClick={handleSendMessage}
+                disabled={loading || !inputValue.trim() || !GEMINI_URL || !systemPrompt}
+                aria-label="Enviar mensaje"
+                title="Enviar (Enter)"
+              >
+                ✉️
+              </button>
             </div>
+            <p className="kodda-chat-hint">
+              Kodda puede ayudarte con búsquedas, recomendaciones de talle y
+              preguntas sobre vendedores.
+            </p>
           </div>
-        )}
-
-        {error && (
-          <div className="kodda-chat-error">
-            <p>{error}</p>
-          </div>
-        )}
-
-        <div ref={messagesEndRef} />
-      </div>
-
-      <div className="kodda-chat-footer">
-        <div className="kodda-chat-input-wrapper">
-          <textarea
-            className="kodda-chat-input"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder={
-              !systemPrompt
-                ? 'Cargando contexto de la plataforma…'
-                : 'Preguntá sobre prendas, vendedores, talles…'
-            }
-            disabled={loading || !GEMINI_URL || !systemPrompt}
-            rows={2}
-          />
-          <button
-            className="kodda-chat-send"
-            onClick={handleSendMessage}
-            disabled={loading || !inputValue.trim() || !GEMINI_URL || !systemPrompt}
-            aria-label="Enviar mensaje"
-            title="Enviar (Enter)"
-          >
-            ✉️
-          </button>
         </div>
-        <p className="kodda-chat-hint">
-          Kodda puede ayudarte con búsquedas, recomendaciones de talle y
-          preguntas sobre vendedores.
-        </p>
-      </div>
-    </div>
+      )}
+    </>
   );
 }

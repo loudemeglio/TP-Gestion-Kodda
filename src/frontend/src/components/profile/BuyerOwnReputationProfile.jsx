@@ -61,7 +61,7 @@ export default function BuyerOwnReputationProfile() {
         <Link to="/perfil" className="kodda-btn-ghost">
           Mi perfil
         </Link>
-        <Link to="/" className="kodda-btn-ghost">
+        <Link to="/explorador" className="kodda-btn-ghost">
           Inicio
         </Link>
       </header>

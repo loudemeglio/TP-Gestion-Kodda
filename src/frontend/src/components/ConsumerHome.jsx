@@ -11,7 +11,6 @@ import { KoddaLogo } from './KoddaLogo';
 import NotificationBell from './notifications/NotificationBell';
 import ProductFilters, { EMPTY_CATALOG_FILTERS } from './ProductFilters';
 import { useActiveCatalog } from '../hooks/useActiveCatalog';
-import ChatBot from './ChatBot';
 import PersonalRecommendationsSection from './PersonalRecommendationsSection';
 import ProductCard from './ProductCard';
 import { api } from '../api/client';
@@ -43,7 +42,6 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
   const { user, logout, avatarVersion } = useAuth();
   const { agregarAlCarrito, obtenerCantidadTotal } = useCarrito();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [chatOpen, setChatOpen] = useState(false);
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -247,9 +245,6 @@ No agregues explicaciones, formato Markdown, ni bloques de código. El output de
           <Link to="/publicar" className="kodda-btn-accent-outline">
             Vender prenda
           </Link>
-          <button type="button" className="kodda-btn-ghost" onClick={() => setChatOpen(true)}>
-            Chat Kodda
-          </button>
           <NotificationBell />
           <Link to="/carrito" className="kodda-cart-icon-link" title="Mi carrito">
             🛒
@@ -272,9 +267,6 @@ No agregues explicaciones, formato Markdown, ni bloques de código. El output de
           >
             Cambiar de cuenta
           </Link>
-          <button type="button" className="kodda-btn-ghost" onClick={() => logout()}>
-            Salir
-          </button>
         </nav>
       </header>
 
@@ -312,7 +304,9 @@ No agregues explicaciones, formato Markdown, ni bloques de código. El output de
           appliedAiQuery={appliedAiQuery}
         />
 
-        <PersonalRecommendationsSection />
+        {!hasActiveCatalogFilters(appliedFilters) && !appliedAiQuery && (
+          <PersonalRecommendationsSection />
+        )}
 
         <div className="kodda-section-title">
           <h2>Prendas disponibles</h2>
@@ -355,19 +349,6 @@ No agregues explicaciones, formato Markdown, ni bloques de código. El output de
           </Link>
         </div>
 
-        <section style={{ marginTop: '2rem' }}>
-          <div className="kodda-section-title">
-            <h2>Tu cuenta</h2>
-          </div>
-          <ul style={{ textAlign: 'left', lineHeight: 1.85, color: 'var(--kd-mist)', paddingLeft: '1.1rem' }}>
-            <li>
-              <strong style={{ color: 'var(--kd-ink-soft)' }}>Email:</strong> {user?.email}
-            </li>
-            <li>
-              <strong style={{ color: 'var(--kd-ink-soft)' }}>Rol:</strong> {user?.role}
-            </li>
-          </ul>
-        </section>
       </main>
 
       <nav className="kodda-mobile-bottom-nav" aria-label="Accesos rápidos">
@@ -391,12 +372,6 @@ No agregues explicaciones, formato Markdown, ni bloques de código. El output de
       </nav>
 
       <footer className="kodda-home-footer">Kodda — moda circular inteligente · Prototipo de producto</footer>
-
-      {chatOpen && (
-        <div className="kodda-chat-modal-overlay">
-          <ChatBot onClose={() => setChatOpen(false)} />
-        </div>
-      )}
     </div>
   );
 }

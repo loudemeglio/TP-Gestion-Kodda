@@ -127,9 +127,8 @@ export default function MyTickets() {
         <KoddaLogo compact />
         <div className="kodda-topbar-spacer" />
         <nav className="kodda-nav-actions" aria-label="Navegación">
-          <Link to="/" className="kodda-btn-ghost">Inicio</Link>
+          <Link to="/explorador" className="kodda-btn-ghost">Inicio</Link>
           <Link to="/perfil" className="kodda-btn-ghost">Mi perfil</Link>
-          <button type="button" className="kodda-btn-ghost" onClick={() => logout()}>Salir</button>
         </nav>
       </header>
 
