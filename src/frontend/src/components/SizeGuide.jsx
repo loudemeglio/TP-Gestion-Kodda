@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { KoddaLogo } from './KoddaLogo';
+import AppTopbar from './AppTopbar';
 
 const TOP_ROWS = [
   { size: 'XS', chest: '82 – 86', waist: '66 – 70' },
@@ -31,18 +31,14 @@ const SHOE_ROWS = [
 export default function SizeGuide() {
   return (
     <div className="kodda-home kodda-size-guide-page">
-      <header className="kodda-topbar">
-        <KoddaLogo compact />
-        <div className="kodda-topbar-spacer" />
-        <nav className="kodda-nav-actions" aria-label="Navegación">
-          <Link to="/" className="kodda-btn-ghost">
-            Volver al catálogo
-          </Link>
-          <Link to="/perfil/editar" className="kodda-btn-accent-outline">
-            Cargar mis medidas
-          </Link>
-        </nav>
-      </header>
+      <AppTopbar>
+        <Link to="/" className="kodda-btn-ghost">
+          Volver al catálogo
+        </Link>
+        <Link to="/perfil/editar" className="kodda-btn-accent-outline">
+          Cargar mis medidas
+        </Link>
+      </AppTopbar>
 
       <main className="kodda-size-guide-main">
         <header className="kodda-size-guide-hero">

@@ -2,8 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../../api/client';
 import { PAYMENT_METHOD_LABELS } from '../checkout/paymentMethods';
-import { KoddaLogo } from '../KoddaLogo';
-import NotificationBell from '../notifications/NotificationBell';
+import AppTopbar from '../AppTopbar';
 
 function formatOrderDate(value) {
   return new Intl.DateTimeFormat('es-AR', {
@@ -43,17 +42,11 @@ export default function MyOrders() {
 
   return (
     <div className="kodda-home kodda-account-history-page">
-      <header className="kodda-topbar">
-        <KoddaLogo compact />
-        <div className="kodda-topbar-spacer" />
-        <NotificationBell />
-        <Link to="/perfil" className="kodda-btn-ghost">
-          Mi perfil
-        </Link>
+      <AppTopbar showNotifications>
         <Link to="/explorador" className="kodda-btn-ghost">
           Inicio
         </Link>
-      </header>
+      </AppTopbar>
 
       <main className="kodda-account-history-layout">
         <header className="kodda-account-history-hero">

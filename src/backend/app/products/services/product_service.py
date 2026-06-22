@@ -5,6 +5,7 @@ from app.products.filters import ProductCatalogFilters
 from app.products.models import Product
 from app.products.repositories.product_repository import ProductRepository
 from app.products.schemas import ProductCreateDTO, ProductDTO
+from app.users.repositories.user_repository import UserRepository
 
 
 class ProductService:
@@ -62,6 +63,21 @@ class ProductService:
         products = ProductRepository.get_all_active_except_user(
             db, user_id, skip, limit, filters=filters
         )
+        return [ProductService._to_dto(product) for product in products]
+
+    @staticmethod
+    def get_active_products_by_seller(
+        db: Session,
+        seller_id: int,
+        skip: int = 0,
+        limit: int = 100,
+    ) -> list[ProductDTO]:
+        """Productos activos de un vendedor para su perfil público."""
+        seller = UserRepository.get_by_id(db, seller_id)
+        if not seller:
+            raise ValueError("Vendedor no encontrado")
+
+        products = ProductRepository.get_active_by_seller(db, seller_id, skip, limit)
         return [ProductService._to_dto(product) for product in products]
 
     @staticmethod

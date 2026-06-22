@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
-import { KoddaLogo } from '../KoddaLogo';
-import NotificationBell from '../notifications/NotificationBell';
+import AppTopbar from '../AppTopbar';
 
 // ── Componentes visuales ─────────────────────────────────────────────────────
 
@@ -54,17 +53,11 @@ export default function BuyerOwnReputationProfile() {
 
   return (
     <div className="kodda-home kodda-profile-edit-page">
-      <header className="kodda-topbar">
-        <KoddaLogo compact />
-        <div className="kodda-topbar-spacer" />
-        <NotificationBell />
-        <Link to="/perfil" className="kodda-btn-ghost">
-          Mi perfil
-        </Link>
+      <AppTopbar showNotifications>
         <Link to="/explorador" className="kodda-btn-ghost">
           Inicio
         </Link>
-      </header>
+      </AppTopbar>
 
       <main className="kodda-profile-edit-layout">
         {loading ? <p className="kodda-auth-muted">Cargando…</p> : null}

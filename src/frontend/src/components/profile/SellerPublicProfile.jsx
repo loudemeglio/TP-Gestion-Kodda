@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api } from '../../api/client';
-import { KoddaLogo } from '../KoddaLogo';
-import NotificationBell from '../notifications/NotificationBell';
+import AppTopbar from '../AppTopbar';
+import ProductCard from '../ProductCard';
 
 // ── Componentes visuales reutilizables ───────────────────────────────────────
 
@@ -82,12 +82,18 @@ function RateBar({ label, rate }) {
 export default function SellerPublicProfile() {
   const { sellerId } = useParams();
   const [profile, setProfile] = useState(null);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [productsLoading, setProductsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [productsError, setProductsError] = useState('');
 
   useEffect(() => {
     setLoading(true);
+    setProductsLoading(true);
     setError('');
+    setProductsError('');
+
     (async () => {
       try {
         const { data } = await api.get(`/api/ratings/sellers/${sellerId}/reputation`);
@@ -98,18 +104,30 @@ export default function SellerPublicProfile() {
         setLoading(false);
       }
     })();
+
+    (async () => {
+      try {
+        const { data } = await api.get(`/api/catalog/sellers/${sellerId}/products`, {
+          params: { limit: 60 },
+        });
+        setProducts(data);
+      } catch (err) {
+        setProductsError(
+          err.response?.data?.detail || 'No se pudieron cargar las publicaciones del vendedor.'
+        );
+      } finally {
+        setProductsLoading(false);
+      }
+    })();
   }, [sellerId]);
 
   return (
     <div className="kodda-home kodda-profile-edit-page">
-      <header className="kodda-topbar">
-        <KoddaLogo compact />
-        <div className="kodda-topbar-spacer" />
-        <NotificationBell />
+      <AppTopbar showNotifications>
         <Link to="/explorador" className="kodda-btn-ghost">
           Inicio
         </Link>
-      </header>
+      </AppTopbar>
 
       <main className="kodda-profile-edit-layout">
         {loading ? <p className="kodda-auth-muted">Cargando…</p> : null}
@@ -122,8 +140,10 @@ export default function SellerPublicProfile() {
               <p className="kodda-profile-edit-eyebrow">Perfil de vendedor</p>
               <h1 className="kodda-profile-edit-title">{profile.username}</h1>
               <div className="kodda-buyer-reputation-head">
-                <StarsDisplay average={profile.average_stars} />
-                <ReputationScoreBadge score={profile.reputation_score} />
+                <div className="kodda-buyer-reputation-metrics">
+                  <StarsDisplay average={profile.average_stars} />
+                  <ReputationScoreBadge score={profile.reputation_score} />
+                </div>
                 <p className="kodda-auth-muted">
                   {profile.review_count} calificación{profile.review_count === 1 ? '' : 'es'}
                 </p>
@@ -138,6 +158,31 @@ export default function SellerPublicProfile() {
                 <RateBar label="Envíos en tiempo acordado" rate={profile.shipping_rate} />
               </section>
             ) : null}
+
+            <section className="kodda-profile-edit-card">
+              <div className="kodda-section-title">
+                <h2 className="kodda-profile-edit-section-title">Publicaciones</h2>
+                {!productsLoading && !productsError ? (
+                  <span className="kodda-badge-ia">
+                    {products.length} {products.length === 1 ? 'prenda' : 'prendas'}
+                  </span>
+                ) : null}
+              </div>
+
+              {productsLoading ? (
+                <p className="kodda-auth-muted">Cargando publicaciones…</p>
+              ) : productsError ? (
+                <p className="kodda-auth-error">{productsError}</p>
+              ) : products.length === 0 ? (
+                <p className="kodda-auth-muted">Este vendedor no tiene prendas activas por el momento.</p>
+              ) : (
+                <div className="kodda-grid kodda-seller-profile-grid" role="list">
+                  {products.map((producto) => (
+                    <ProductCard key={producto.id} producto={producto} showSellerLink={false} />
+                  ))}
+                </div>
+              )}
+            </section>
 
             {/* Lista de calificaciones */}
             <section className="kodda-profile-edit-card">

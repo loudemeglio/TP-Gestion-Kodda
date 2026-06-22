@@ -1,14 +1,12 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCarrito } from '../context/CarritoContext';
-import { resolveMediaUrl } from '../utils/mediaUrl';
 import {
   buildCatalogQueryParams,
   clearCatalogFilter,
   hasActiveCatalogFilters,
 } from '../utils/productFilters';
-import { KoddaLogo } from './KoddaLogo';
-import NotificationBell from './notifications/NotificationBell';
+import AppTopbar from './AppTopbar';
 import ProductFilters, { EMPTY_CATALOG_FILTERS } from './ProductFilters';
 import { useActiveCatalog } from '../hooks/useActiveCatalog';
 import PersonalRecommendationsSection from './PersonalRecommendationsSection';
@@ -39,9 +37,8 @@ function CatalogSkeleton() {
  */
 export default function ConsumerHome({ allowAdminPreview = false }) {
   const navigate = useNavigate();
-  const { user, logout, avatarVersion } = useAuth();
+  const { user, logout } = useAuth();
   const { agregarAlCarrito, obtenerCantidadTotal } = useCarrito();
-  const [menuOpen, setMenuOpen] = useState(false);
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -50,8 +47,6 @@ export default function ConsumerHome({ allowAdminPreview = false }) {
   const [aiQuery, setAiQuery] = useState('');
   const [appliedAiQuery, setAppliedAiQuery] = useState('');
   const [isAiSearching, setIsAiSearching] = useState(false);
-  const initial = (user?.username || user?.email || '?').charAt(0).toUpperCase();
-  const avatarSrc = resolveMediaUrl(user?.profile_image_url, avatarVersion || undefined);
   const showAdminPreviewBar = allowAdminPreview && user?.role === 'admin';
   const cantidadCarrito = obtenerCantidadTotal();
   const { categories: activeCategories, brands: activeBrands } = useActiveCatalog();
@@ -223,43 +218,10 @@ No agregues explicaciones, formato Markdown, ni bloques de código. El output de
         </div>
       ) : null}
 
-      <header className="kodda-topbar">
-        <KoddaLogo compact />
-        <div className="kodda-topbar-spacer" />
-
-        <button
-          className="kodda-hamburger"
-          onClick={() => setMenuOpen(!menuOpen)}
-          aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
-          aria-expanded={menuOpen}
-        >
-          {menuOpen ? '✕' : '☰'}
-        </button>
-
-        <nav className={`kodda-nav-actions-collapsible ${menuOpen ? 'open' : ''}`} aria-label="Acciones principales">
-          {showAdminPreviewBar ? (
-            <Link to="/admin" className="kodda-btn-accent-outline" title="Ir al panel de administración">
-              Panel admin
-            </Link>
-          ) : null}
-          <Link to="/publicar" className="kodda-btn-accent-outline">
-            Vender prenda
-          </Link>
-          <NotificationBell />
-          <Link to="/carrito" className="kodda-cart-icon-link" title="Mi carrito">
-            🛒
-            {cantidadCarrito > 0 && <span className="kodda-cart-badge">{cantidadCarrito}</span>}
-          </Link>
-          <Link to="/perfil" className="kodda-user-chip" title="Mi perfil">
-            {avatarSrc ? (
-              <img key={avatarSrc} src={avatarSrc} alt="" className="kodda-avatar kodda-avatar-img" />
-            ) : (
-              <span className="kodda-avatar" aria-hidden="true">
-                {initial}
-              </span>
-            )}
-            <span>{user?.username || 'Usuario'}</span>
-          </Link>
+      <AppTopbar
+        collapsible
+        showNotifications
+        trailing={(
           <Link
             to="/login?cambiar=1"
             className="kodda-link-cuenta"
@@ -267,42 +229,50 @@ No agregues explicaciones, formato Markdown, ni bloques de código. El output de
           >
             Cambiar de cuenta
           </Link>
-        </nav>
-      </header>
+        )}
+      >
+        {showAdminPreviewBar ? (
+          <Link to="/admin" className="kodda-btn-accent-outline" title="Ir al panel de administración">
+            Panel admin
+          </Link>
+        ) : null}
+        <Link to="/publicar" className="kodda-btn-sell">
+          <span className="kodda-btn-sell-icon" aria-hidden="true">+</span>
+          Vender prenda
+        </Link>
+      </AppTopbar>
 
       <main className="kodda-home-main">
-        <section className="kodda-catalog-hero">
-          <div>
-            <p className="kodda-hello">Hola, {user?.username || 'explorador'}</p>
-            <p className="kodda-hello-sub">
-              Descubrí moda circular con fotos reales, filtros por talle y disponibilidad al instante.
-            </p>
-          </div>
-          <div className="kodda-catalog-hero-tags" aria-hidden="true">
-            <span>Segunda mano</span>
-            <span>Con stock en vivo</span>
-            <span>Envío seguro</span>
-          </div>
-        </section>
+        <div className="kodda-catalog-intro">
+          <header className="kodda-catalog-hero">
+            <div className="kodda-catalog-hero-copy">
+              <p className="kodda-catalog-hero-eyebrow">Tu placard inteligente</p>
+              <h1 className="kodda-hello">Hola, {user?.username || 'explorador'}</h1>
+              <p className="kodda-hello-sub">
+                Descubrí moda circular con fotos reales, filtros por talle y disponibilidad al instante.
+              </p>
+            </div>
+          </header>
 
-        <ProductFilters
-          values={filterDraft}
-          appliedFilters={appliedFilters}
-          onChange={setFilterDraft}
-          onApply={handleApplyFilters}
-          onClear={handleClearFilters}
-          onRemoveFilter={handleRemoveFilter}
-          loading={loading}
-          resultCount={loading ? null : productos.length}
-          categoryOptions={activeCategories}
-          brandOptions={activeBrands}
-          aiQuery={aiQuery}
-          onChangeAiQuery={setAiQuery}
-          onAiSearch={handleAiSearch}
-          onClearAiSearch={handleClearAiSearch}
-          isAiSearching={isAiSearching}
-          appliedAiQuery={appliedAiQuery}
-        />
+          <ProductFilters
+            values={filterDraft}
+            appliedFilters={appliedFilters}
+            onChange={setFilterDraft}
+            onApply={handleApplyFilters}
+            onClear={handleClearFilters}
+            onRemoveFilter={handleRemoveFilter}
+            loading={loading}
+            resultCount={loading ? null : productos.length}
+            categoryOptions={activeCategories}
+            brandOptions={activeBrands}
+            aiQuery={aiQuery}
+            onChangeAiQuery={setAiQuery}
+            onAiSearch={handleAiSearch}
+            onClearAiSearch={handleClearAiSearch}
+            isAiSearching={isAiSearching}
+            appliedAiQuery={appliedAiQuery}
+          />
+        </div>
 
         {!hasActiveCatalogFilters(appliedFilters) && !appliedAiQuery && (
           <PersonalRecommendationsSection />

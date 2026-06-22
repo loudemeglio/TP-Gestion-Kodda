@@ -1,6 +1,5 @@
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
-import { KoddaLogo } from '../KoddaLogo';
-import NotificationBell from '../notifications/NotificationBell';
+import AppTopbar from '../AppTopbar';
 
 function salesTabClass({ isActive }) {
   return `kodda-my-sales-tab${isActive ? ' kodda-my-sales-tab--active' : ''}`;
@@ -15,17 +14,11 @@ export default function MySalesLayout() {
 
   return (
     <div className="kodda-home kodda-account-history-page kodda-my-sales-page">
-      <header className="kodda-topbar">
-        <KoddaLogo compact />
-        <div className="kodda-topbar-spacer" />
-        <NotificationBell />
-        <Link to="/perfil" className="kodda-btn-ghost">
-          Mi perfil
-        </Link>
+      <AppTopbar showNotifications>
         <Link to="/explorador" className="kodda-btn-ghost">
           Inicio
         </Link>
-      </header>
+      </AppTopbar>
 
       <main className={layoutClass}>
         <header className="kodda-account-history-hero kodda-my-sales-header">

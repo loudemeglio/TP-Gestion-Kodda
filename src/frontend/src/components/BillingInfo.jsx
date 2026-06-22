@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import BillingForm from './billing/BillingForm';
 import BillingView from './billing/BillingView';
-import { KoddaLogo } from './KoddaLogo';
+import AppTopbar from './AppTopbar';
 import { useAuth } from '../context/AuthContext';
 import { useBilling } from '../hooks/useBilling';
 
@@ -41,15 +41,7 @@ export default function BillingInfo() {
 
   return (
     <div className="kodda-home kodda-profile-edit-page">
-      <header className="kodda-topbar">
-        <KoddaLogo compact />
-        <div className="kodda-topbar-spacer" />
-        <nav className="kodda-nav-actions" aria-label="Navegación">
-          <Link to="/perfil" className="kodda-btn-ghost">
-            Mi perfil
-          </Link>
-        </nav>
-      </header>
+      <AppTopbar />
 
       <main className="kodda-profile-edit-layout">
         <header className="kodda-profile-edit-hero">

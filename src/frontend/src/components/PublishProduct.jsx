@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { KoddaLogo } from './KoddaLogo';
+import AppTopbar from './AppTopbar';
 import { api } from '../api/client';
 import { findBrandIdByName, findCategoryIdByName, useActiveCatalog } from '../hooks/useActiveCatalog';
 
@@ -380,6 +381,11 @@ export default function PublishProduct() {
 
   return (
     <div className="kodda-home">
+      <AppTopbar>
+        <Link to="/explorador" className="kodda-btn-ghost">
+          Volver al catálogo
+        </Link>
+      </AppTopbar>
       <div className="kodda-auth-root" style={{ minHeight: 'auto', flex: 1 }}>
       <aside className="kodda-auth-brand" aria-hidden="false">
         <div className="kodda-auth-brand-inner">

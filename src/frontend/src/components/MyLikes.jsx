@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client';
+import AppTopbar from './AppTopbar';
 import ProductCard from './ProductCard';
 
 function MyLikesSkeleton() {
@@ -50,7 +51,13 @@ export default function MyLikes() {
   }, []);
 
   return (
-    <main className="kodda-home-main">
+    <div className="kodda-home">
+      <AppTopbar>
+        <Link to="/explorador" className="kodda-btn-ghost">
+          Volver al catálogo
+        </Link>
+      </AppTopbar>
+      <main className="kodda-home-main">
       <section className="kodda-catalog-hero">
         <div>
           <p className="kodda-hello">Mis prendas con like ❤️</p>
@@ -87,6 +94,7 @@ export default function MyLikes() {
           ))}
         </div>
       )}
-    </main>
+      </main>
+    </div>
   );
 }

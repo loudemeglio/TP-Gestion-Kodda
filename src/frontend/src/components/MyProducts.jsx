@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client';
 import { formatApiError } from '../utils/apiError';
-import { KoddaLogo } from './KoddaLogo';
+import AppTopbar from './AppTopbar';
 import { findBrandIdByName, findCategoryIdByName, useActiveCatalog } from '../hooks/useActiveCatalog';
 import '../styles/my-products.css';
 
@@ -236,11 +236,14 @@ function ProductCard({ product, brands, categories, onEdit, onEditCancel, isEdit
 
         <div className="kodda-product-card-content">
           <div className="kodda-product-card-header">
-            <h3>{product.name}</h3>
             <div className="kodda-product-badges">
               {product.brand ? <span className="kodda-product-badge">{product.brand}</span> : null}
               <span className="kodda-product-badge">{product.category}</span>
+              {product.size ? (
+                <span className="kodda-product-badge kodda-product-badge--size">{product.size}</span>
+              ) : null}
             </div>
+            <h3>{product.name}</h3>
           </div>
 
           <p className="kodda-product-description">{product.description}</p>
@@ -498,18 +501,11 @@ export default function MyProducts() {
 
   return (
     <div className="kodda-home kodda-my-products-page">
-      <header className="kodda-topbar">
-        <KoddaLogo compact />
-        <div className="kodda-topbar-spacer" />
-        <nav className="kodda-nav-actions" aria-label="Navegación">
-          <Link to="/perfil" className="kodda-btn-ghost">
-            Mi perfil
-          </Link>
-          <Link to="/publicar" className="kodda-btn-accent-outline">
-            Publicar prenda
-          </Link>
-        </nav>
-      </header>
+      <AppTopbar>
+        <Link to="/publicar" className="kodda-btn-accent-outline">
+          Publicar prenda
+        </Link>
+      </AppTopbar>
 
       <main className="kodda-my-products-main">
         <div className="kodda-my-products-header">

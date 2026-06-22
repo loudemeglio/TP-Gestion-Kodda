@@ -4,7 +4,7 @@ import { api } from '../../api/client';
 import BillingView from '../billing/BillingView';
 import { formatTaxIdDisplay } from '../billing/billingUtils';
 import { PAYMENT_METHOD_LABELS } from '../checkout/paymentMethods';
-import { KoddaLogo } from '../KoddaLogo';
+import AppTopbar from '../AppTopbar';
 import SellerRatingSection from '../ratings/SellerRatingSection';
 import '../../styles/checkout.css';
 
@@ -55,16 +55,14 @@ export default function PurchaseOrderDetail({
 
   return (
     <div className="kodda-home kodda-account-history-page">
-      <header className="kodda-topbar">
-        <KoddaLogo compact />
-        <div className="kodda-topbar-spacer" />
+      <AppTopbar>
         <Link to="/mis-compras" className="kodda-btn-ghost">
           Mis compras
         </Link>
         <Link to="/" className="kodda-btn-ghost">
           Inicio
         </Link>
-      </header>
+      </AppTopbar>
 
       <main className="kodda-account-history-layout kodda-checkout-success-card">
         {loading ? <p className="kodda-auth-muted">Cargando…</p> : null}

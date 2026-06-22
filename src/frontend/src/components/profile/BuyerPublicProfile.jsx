@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api } from '../../api/client';
-import { KoddaLogo } from '../KoddaLogo';
-import NotificationBell from '../notifications/NotificationBell';
+import AppTopbar from '../AppTopbar';
 
 function StarsDisplay({ average }) {
   if (average == null) {
@@ -42,14 +41,11 @@ export default function BuyerPublicProfile() {
 
   return (
     <div className="kodda-home kodda-profile-edit-page">
-      <header className="kodda-topbar">
-        <KoddaLogo compact />
-        <div className="kodda-topbar-spacer" />
-        <NotificationBell />
-        <Link to="/" className="kodda-btn-ghost">
+      <AppTopbar showNotifications>
+        <Link to="/explorador" className="kodda-btn-ghost">
           Inicio
         </Link>
-      </header>
+      </AppTopbar>
 
       <main className="kodda-profile-edit-layout">
         {loading ? <p className="kodda-auth-muted">Cargando…</p> : null}

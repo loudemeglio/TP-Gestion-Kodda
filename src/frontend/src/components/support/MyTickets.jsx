@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../../api/client';
-import { KoddaLogo } from '../KoddaLogo';
+import AppTopbar from '../AppTopbar';
 import { useAuth } from '../../context/AuthContext';
 import CreateTicket from './CreateTicket';
 
@@ -123,14 +123,9 @@ export default function MyTickets() {
 
   return (
     <div className="kodda-home kodda-profile-view-page">
-      <header className="kodda-topbar">
-        <KoddaLogo compact />
-        <div className="kodda-topbar-spacer" />
-        <nav className="kodda-nav-actions" aria-label="Navegación">
-          <Link to="/explorador" className="kodda-btn-ghost">Inicio</Link>
-          <Link to="/perfil" className="kodda-btn-ghost">Mi perfil</Link>
-        </nav>
-      </header>
+      <AppTopbar>
+        <Link to="/explorador" className="kodda-btn-ghost">Inicio</Link>
+      </AppTopbar>
 
       <main className="kodda-profile-edit-layout" style={{ maxWidth: 720, margin: '0 auto', padding: '2rem 1rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
