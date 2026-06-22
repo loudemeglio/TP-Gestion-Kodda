@@ -1444,6 +1444,9 @@ body {
 }
 
 .kodda-rating-star {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 2.5rem;
   height: 2.5rem;
   border: 1px solid var(--kd-line);
@@ -3332,6 +3335,7 @@ a.kodda-user-chip:hover {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: 0.75rem;
   margin-top: 0.5rem;
 }
@@ -3344,6 +3348,32 @@ a.kodda-user-chip:hover {
 
 .kodda-buyer-stars-avg {
   margin-left: 0.35rem;
+}
+
+.kodda-profile-view-logout {
+  margin-top: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--kd-line);
+  text-align: center;
+}
+
+.kodda-btn-logout {
+  padding: 0.75rem 2rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--kd-ink-soft);
+  background: transparent;
+  border: 1px solid var(--kd-line);
+  border-radius: var(--kd-radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.kodda-btn-logout:hover {
+  color: #fff;
+  background: var(--kd-danger);
+  border-color: var(--kd-danger);
 }
 
 .kodda-buyer-review-list {

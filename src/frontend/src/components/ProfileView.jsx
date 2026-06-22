@@ -113,7 +113,7 @@ export default function ProfileView() {
         <KoddaLogo compact />
         <div className="kodda-topbar-spacer" />
         <nav className="kodda-nav-actions" aria-label="Navegación de perfil">
-          <Link to="/" className="kodda-btn-ghost">
+          <Link to="/explorador" className="kodda-btn-ghost">
             Inicio
           </Link>
           <Link to="/mis-compras" className="kodda-btn-ghost">
@@ -122,12 +122,6 @@ export default function ProfileView() {
           <Link to="/mis-ventas" className="kodda-btn-ghost">
             Mis ventas
           </Link>
-          <Link to="/perfil/editar" className="kodda-btn-accent-outline">
-            Editar
-          </Link>
-          <button type="button" className="kodda-btn-ghost" onClick={() => logout()}>
-            Salir
-          </button>
         </nav>
       </header>
 
@@ -379,6 +373,11 @@ export default function ProfileView() {
                     ›
                   </span>
                 </Link>
+              </div>
+              <div className="kodda-profile-view-logout">
+                <button type="button" className="kodda-btn-logout" onClick={() => logout()}>
+                  Salir
+                </button>
               </div>
             </div>
           </>

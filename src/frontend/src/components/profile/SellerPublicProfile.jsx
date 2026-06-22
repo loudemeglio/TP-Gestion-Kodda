@@ -106,7 +106,7 @@ export default function SellerPublicProfile() {
         <KoddaLogo compact />
         <div className="kodda-topbar-spacer" />
         <NotificationBell />
-        <Link to="/" className="kodda-btn-ghost">
+        <Link to="/explorador" className="kodda-btn-ghost">
           Inicio
         </Link>
       </header>

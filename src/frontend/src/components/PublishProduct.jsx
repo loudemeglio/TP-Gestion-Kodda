@@ -80,7 +80,6 @@ export default function PublishProduct() {
   const [priceFromSuggestion, setPriceFromSuggestion] = useState(false);
 
   // Estados para modelo virtual
-  const [virtualModelFile, setVirtualModelFile] = useState(null);
   const [generatingModel, setGeneratingModel] = useState(false);
   const [virtualModelError, setVirtualModelError] = useState('');
   const [virtualModelImageUrl, setVirtualModelImageUrl] = useState('');
@@ -149,6 +148,9 @@ export default function PublishProduct() {
     setIaFile(file);
     resetPriceSuggestion();
     setIaError('');
+    setVirtualModelImageUrl('');
+    setVirtualModelError('');
+    setVirtualModelGenerated(false);
   }
 
   async function handleAnalyzeIA() {
@@ -210,15 +212,8 @@ export default function PublishProduct() {
     }
   }
 
-  function handleVirtualModelFileChange(file) {
-    setVirtualModelFile(file);
-    setVirtualModelImageUrl('');
-    setVirtualModelError('');
-    setVirtualModelGenerated(false);
-  }
-
   async function handleGenerateVirtualModel() {
-    if (!virtualModelFile) return;
+    if (!iaFile) return;
     setGeneratingModel(true);
     setVirtualModelError('');
     setVirtualModelImageUrl('');
@@ -231,8 +226,8 @@ export default function PublishProduct() {
       const fullDescription = categoryInfo ? `${categoryInfo}: ${garmentDescription}` : garmentDescription;
 
       // Convertir imagen a base64
-      const imageBase64 = await fileToBase64(virtualModelFile);
-      const imageMimeType = virtualModelFile.type || 'image/jpeg';
+      const imageBase64 = await fileToBase64(iaFile);
+      const imageMimeType = iaFile.type || 'image/jpeg';
 
       // Enviar solicitud al backend para generar modelo
       const response = await api.post(
@@ -416,60 +411,43 @@ export default function PublishProduct() {
           <form onSubmit={handleSubmit}>
             {error ? <p className="kodda-auth-error">{error}</p> : null}
 
-            {GEMINI_URL ? (
-              <>
-                <label className="kodda-field">
-                  <span>Foto de la prenda (opcional)</span>
-                  <input
-                    className="kodda-input"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleIaFileChange(e.target.files?.[0] || null)}
-                  />
-                </label>
-
-                <button
-                  type="button"
-                  className="kodda-btn-accent-outline"
-                  onClick={handleAnalyzeIA}
-                  disabled={!iaFile || analyzing}
-                  style={{ marginBottom: '1rem' }}
-                >
-                  {analyzing ? 'Analizando…' : 'Analizar con IA'}
-                </button>
-
-                {iaError ? <p className="kodda-auth-error">{iaError}</p> : null}
-              </>
-            ) : null}
-
-            {/* Sección de Modelo Virtual */}
             <>
-              <hr style={{ margin: '1.5rem 0', opacity: 0.3 }} />
               <label className="kodda-field">
-                <span>Generar modelo virtual con la prenda (opcional)</span>
-                <p style={{ fontSize: '0.85rem', color: '#666', margin: '0.5rem 0 0 0' }}>
-                  Subí una foto de tu prenda y la IA generará una imagen de un modelo vistiendo esa prenda exacta.
-                  Puede tardar hasta 2 minutos.
+                <span>Foto de la prenda (opcional)</span>
+                <p style={{ fontSize: '0.85rem', color: '#666', margin: '0.25rem 0 0.5rem 0' }}>
+                  Subí una foto de tu prenda. Podés usarla para completar los datos automáticamente con IA y/o generar un modelo virtual que vista la prenda.
                 </p>
                 <input
                   className="kodda-input"
                   type="file"
                   accept="image/*"
-                  onChange={(e) => handleVirtualModelFileChange(e.target.files?.[0] || null)}
-                  style={{ marginTop: '0.5rem' }}
+                  onChange={(e) => handleIaFileChange(e.target.files?.[0] || null)}
                 />
               </label>
 
-              <button
-                type="button"
-                className="kodda-btn-accent-outline"
-                onClick={handleGenerateVirtualModel}
-                disabled={!virtualModelFile || generatingModel}
-                style={{ marginBottom: '1rem' }}
-              >
-                {generatingModel ? 'Generando modelo con IA…' : 'Generar modelo virtual'}
-              </button>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
+                {GEMINI_URL && (
+                  <button
+                    type="button"
+                    className="kodda-btn-accent-outline"
+                    onClick={handleAnalyzeIA}
+                    disabled={!iaFile || analyzing}
+                  >
+                    {analyzing ? 'Analizando…' : 'Analizar con IA'}
+                  </button>
+                )}
 
+                <button
+                  type="button"
+                  className="kodda-btn-accent-outline"
+                  onClick={handleGenerateVirtualModel}
+                  disabled={!iaFile || generatingModel}
+                >
+                  {generatingModel ? 'Generando modelo…' : 'Generar modelo virtual'}
+                </button>
+              </div>
+
+              {iaError ? <p className="kodda-auth-error">{iaError}</p> : null}
               {virtualModelError ? (
                 <p className="kodda-auth-error">{virtualModelError}</p>
               ) : null}
@@ -662,7 +640,7 @@ export default function PublishProduct() {
           </form>
 
           <div className="kodda-auth-links">
-            <Link to="/">← Volver al inicio</Link>
+            <Link to="/explorador">← Volver al inicio</Link>
           </div>
         </div>
       </main>

@@ -4,13 +4,13 @@ import { getBaseURL } from '../api/client';
 export function resolveMediaUrl(path, cacheBust) {
   if (!path) return null;
   let url;
-  if (path.startsWith('http://') || path.startsWith('https://')) {
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
     url = path;
   } else {
     const base = getBaseURL().replace(/\/$/, '');
     url = `${base}${path.startsWith('/') ? path : `/${path}`}`;
   }
-  if (cacheBust != null && cacheBust !== '') {
+  if (cacheBust != null && cacheBust !== '' && !url.startsWith('data:')) {
     const sep = url.includes('?') ? '&' : '?';
     url = `${url}${sep}v=${encodeURIComponent(String(cacheBust))}`;
   }

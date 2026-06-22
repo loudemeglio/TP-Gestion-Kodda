@@ -4,14 +4,12 @@ import { useAuth } from '../context/AuthContext';
 import { useCarrito } from '../context/CarritoContext';
 import { resolveMediaUrl } from '../utils/mediaUrl';
 import { KoddaLogo } from './KoddaLogo';
-import ChatBot from './ChatBot';
 import '../styles/cart.css';
 
 export default function Cart() {
   const { user, logout } = useAuth();
   const { items, eliminarDelCarrito, incrementarCantidad, decrementarCantidad, obtenerTotal, vaciarCarrito } = useCarrito();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [chatOpen, setChatOpen] = useState(false);
   const initial = (user?.username || user?.email || '?').charAt(0).toUpperCase();
 
   const total = obtenerTotal();
@@ -31,15 +29,12 @@ export default function Cart() {
         </button>
 
         <nav className={`kodda-nav-actions-collapsible ${menuOpen ? 'open' : ''}`} aria-label="Acciones principales">
-          <Link to="/" className="kodda-btn-accent-outline">
+          <Link to="/explorador" className="kodda-btn-accent-outline">
             Volver al feed
           </Link>
           <Link to="/publicar" className="kodda-btn-accent-outline">
             Vender prenda
           </Link>
-          <button type="button" className="kodda-btn-ghost" onClick={() => setChatOpen(true)}>
-            Chat Kodda
-          </button>
           <Link to="/perfil" className="kodda-user-chip" title="Mi perfil">
             <span className="kodda-avatar" aria-hidden="true">
               {initial}
@@ -53,9 +48,6 @@ export default function Cart() {
           >
             Cambiar de cuenta
           </Link>
-          <button type="button" className="kodda-btn-ghost" onClick={() => logout()}>
-            Salir
-          </button>
         </nav>
       </header>
 
@@ -152,12 +144,6 @@ export default function Cart() {
           )}
         </div>
       </main>
-
-      {chatOpen && (
-        <div className="kodda-chat-modal-overlay">
-          <ChatBot onClose={() => setChatOpen(false)} />
-        </div>
-      )}
     </div>
   );
 }

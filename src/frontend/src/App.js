@@ -39,6 +39,7 @@ import MyLikes from './components/MyLikes';
 import PayPage from './components/PayPage';
 import AdminTicketsPanel from './components/admin/AdminTicketsPanel';
 import MyTickets from './components/support/MyTickets';
+import ChatBot from './components/ChatBot';
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
@@ -270,12 +271,27 @@ function AppRoutes() {
   );
 }
 
+function AppContent() {
+  const { user } = useAuth();
+  const location = useLocation();
+
+  // Mostrar el chatbot flotante si el usuario está logueado y no está en la vista de administración
+  const showChat = user && !location.pathname.startsWith('/admin');
+
+  return (
+    <>
+      <AppRoutes />
+      {showChat && <ChatBot />}
+    </>
+  );
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <CarritoProvider>
-          <AppRoutes />
+          <AppContent />
         </CarritoProvider>
       </AuthProvider>
     </BrowserRouter>

@@ -76,7 +76,7 @@ export default function MyLikes() {
       ) : likes.length === 0 ? (
         <div className="kodda-catalog-empty">
           <p>No tienes prendas marcadas como favoritas aún</p>
-          <Link to="/home" className="kodda-btn-accent-outline" style={{ marginTop: '1rem' }}>
+          <Link to="/explorador" className="kodda-btn-accent-outline" style={{ marginTop: '1rem' }}>
             Ir al catálogo
           </Link>
         </div>
