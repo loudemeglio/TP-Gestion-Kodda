@@ -291,6 +291,9 @@ export default function ProfileView() {
                   className="kodda-profile-view-nav-item"
                   style={{ textDecoration: 'none', color: 'inherit' }}
                 >
+                  <span className="kodda-profile-view-nav-icon" aria-hidden="true">
+                    ⭐
+                  </span>
                   <span className="kodda-profile-view-nav-text">
                     <span className="kodda-profile-view-nav-title">Mi reputación como vendedor</span>
                     <span className="kodda-profile-view-nav-desc">
