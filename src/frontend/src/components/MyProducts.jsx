@@ -236,11 +236,14 @@ function ProductCard({ product, brands, categories, onEdit, onEditCancel, isEdit
 
         <div className="kodda-product-card-content">
           <div className="kodda-product-card-header">
-            <h3>{product.name}</h3>
             <div className="kodda-product-badges">
               {product.brand ? <span className="kodda-product-badge">{product.brand}</span> : null}
               <span className="kodda-product-badge">{product.category}</span>
+              {product.size ? (
+                <span className="kodda-product-badge kodda-product-badge--size">{product.size}</span>
+              ) : null}
             </div>
+            <h3>{product.name}</h3>
           </div>
 
           <p className="kodda-product-description">{product.description}</p>
