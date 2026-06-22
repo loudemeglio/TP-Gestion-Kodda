@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client';
 import { formatApiError } from '../utils/apiError';
-import { KoddaLogo } from './KoddaLogo';
+import AppTopbar from './AppTopbar';
 import { findBrandIdByName, findCategoryIdByName, useActiveCatalog } from '../hooks/useActiveCatalog';
 import '../styles/my-products.css';
 
@@ -501,18 +501,11 @@ export default function MyProducts() {
 
   return (
     <div className="kodda-home kodda-my-products-page">
-      <header className="kodda-topbar">
-        <KoddaLogo compact />
-        <div className="kodda-topbar-spacer" />
-        <nav className="kodda-nav-actions" aria-label="Navegación">
-          <Link to="/perfil" className="kodda-btn-ghost">
-            Mi perfil
-          </Link>
-          <Link to="/publicar" className="kodda-btn-accent-outline">
-            Publicar prenda
-          </Link>
-        </nav>
-      </header>
+      <AppTopbar>
+        <Link to="/publicar" className="kodda-btn-accent-outline">
+          Publicar prenda
+        </Link>
+      </AppTopbar>
 
       <main className="kodda-my-products-main">
         <div className="kodda-my-products-header">

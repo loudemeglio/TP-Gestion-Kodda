@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { resolveMediaUrl } from '../utils/mediaUrl';
-import { KoddaLogo } from './KoddaLogo';
+import AppTopbar from './AppTopbar';
 
 function hasValue(value) {
   return value !== null && value !== undefined && value !== '';
@@ -109,21 +109,17 @@ export default function ProfileView() {
 
   return (
     <div className="kodda-home kodda-profile-view-page">
-      <header className="kodda-topbar">
-        <KoddaLogo compact />
-        <div className="kodda-topbar-spacer" />
-        <nav className="kodda-nav-actions" aria-label="Navegación de perfil">
-          <Link to="/explorador" className="kodda-btn-ghost">
-            Inicio
-          </Link>
-          <Link to="/mis-compras" className="kodda-btn-ghost">
-            Mis compras
-          </Link>
-          <Link to="/mis-ventas" className="kodda-btn-ghost">
-            Mis ventas
-          </Link>
-        </nav>
-      </header>
+      <AppTopbar navLabel="Navegación de perfil">
+        <Link to="/explorador" className="kodda-btn-ghost">
+          Inicio
+        </Link>
+        <Link to="/mis-compras" className="kodda-btn-ghost">
+          Mis compras
+        </Link>
+        <Link to="/mis-ventas" className="kodda-btn-ghost">
+          Mis ventas
+        </Link>
+      </AppTopbar>
 
       <main className="kodda-profile-edit-layout">
         {loading ? <p className="kodda-auth-muted kodda-profile-edit-loading">Cargando tu perfil…</p> : null}

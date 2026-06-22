@@ -86,6 +86,31 @@ def get_my_products(
         )
 
 
+@router.get("/sellers/{seller_id}/products", response_model=list[ProductDTO])
+def get_seller_catalog_products(
+    seller_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    skip: int = 0,
+    limit: int = 100,
+):
+    """
+    Publicaciones activas de un vendedor (perfil público).
+    """
+    try:
+        return ProductService.get_active_products_by_seller(db, seller_id, skip, limit)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e),
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error al obtener las publicaciones del vendedor",
+        )
+
+
 @router.get("/products/{product_id}", response_model=ProductDTO)
 def get_product_detail(
     product_id: int,

@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { resolveMediaUrl } from '../utils/mediaUrl';
-import { KoddaLogo } from './KoddaLogo';
+import AppTopbar from './AppTopbar';
 
 const FIT_OPTIONS = [
   { value: '', label: 'Sin preferencia' },
@@ -198,15 +198,11 @@ export default function ProfileEdit() {
 
   return (
     <div className="kodda-home kodda-profile-edit-page">
-      <header className="kodda-topbar">
-        <KoddaLogo compact />
-        <div className="kodda-topbar-spacer" />
-        <nav className="kodda-nav-actions">
-          <Link to="/perfil" className="kodda-btn-ghost">
-            ← Mi perfil
-          </Link>
-        </nav>
-      </header>
+      <AppTopbar>
+        <Link to="/perfil" className="kodda-btn-ghost">
+          ← Mi perfil
+        </Link>
+      </AppTopbar>
 
       <main className="kodda-profile-edit-layout">
         <header className="kodda-profile-edit-hero">

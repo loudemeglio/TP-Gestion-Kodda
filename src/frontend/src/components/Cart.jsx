@@ -1,55 +1,31 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import { useCarrito } from '../context/CarritoContext';
-import { resolveMediaUrl } from '../utils/mediaUrl';
-import { KoddaLogo } from './KoddaLogo';
+import AppTopbar from './AppTopbar';
 import '../styles/cart.css';
 
 export default function Cart() {
-  const { user, logout } = useAuth();
   const { items, eliminarDelCarrito, incrementarCantidad, decrementarCantidad, obtenerTotal, vaciarCarrito } = useCarrito();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const initial = (user?.username || user?.email || '?').charAt(0).toUpperCase();
 
   const total = obtenerTotal();
 
   return (
     <div className="kodda-home">
-      <header className="kodda-topbar">
-        <KoddaLogo compact />
-        <div className="kodda-topbar-spacer" />
-        
-        <button 
-          className="kodda-hamburger" 
-          onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="Toggle menu"
+      <AppTopbar collapsible>
+        <Link to="/explorador" className="kodda-btn-accent-outline">
+          Volver al feed
+        </Link>
+        <Link to="/publicar" className="kodda-btn-sell">
+          <span className="kodda-btn-sell-icon" aria-hidden="true">+</span>
+          Vender prenda
+        </Link>
+        <Link
+          to="/login?cambiar=1"
+          className="kodda-link-cuenta"
+          title="Para demo con dos cuentas: esta ventana + otra en modo privado (misma URL)"
         >
-          {menuOpen ? '✕' : '☰'}
-        </button>
-
-        <nav className={`kodda-nav-actions-collapsible ${menuOpen ? 'open' : ''}`} aria-label="Acciones principales">
-          <Link to="/explorador" className="kodda-btn-accent-outline">
-            Volver al feed
-          </Link>
-          <Link to="/publicar" className="kodda-btn-accent-outline">
-            Vender prenda
-          </Link>
-          <Link to="/perfil" className="kodda-user-chip" title="Mi perfil">
-            <span className="kodda-avatar" aria-hidden="true">
-              {initial}
-            </span>
-            <span>{user?.username || 'Usuario'}</span>
-          </Link>
-          <Link
-            to="/login?cambiar=1"
-            className="kodda-link-cuenta"
-            title="Para demo con dos cuentas: esta ventana + otra en modo privado (misma URL)"
-          >
-            Cambiar de cuenta
-          </Link>
-        </nav>
-      </header>
+          Cambiar de cuenta
+        </Link>
+      </AppTopbar>
 
       <main className="kodda-cart-main">
         <div className="kodda-cart-container">

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import '../styles/chat.css';
@@ -52,7 +53,7 @@ async function searchProductsByIntent(userMessage) {
   }
 }
 
-// Formatear productos para el contexto
+// Formatear productos para el contexto de una respuesta puntual
 function formatProductsForContext(products) {
   if (!products || products.length === 0) return 'No hay prendas disponibles.';
 
@@ -60,12 +61,93 @@ function formatProductsForContext(products) {
     .slice(0, 8)
     .map(
       (p) =>
-        `- ${p.name} (${p.category}, talle ${p.size}, $${Math.floor(p.price)} ARS, ${p.condition || 'buen estado'})`
+        `- [ID:${p.id}] ${p.name} (${p.category}, talle ${p.size}, $${Math.floor(p.price)} ARS, ${p.condition || 'buen estado'})`
     )
     .join('\n');
 }
 
-function renderAssistantMessage(text) {
+function formatCatalogForPrompt(products) {
+  if (!products?.length) return 'Sin prendas cargadas.';
+
+  return products
+    .slice(0, 80)
+    .map(
+      (p) =>
+        `[ID:${p.id}] ${p.name} — ${p.category || 'sin categoría'}, talle ${p.size || '—'}, $${Math.floor(p.price || 0)} ARS`
+    )
+    .join('\n');
+}
+
+function extractProductIdFromText(text) {
+  const match = text.match(/\[ID:\s*(\d+)\]/i);
+  return match ? Number(match[1]) : null;
+}
+
+function findProductInText(text, products) {
+  if (!text || !products?.length) return null;
+
+  const id = extractProductIdFromText(text);
+  if (id) {
+    return products.find((p) => p.id === id) || null;
+  }
+
+  const normalized = text.toLowerCase();
+  const sorted = [...products].sort((a, b) => (b.name?.length || 0) - (a.name?.length || 0));
+  return sorted.find((p) => p.name && normalized.includes(p.name.toLowerCase())) || null;
+}
+
+function renderProductListItemContent(content, catalogProducts, referencedProducts = []) {
+  const searchPool =
+    referencedProducts.length > 0
+      ? [
+          ...referencedProducts,
+          ...catalogProducts.filter((p) => !referencedProducts.some((r) => r.id === p.id)),
+        ]
+      : catalogProducts;
+
+  const product = findProductInText(content, searchPool);
+  const displayText = content.replace(/\[ID:\s*\d+\]\s*/i, '').trim();
+
+  if (!product) {
+    return <span>{displayText || content}</span>;
+  }
+
+  const name = product.name;
+  const lowerDisplay = displayText.toLowerCase();
+  const nameIndex = lowerDisplay.indexOf(name.toLowerCase());
+
+  if (nameIndex >= 0) {
+    const before = displayText.slice(0, nameIndex);
+    const matched = displayText.slice(nameIndex, nameIndex + name.length);
+    const after = displayText.slice(nameIndex + name.length);
+
+    return (
+      <>
+        {before}
+        <Link
+          to={`/productos/${product.id}`}
+          className="kodda-chat-product-link"
+          title={`Ver ${name}`}
+        >
+          {matched}
+        </Link>
+        {after}
+      </>
+    );
+  }
+
+  return (
+    <Link
+      to={`/productos/${product.id}`}
+      className="kodda-chat-product-link"
+      title={`Ver ${name}`}
+    >
+      {displayText}
+    </Link>
+  );
+}
+
+function renderAssistantMessage(text, catalogProducts, referencedProducts = []) {
   const lines = text.split('\n');
   const hasList = lines.some((line) => /^[\s]*[-•*]\s+/.test(line));
 
@@ -83,7 +165,9 @@ function renderAssistantMessage(text) {
               <span className="kodda-chat-list-bullet" aria-hidden="true">
                 •
               </span>
-              <span>{listMatch[1]}</span>
+              <span>
+                {renderProductListItemContent(listMatch[1], catalogProducts, referencedProducts)}
+              </span>
             </div>
           );
         }
@@ -100,13 +184,8 @@ function renderAssistantMessage(text) {
   );
 }
 
-async function buildChatPromptWithContext() {
+async function buildChatPromptWithContext(products) {
   try {
-    // Obtener datos reales del catálogo
-    const productsRes = await api.get('/api/catalog/products?limit=50').catch(() => null);
-    const products = productsRes?.data || [];
-
-    // Agrupar por categoría, marca, talle, rango de precio
     const categories = {};
     const brands = new Set();
     const sizes = new Set();
@@ -136,6 +215,8 @@ async function buildChatPromptWithContext() {
         ? `$${Math.floor(priceRanges.min)} - $${Math.floor(priceRanges.max)} ARS`
         : 'variable';
 
+    const catalogLines = formatCatalogForPrompt(products);
+
     return `Sos Kodda, asistente de moda circular de plataforma Kodda (Argentina).
 SOLO responde sobre prendas/vendedores del CATÁLOGO REAL. No información general.
 
@@ -146,12 +227,15 @@ Marcas: ${brandsList}
 Talles: ${sizesList}
 Rango precios: ${priceInfo}
 
+PRENDAS DISPONIBLES (usá el ID exacto al recomendar):
+${catalogLines}
+
 REGLAS:
 ✓ "En nuestro catálogo tenemos..." - Cita lo real
 ✓ "Encontramos X prendas de [categoría]..." - Datos concretos
 ✓ Recomendaciones de talle basadas en talles disponibles
 ✓ Si no hay en stock → "No tenemos disponible ahora"
-✓ Al sugerir productos, listalos uno por línea con guión (-) al inicio
+✓ Al sugerir productos, listalos uno por línea con guión (-) y el ID exacto: - [ID:123] Nombre (detalles...)
 ✗ NO inventes productos/precios/vendedores
 ✗ NO des información general (solo lo que existe en BD)
 
@@ -182,6 +266,7 @@ export default function ChatBot({ onClose }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [systemPrompt, setSystemPrompt] = useState('');
+  const [catalogProducts, setCatalogProducts] = useState([]);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -230,7 +315,10 @@ export default function ChatBot({ onClose }) {
     }
 
     (async () => {
-      const prompt = await buildChatPromptWithContext();
+      const productsRes = await api.get('/api/catalog/products?limit=200').catch(() => null);
+      const products = productsRes?.data || [];
+      setCatalogProducts(products);
+      const prompt = await buildChatPromptWithContext(products);
       setSystemPrompt(prompt);
     })();
   }, [user, storageKey]);
@@ -362,6 +450,7 @@ Kodda:`;
         id: messages.length + 2,
         role: 'assistant',
         text: assistantText,
+        referencedProducts: foundProducts.map((p) => ({ id: p.id, name: p.name })),
         timestamp: new Date(),
       };
 
@@ -426,7 +515,11 @@ Kodda:`;
                 </div>
                 <div className="kodda-chat-message-content">
                   {msg.role === 'assistant' ? (
-                    renderAssistantMessage(msg.text)
+                    renderAssistantMessage(
+                      msg.text,
+                      catalogProducts,
+                      msg.referencedProducts || []
+                    )
                   ) : (
                     <p className="kodda-chat-message-text">{msg.text}</p>
                   )}

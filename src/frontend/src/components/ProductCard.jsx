@@ -9,7 +9,7 @@ import '../styles/likeButton.css';
  * Tarjeta de producto reutilizable
  * Se usa en ConsumerHome, PersonalRecommendationsSection y MyLikes
  */
-export default function ProductCard({ producto, showLink = true }) {
+export default function ProductCard({ producto, showLink = true, showSellerLink = true }) {
   const navigate = useNavigate();
   const { agregarAlCarrito } = useCarrito();
   const [isLiked, setIsLiked] = useState(false);
@@ -98,17 +98,19 @@ export default function ProductCard({ producto, showLink = true }) {
 
       <div className="kodda-card-body">
         <h3>{producto.name}</h3>
-        <p className="kodda-card-meta" style={{ marginTop: '0.15rem', marginBottom: '0.4rem' }}>
-          Publicada por{' '}
-          <Link
-            to={`/vendedores/${producto.seller_id}`}
-            className="kodda-auth-link"
-            title="Ver reputación del vendedor"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {producto.seller_username || `#${producto.seller_id}`}
-          </Link>
-        </p>
+        {showSellerLink ? (
+          <p className="kodda-card-meta" style={{ marginTop: '0.15rem', marginBottom: '0.4rem' }}>
+            Publicada por{' '}
+            <Link
+              to={`/vendedores/${producto.seller_id}`}
+              className="kodda-auth-link"
+              title="Ver reputación del vendedor"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {producto.seller_username || `#${producto.seller_id}`}
+            </Link>
+          </p>
+        ) : null}
         <div className="kodda-card-flags">
           {producto.brand ? <span className="kodda-card-flag">{producto.brand}</span> : null}
           <span className="kodda-card-flag">{producto.category}</span>

@@ -8,7 +8,7 @@ import {
   EMPTY_PAYMENT_DETAILS,
   isPaymentDetailsComplete,
 } from './checkout/paymentMethods';
-import { KoddaLogo } from './KoddaLogo';
+import AppTopbar from './AppTopbar';
 import { useAuth } from '../context/AuthContext';
 import { useCarrito } from '../context/CarritoContext';
 import { useBilling } from '../hooks/useBilling';
@@ -68,15 +68,11 @@ export default function Checkout() {
   if (!items.length) {
     return (
       <div className="kodda-home">
-        <header className="kodda-topbar">
-          <KoddaLogo compact />
-          <div className="kodda-topbar-spacer" />
-          <nav className="kodda-nav-actions" aria-label="Navegación">
-            <Link to="/carrito" className="kodda-btn-ghost">
-              Volver al carrito
-            </Link>
-          </nav>
-        </header>
+        <AppTopbar>
+          <Link to="/carrito" className="kodda-btn-ghost">
+            Volver al carrito
+          </Link>
+        </AppTopbar>
         <main className="kodda-checkout-main">
           <p className="kodda-auth-muted">Tu carrito está vacío.</p>
           <Link to="/" className="kodda-btn-primary">
@@ -115,15 +111,11 @@ export default function Checkout() {
 
   return (
     <div className="kodda-home">
-      <header className="kodda-topbar">
-        <KoddaLogo compact />
-        <div className="kodda-topbar-spacer" />
-        <nav className="kodda-nav-actions" aria-label="Checkout">
-          <Link to="/carrito" className="kodda-btn-ghost">
-            Volver al carrito
-          </Link>
-        </nav>
-      </header>
+      <AppTopbar navLabel="Checkout">
+        <Link to="/carrito" className="kodda-btn-ghost">
+          Volver al carrito
+        </Link>
+      </AppTopbar>
 
       <main className="kodda-checkout-main">
         <header className="kodda-checkout-header">

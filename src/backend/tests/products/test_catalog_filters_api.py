@@ -231,3 +231,22 @@ def test_catalog_invalid_price_range_returns_422(api_client):
         headers=buyer_h,
     )
     assert r.status_code == 422
+
+
+@pytest.mark.postgres
+def test_seller_catalog_products_lists_active_only(api_client):
+    admin_h = _admin_headers(api_client, "admin_seller_pub", "admin_seller_pub@example.com")
+    seller_h = register_user_headers(api_client, "seller_pub", "seller_pub@example.com")
+    buyer_h = register_user_headers(api_client, "buyer_pub", "buyer_pub@example.com")
+
+    active = _create_product(api_client, seller_h, admin_h, name="Remera publicada")
+    paused = _create_product(api_client, seller_h, admin_h, name="Pantalon pausado")
+
+    pause = api_client.patch(f"/api/catalog/products/{paused['id']}/pause", headers=seller_h)
+    assert pause.status_code == 200
+
+    seller_id = active["seller_id"]
+    r = api_client.get(f"/api/catalog/sellers/{seller_id}/products", headers=buyer_h)
+    assert r.status_code == 200
+    names = [p["name"] for p in r.json()]
+    assert names == ["Remera publicada"]

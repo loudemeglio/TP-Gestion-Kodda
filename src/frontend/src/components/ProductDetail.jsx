@@ -2,7 +2,7 @@ import { Link, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { api } from '../api/client';
 import { resolveMediaUrl } from '../utils/mediaUrl';
-import { KoddaLogo } from './KoddaLogo';
+import AppTopbar from './AppTopbar';
 import ProductImageViewer from './ProductImageViewer';
 import FitRecommendation from './FitRecommendation';
 import { useCarrito } from '../context/CarritoContext';
@@ -11,12 +11,11 @@ import '../styles/likeButton.css';
 
 export default function ProductDetail() {
   const { productId } = useParams();
-  const { user, avatarVersion } = useAuth();
+  const { user } = useAuth();
   const { agregarAlCarrito, obtenerCantidadTotal } = useCarrito();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [menuOpen, setMenuOpen] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [likeLoading, setLikeLoading] = useState(false);
 
@@ -58,8 +57,6 @@ export default function ProductDetail() {
   const imageSrc = resolveMediaUrl(product?.main_image_url);
   const hasStock = Number(product?.stock || 0) > 0;
   const cartCount = obtenerCantidadTotal();
-  const avatarSrc = resolveMediaUrl(user?.profile_image_url, avatarVersion || undefined);
-  const initial = (user?.username || user?.email || '?').charAt(0).toUpperCase();
 
   function handleAddToCart() {
     if (product && hasStock) {
@@ -82,39 +79,11 @@ export default function ProductDetail() {
 
   return (
     <div className="kodda-home kodda-product-detail-page">
-      <header className="kodda-topbar">
-        <KoddaLogo compact />
-        <div className="kodda-topbar-spacer" />
-
-        <button
-          className="kodda-hamburger"
-          onClick={() => setMenuOpen(!menuOpen)}
-          aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
-          aria-expanded={menuOpen}
-        >
-          {menuOpen ? '✕' : '☰'}
-        </button>
-
-        <nav className={`kodda-nav-actions-collapsible ${menuOpen ? 'open' : ''}`} aria-label="Acciones principales">
-          <Link to="/" className="kodda-btn-ghost">
-            Volver al catálogo
-          </Link>
-          <Link to="/carrito" className="kodda-cart-icon-link" title="Mi carrito">
-            🛒
-            {cartCount > 0 ? <span className="kodda-cart-badge">{cartCount}</span> : null}
-          </Link>
-          <Link to="/perfil" className="kodda-user-chip" title="Mi perfil">
-            {avatarSrc ? (
-              <img key={avatarSrc} src={avatarSrc} alt="" className="kodda-avatar kodda-avatar-img" />
-            ) : (
-              <span className="kodda-avatar" aria-hidden="true">
-                {initial}
-              </span>
-            )}
-            <span>{user?.username || 'Usuario'}</span>
-          </Link>
-        </nav>
-      </header>
+      <AppTopbar collapsible>
+        <Link to="/" className="kodda-btn-ghost">
+          Volver al catálogo
+        </Link>
+      </AppTopbar>
 
       <main className="kodda-home-main kodda-product-detail-main">
         {loading ? <p className="kodda-auth-muted">Cargando detalle...</p> : null}

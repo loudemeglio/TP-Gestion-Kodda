@@ -11,9 +11,7 @@ export default function AdminLayout() {
     <div className="kodda-admin-root">
       <header className="kodda-admin-topbar">
         <div className="kodda-admin-brand">
-          <Link to="/admin" className="kodda-admin-logo-link" title="Ir al panel de administracion">
-            <KoddaLogo compact />
-          </Link>
+          <KoddaLogo compact to="/admin" />
           <span className="kodda-admin-badge">Administracion</span>
         </div>
         <p className="kodda-admin-topbar-tagline">Gestiona la plataforma por fuera de la experiencia de compra/venta.</p>

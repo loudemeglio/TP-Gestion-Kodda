@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import axios from 'axios';
-import { KoddaLogo } from './KoddaLogo';
+import AppTopbar from './AppTopbar';
 import { getBaseURL } from '../api/client';
 import '../styles/checkout.css';
 
@@ -69,10 +69,7 @@ export default function PayPage() {
 
   return (
     <div className="kodda-home kodda-pay-page">
-      <header className="kodda-topbar">
-        <KoddaLogo compact />
-        <div className="kodda-topbar-spacer" />
-      </header>
+      <AppTopbar />
 
       <main className="kodda-pay-page-main">
         <div className="kodda-wallet-qr-card kodda-pay-page-card">

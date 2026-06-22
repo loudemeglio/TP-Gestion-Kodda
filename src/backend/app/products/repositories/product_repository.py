@@ -99,6 +99,22 @@ class ProductRepository:
         return db.query(Product).filter(Product.seller_id == seller_id).offset(skip).limit(limit).all()
 
     @staticmethod
+    def get_active_by_seller(db: Session, seller_id: int, skip: int = 0, limit: int = 100):
+        """Obtener productos activos (no pausados) de un vendedor."""
+        return (
+            db.query(Product)
+            .options(joinedload(Product.seller))
+            .filter(
+                Product.seller_id == seller_id,
+                Product.is_paused == False,
+            )
+            .order_by(Product.updated_at.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
+
+    @staticmethod
     def update(
         db: Session,
         product_id: int,
