@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useCarrito } from '../context/CarritoContext';
+import { resolveMediaUrl } from '../utils/mediaUrl';
 import AppTopbar from './AppTopbar';
 import '../styles/cart.css';
 
