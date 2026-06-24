@@ -53,3 +53,9 @@ pytest -v
    ```
    http://localhost:3000
    ```
+
+## Utilización de IA en el TP
+
+Para el desarrollo de este trabajo práctico, se utilizaron distintas herramientas de Inteligencia Artificial con el objetivo de asistir en diversas etapas del proceso. En particular, se emplearon **Gemini, Claude, ChatGPT y Copilot** como apoyo para la **resolución de dudas sobre el código**, la **creación y mejora de prompts**, la **detección y corrección de errores**, y la **exploración de distintas alternativas de implementación**.
+
+Además, se trabajó con los IDEs **Antigravity, Cursor y Visual Studio Code con GitHub Copilot**, los cuales facilitaron un enfoque de desarrollo orientado a **vibe coding**, **low-code / no-code**, y asistencia inteligente durante la programación. Estas herramientas permitieron agilizar tareas repetitivas, mejorar la productividad y acelerar el proceso de desarrollo y depuración.
